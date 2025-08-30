@@ -1,0 +1,9 @@
+﻿using MultiTenantProductManagementApp.EntityFrameworkCore;
+using Xunit;
+
+namespace MultiTenantProductManagementApp.EntityFrameworkCore;
+
+public class MultiTenantProductManagementAppEntityFrameworkCoreCollectionFixtureBase : ICollectionFixture<MultiTenantProductManagementAppEntityFrameworkCoreFixture>
+{
+
+}

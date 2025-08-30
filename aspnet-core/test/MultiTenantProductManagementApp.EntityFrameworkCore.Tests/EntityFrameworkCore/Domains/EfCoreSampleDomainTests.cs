@@ -1,0 +1,10 @@
+using MultiTenantProductManagementApp.Samples;
+using Xunit;
+
+namespace MultiTenantProductManagementApp.EntityFrameworkCore.Domains;
+
+[Collection(MultiTenantProductManagementAppTestConsts.CollectionDefinitionName)]
+public class EfCoreSampleDomainTests : SampleDomainTests<MultiTenantProductManagementAppEntityFrameworkCoreTestModule>
+{
+
+}

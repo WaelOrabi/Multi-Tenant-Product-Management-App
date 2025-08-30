@@ -1,0 +1,9 @@
+﻿using Xunit;
+
+namespace MultiTenantProductManagementApp.EntityFrameworkCore;
+
+[CollectionDefinition(MultiTenantProductManagementAppTestConsts.CollectionDefinitionName)]
+public class MultiTenantProductManagementAppEntityFrameworkCoreCollection : ICollectionFixture<MultiTenantProductManagementAppEntityFrameworkCoreFixture>
+{
+
+}

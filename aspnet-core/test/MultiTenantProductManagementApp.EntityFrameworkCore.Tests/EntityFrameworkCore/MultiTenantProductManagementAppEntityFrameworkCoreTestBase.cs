@@ -1,0 +1,8 @@
+﻿using Volo.Abp;
+
+namespace MultiTenantProductManagementApp.EntityFrameworkCore;
+
+public abstract class MultiTenantProductManagementAppEntityFrameworkCoreTestBase : MultiTenantProductManagementAppTestBase<MultiTenantProductManagementAppEntityFrameworkCoreTestModule>
+{
+
+}

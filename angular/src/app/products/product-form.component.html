@@ -1,0 +1,35 @@
+<div class="page">
+  <h2>{{ isEdit ? 'Edit' : 'Create' }} Product</h2>
+
+  <form [formGroup]="form" (ngSubmit)="save()" class="form">
+    <div class="grid2">
+      <label>Name<input formControlName="name" required /></label>
+      <label>Category<input formControlName="category" /></label>
+      <label>Description<textarea formControlName="description"></textarea></label>
+      <label>
+        Has Variants
+        <input type="checkbox" formControlName="hasVariants" />
+      </label>
+      <label *ngIf="!form.value.hasVariants">Base Price<input type="number" step="0.01" formControlName="basePrice" /></label>
+    </div>
+
+    <div *ngIf="form.value.hasVariants" class="variants">
+      <div class="v-header">
+        <div>SKU</div><div>Price</div><div>Stock</div><div>Attributes (JSON)</div><div></div>
+      </div>
+      <div class="v-row" *ngFor="let v of variants.controls; let i = index" [formGroup]="v">
+        <input formControlName="sku" placeholder="SKU" />
+        <input type="number" step="0.01" formControlName="price" />
+        <input type="number" formControlName="stockQuantity" />
+        <input formControlName="attributesJson" placeholder='{"color":"Black"}' />
+        <button type="button" class="danger" (click)="removeVariant(i)">Remove</button>
+      </div>
+      <button type="button" class="secondary" (click)="addVariant()">+ Add Variant</button>
+    </div>
+
+    <div class="actions">
+      <button type="submit" [disabled]="saving || form.invalid">{{ saving ? 'Saving...' : 'Save' }}</button>
+      <a [routerLink]="['/products']">Cancel</a>
+    </div>
+  </form>
+</div>

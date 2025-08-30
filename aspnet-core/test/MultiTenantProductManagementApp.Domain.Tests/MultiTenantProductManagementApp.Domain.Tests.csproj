@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\..\common.props" />
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <RootNamespace>MultiTenantProductManagementApp</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\MultiTenantProductManagementApp.Domain\MultiTenantProductManagementApp.Domain.csproj" />
+    <ProjectReference Include="..\MultiTenantProductManagementApp.TestBase\MultiTenantProductManagementApp.TestBase.csproj" />
+  </ItemGroup>
+
+</Project>
