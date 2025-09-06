@@ -1,0 +1,149 @@
+<div class="page">
+  <div class="header">
+    <div class="header-content">
+      <h2>Product Details</h2>
+      @if (product && !loading) {
+      <div class="actions">
+        <a class="btn btn-outline-primary btn-sm" [routerLink]="['/products', product.id, 'edit']">
+          <i class="bi bi-pencil"></i> Edit
+        </a>
+        <button type="button" class="btn btn-danger btn-sm" (click)="confirmDelete()">
+          <i class="bi bi-trash"></i> Delete
+        </button>
+      </div>
+      }
+    </div>
+    <a class="btn btn-ghost btn-sm" [routerLink]="['/products']">
+      <i class="bi bi-arrow-left"></i> Back to Products
+    </a>
+  </div>
+
+  @if (loading) {
+    <div class="loading">
+      <div class="donut"></div>
+      <span>Loading product details...</span>
+    </div>
+  }
+
+  @if (!loading && product) {
+  <div class="product-details">
+    <div class="info-card">
+      <h3>Product Information</h3>
+      <div class="info-grid">
+        <div class="info-item">
+          <label>Name</label>
+          <span>{{ product.name }}</span>
+        </div>
+        <div class="info-item">
+          <label>Category</label>
+          <span>{{ product.category || 'Uncategorized' }}</span>
+        </div>
+        <div class="info-item">
+          <label>Status</label>
+          <span class="badge" [class]="product.status === 1 ? 'badge-success' : 'badge-secondary'">
+            {{ product.status === 1 ? 'Active' : 'Inactive' }}
+          </span>
+        </div>
+        <div class="info-item">
+          <label>Has Variants</label>
+          <span class="badge" [class]="product.hasVariants ? 'badge-success' : 'badge-secondary'">
+            {{ product.hasVariants ? 'Yes' : 'No' }}
+          </span>
+        </div>
+        @if (!product.hasVariants) {
+        <div class="info-item">
+          <label>Base Price</label>
+          <span class="price">${{ product.basePrice | number:'1.2-2' }}</span>
+        </div>
+        }
+        @if (product.description) {
+        <div class="info-item full-width">
+          <label>Description</label>
+          <p>{{ product.description }}</p>
+        </div>
+        }
+      </div>
+    </div>
+
+    @if (product.hasVariants && product.variants?.length) {
+    <div class="variants-card">
+      <h3>Product Variants</h3>
+      <div class="table-container ">
+        <table class="variants-table">
+          <thead>
+            <tr>
+              <th>SKU</th>
+              <th>Color</th>
+              <th>Size</th>
+              <th>Price</th>
+              <th>Stock</th>
+              <th>Created</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (variant of product.variants; track variant.id; let i = $index) {
+            <tr>
+              <td>
+                <span class="sku">{{ variant.sku || 'N/A' }}</span>
+              </td>
+              <td>
+                @if (variant.color) {
+                  <span class="color-badge">{{ variant.color }}</span>
+                } @else {
+                  <span class="text-muted">-</span>
+                }
+              </td>
+              <td>
+                @if (variant.size) {
+                  <span class="size-badge">{{ variant.size }}</span>
+                } @else {
+                  <span class="text-muted">-</span>
+                }
+              </td>
+              <td>
+                <span class="price">${{ variant.price | number:'1.2-2' }}</span>
+              </td>
+              <td>
+                <span class="stock" [class.low-stock]="variant.stockQuantity < 10">
+                  {{ variant.stockQuantity }}
+                </span>
+              </td>
+              <td>
+                <span class="date">{{ variant.creationTime | date:'short' }}</span>
+              </td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+    }
+
+    @if (product.hasVariants && (!product.variants || product.variants.length === 0)) {
+    <div class="no-variants">
+      <div class="empty-state">
+        <i class="bi bi-box"></i>
+        <h4>No Variants Found</h4>
+        <p>This product is configured to use variants, but none have been created yet.</p>
+        <a class="btn btn-primary" [routerLink]="['/products', product.id, 'edit']">
+          <i class="bi bi-plus-lg"></i> Add Variants
+        </a>
+      </div>
+    </div>
+    }
+  </div>
+  }
+
+  @if (!loading && !product) {
+  <div class="error-state">
+    <div class="empty-state">
+      <i class="bi bi-exclamation-triangle"></i>
+      <h4>Product Not Found</h4>
+      <p>The requested product could not be found.</p>
+      <a class="btn btn-primary" [routerLink]="['/products']">
+        <i class="bi bi-arrow-left"></i> Back to Products
+      </a>
+    </div>
+  </div>
+  }
+</div>

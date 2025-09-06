@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MultiTenantProductManagementApp.EntityFrameworkCore;
 using Volo.Abp.EntityFrameworkCore;
@@ -12,14 +13,16 @@ using Volo.Abp.EntityFrameworkCore;
 namespace MultiTenantProductManagementApp.Migrations
 {
     [DbContext(typeof(MultiTenantProductManagementAppDbContext))]
-    partial class MultiTenantProductManagementAppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250906095552_MigrateVariantAttributesToColorSize")]
+    partial class MigrateVariantAttributesToColorSize
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("_Abp_DatabaseProvider", EfCoreDatabaseProvider.SqlServer)
-                .HasAnnotation("ProductVersion", "9.0.8")
+                .HasAnnotation("ProductVersion", "9.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);

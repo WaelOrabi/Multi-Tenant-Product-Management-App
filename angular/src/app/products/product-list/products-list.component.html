@@ -1,0 +1,66 @@
+<div class="page">
+  <form class="toolbar" role="search" (submit)="$event.preventDefault()">
+    <input name="filterText" class="form-control form-control-sm" [(ngModel)]="filters.filterText" (ngModelChange)="onSearchChange($event)" placeholder="Search products" />
+    <select name="category" class="form-select form-select-sm" [(ngModel)]="filters.category" (focus)="onCategoryFocus()" (ngModelChange)="onCategoryChange($event)">
+      <option value="">All categories</option>
+      @for (c of allCategories; track c; let i = $index) {
+        <option [value]="c">{{ c }}</option>
+      }
+    </select>
+    <select name="status" class="form-select form-select-sm" [(ngModel)]="filters.status" (ngModelChange)="onStatusChange($event)">
+      <option value="">All statuses</option>
+      <option value="1">Active</option>
+      <option value="0">Inactive</option>
+    </select>
+    <a class="btn btn-primary btn-sm" [routerLink]="['/products/create']">
+      New Product
+    </a>
+  </form>
+
+  @if (loading) {
+    <div class="loading">Loading...</div>
+  } @else {
+  <div class="grid">
+    @for (p of items; track p.id; let i = $index) {
+    <div class="card" (click)="viewProduct(p.id)">
+      <div class="card-header">
+        <div>
+          <div class="title">{{ p.name }}</div>
+          <div class="subtitle">{{ p.category || 'Uncategorized' }}</div>
+          <div class="date">{{ p.creationTime | date:'short' }}</div>
+        </div>
+        <div class="actions inline-center" (click)="$event.stopPropagation()">
+          <a class="btn btn-primary btn-sm" [routerLink]="['/products', p.id, 'edit']" title="Edit">
+            <i class="bi bi-pencil"></i>
+          </a>
+          <button class="btn btn-danger btn-sm" (click)="confirmDelete(p)" title="Delete">
+            <i class="bi bi-trash"></i>
+          </button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="description">{{ p.description }}</div>
+        <div class="product-info">
+          @if (!p.hasVariants) {
+            <div class="price">Price: {{ p.basePrice | currency }}</div>
+          } @else {
+            <div class="variants">Variants: {{ p.variants?.length || 0 }}</div>
+          }
+          <div class="status">Status: {{ p.status === 1 ? 'Active' : 'Inactive' }}</div>
+        </div>
+      </div>
+    </div>
+    }
+  </div>
+  }
+
+  <div class="pager">
+    <button class="btn btn-outline-primary btn-sm" (click)="prev()" [disabled]="skipCount===0 || loading">
+      <i class="bi bi-chevron-left"></i> Prev
+    </button>
+    <span>{{ skipCount + 1 }} - {{ Math.min(skipCount+pageSize, totalCount) }} / {{ totalCount }}</span>
+    <button class="btn btn-outline-primary btn-sm" (click)="next()" [disabled]="skipCount+pageSize>=totalCount || loading">
+      Next <i class="bi bi-chevron-right"></i>
+    </button>
+  </div>
+</div>

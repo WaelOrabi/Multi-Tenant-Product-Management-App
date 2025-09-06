@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MultiTenantProductManagementApp.EntityFrameworkCore;
 using Volo.Abp.EntityFrameworkCore;
@@ -12,14 +13,16 @@ using Volo.Abp.EntityFrameworkCore;
 namespace MultiTenantProductManagementApp.Migrations
 {
     [DbContext(typeof(MultiTenantProductManagementAppDbContext))]
-    partial class MultiTenantProductManagementAppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250906085525_AddColorSizeToProductVariant")]
+    partial class AddColorSizeToProductVariant
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("_Abp_DatabaseProvider", EfCoreDatabaseProvider.SqlServer)
-                .HasAnnotation("ProductVersion", "9.0.8")
+                .HasAnnotation("ProductVersion", "9.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -109,8 +112,7 @@ namespace MultiTenantProductManagementApp.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Color")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreationTime")
                         .HasColumnType("datetime2")
@@ -149,8 +151,7 @@ namespace MultiTenantProductManagementApp.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Size")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Sku")
                         .HasMaxLength(64)

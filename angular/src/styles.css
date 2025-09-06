@@ -1,13 +1,28 @@
-/* Global styles (CSS version converted from styles.scss) */
 
 @keyframes donut-spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
 
+.form-select,
+.form-select:focus {
+  background-color: #ffffff !important;
+  color: var(--color-text, #0f172a);
+  border-color: var(--color-border, #e5e7eb);
+}
+
 :root {
   --lpx-logo: url('/assets/images/logo/logo-light.png');
   --lpx-logo-icon: url('/assets/images/logo/logo-light-thumbnail.png');
+  
+  --color-primary: #4f46e5;
+  --color-surface: #ffffff;
+  --color-text-muted: #64748b;
+  --space-2: 0.5rem;
+  --space-4: 1rem;
+  --space-8: 2rem;
+  --radius-lg: 12px;
+  --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.05);
 }
 
 .donut {
@@ -55,3 +70,37 @@
   height: 20px;
   background-image: url('/assets/images/getting-started/x.svg');
 }
+
+/* Button variants and sizes */
+.btn-danger {
+  background-color: var(--color-danger);
+  border-color: var(--color-danger);
+  color: #fff;
+}
+.btn-danger:hover {
+  background-color: #b91c1c;
+  border-color: #b91c1c;
+}
+.btn-outline-danger {
+  background: transparent;
+  color: #b91c1c;
+  border-color: var(--color-danger);
+}
+.btn-outline-danger:hover { background-color: rgba(220, 38, 38, 0.08); }
+
+.btn-success {
+  background-color: var(--color-success);
+  border-color: var(--color-success);
+  color: #fff;
+}
+.btn-success:hover { background-color: #15803d; border-color: #15803d; }
+
+.btn-warning {
+  background-color: var(--color-warning);
+  border-color: var(--color-warning);
+  color: #111827;
+}
+.btn-warning:hover { background-color: #d97706; border-color: #d97706; }
+
+/* Size helpers */
+.btn-sm { padding: 0.35rem 0.6rem; border-radius: var(--radius-sm); font-size: 0.875rem; }

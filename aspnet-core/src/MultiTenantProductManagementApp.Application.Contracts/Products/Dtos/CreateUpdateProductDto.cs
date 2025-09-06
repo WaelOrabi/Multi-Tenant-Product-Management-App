@@ -19,7 +19,7 @@ public class CreateUpdateProductDto
     [MaxLength(64)]
     public string? Category { get; set; }
 
-    public ProductStatus Status { get; set; } = ProductStatus.Draft;
+    public ProductStatus Status { get; set; } = ProductStatus.Inactive;
 
     public bool HasVariants { get; set; }
 

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MultiTenantProductManagementApp.EntityFrameworkCore;
 using Volo.Abp.EntityFrameworkCore;
@@ -12,9 +13,11 @@ using Volo.Abp.EntityFrameworkCore;
 namespace MultiTenantProductManagementApp.Migrations
 {
     [DbContext(typeof(MultiTenantProductManagementAppDbContext))]
-    partial class MultiTenantProductManagementAppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250906153621_RemoveProductStatus")]
+    partial class RemoveProductStatus
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -88,9 +91,6 @@ namespace MultiTenantProductManagementApp.Migrations
                         .IsRequired()
                         .HasMaxLength(128)
                         .HasColumnType("nvarchar(128)");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
 
                     b.Property<Guid?>("TenantId")
                         .HasColumnType("uniqueidentifier")

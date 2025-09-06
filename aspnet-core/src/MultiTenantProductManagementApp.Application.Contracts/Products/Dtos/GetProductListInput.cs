@@ -9,4 +9,5 @@ public class GetProductListInput : PagedAndSortedResultRequestDto
     public string? Name { get; set; }
     public string? Category { get; set; }
     public ProductStatus? Status { get; set; }
+
 }

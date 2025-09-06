@@ -1,9 +1,8 @@
 import { mapEnumToOptions } from '@abp/ng.core';
 
 export enum ProductStatus {
-  Draft = 0,
-  Inactive = 1,
-  Active = 2,
+  Inactive = 0,
+  Active = 1,
 }
 
 export const productStatusOptions = mapEnumToOptions(ProductStatus);

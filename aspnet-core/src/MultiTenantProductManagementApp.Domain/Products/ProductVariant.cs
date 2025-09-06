@@ -12,7 +12,10 @@ public class ProductVariant : FullAuditedEntity<Guid>, IMultiTenant
 
     public string? Sku { get; protected set; }
 
-    public string? AttributesJson { get; protected set; } 
+    
+    public string? Color { get; protected set; }
+    
+    public string? Size { get; protected set; } 
 
     public decimal Price { get; protected set; }
 
@@ -21,7 +24,7 @@ public class ProductVariant : FullAuditedEntity<Guid>, IMultiTenant
     protected ProductVariant() { }
 
     public ProductVariant(Guid id, Guid? tenantId, Guid productId, decimal price, int stockQuantity,
-        string? sku = null, string? attributesJson = null)
+        string? sku = null, string? color = null, string? size = null)
         : base(id)
     {
         TenantId = tenantId;
@@ -29,7 +32,8 @@ public class ProductVariant : FullAuditedEntity<Guid>, IMultiTenant
         SetPrice(price);
         SetStock(stockQuantity);
         SetSku(sku);
-        SetAttributes(attributesJson);
+        SetColor(color);
+        SetSize(size);
     }
 
     public void SetSku(string? sku)
@@ -39,10 +43,6 @@ public class ProductVariant : FullAuditedEntity<Guid>, IMultiTenant
         Sku = sku;
     }
 
-    public void SetAttributes(string? json)
-    {
-        AttributesJson = json;
-    }
 
     public void SetPrice(decimal price)
     {
@@ -54,5 +54,19 @@ public class ProductVariant : FullAuditedEntity<Guid>, IMultiTenant
     {
         if (qty < 0) throw new ArgumentOutOfRangeException(nameof(qty));
         StockQuantity = qty;
+    }
+
+    public void SetColor(string? color)
+    {
+        if (color != null && color.Length > 50)
+            throw new ArgumentException("Color max length is 50", nameof(color));
+        Color = color;
+    }
+
+    public void SetSize(string? size)
+    {
+        if (size != null && size.Length > 20)
+            throw new ArgumentException("Size max length is 20", nameof(size));
+        Size = size;
     }
 }

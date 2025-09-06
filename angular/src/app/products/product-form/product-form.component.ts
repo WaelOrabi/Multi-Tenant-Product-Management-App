@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { ProductService } from 'src/app/proxy/products';
+import { ProductService, ProductStatus } from 'src/app/proxy/products';
 import { CreateUpdateProductDto, ProductDto, ProductVariantDto } from 'src/app/proxy/products/dtos';
 import { ToasterService } from '@abp/ng.theme.shared';
 
@@ -25,7 +25,7 @@ export class ProductFormComponent implements OnInit {
     description: [''],
     basePrice: [null],
     category: [''],
-    status: [0],
+    status: [ProductStatus.Inactive],
     hasVariants: [false],
     variants: this.fb.array([] as FormGroup[]),
   });
@@ -60,7 +60,7 @@ export class ProductFormComponent implements OnInit {
           description: p.description,
           basePrice: p.basePrice ?? null,
           category: p.category,
-          status: p.status,
+          status: p.status ?? ProductStatus.Inactive,
           hasVariants: p.hasVariants,
         });
         this.variants.clear();
@@ -77,7 +77,8 @@ export class ProductFormComponent implements OnInit {
       sku: [v?.sku || '', Validators.required],
       price: [v?.price ?? 0, [Validators.required, Validators.min(0)]],
       stockQuantity: [v?.stockQuantity ?? 0, [Validators.required, Validators.min(0)]],
-      attributesJson: [v?.attributesJson || ''],
+      color: [v?.color || ''],
+      size: [v?.size || ''],
     });
   }
 
@@ -93,13 +94,22 @@ export class ProductFormComponent implements OnInit {
       description: value.description || undefined,
       basePrice: value.hasVariants ? null : (value.basePrice ?? null),
       category: value.category || undefined,
-      status: value.status ?? 0,
+      status: value.status ?? ProductStatus.Inactive,
       hasVariants: value.hasVariants,
       variants: value.hasVariants ? (value.variants as any) : undefined,
     };
     const obs = this.isEdit && this.id ? this.service.update(this.id, input) : this.service.create(input);
     obs.subscribe({
-      next: () => { this.toaster.success('Saved'); this.router.navigate(['/products']); },
+      next: (result) => { 
+        this.toaster.success(this.isEdit ? 'Product updated' : 'Product created'); 
+        if (!this.isEdit) {
+          // Navigate to the newly created product's details page
+          this.router.navigate(['/products', result.id]);
+        } else {
+          // Navigate back to products list for edits
+          this.router.navigate(['/products']);
+        }
+      },
       error: err => { this.saving = false; this.toaster.error('Save failed'); console.error(err); }
     });
   }
