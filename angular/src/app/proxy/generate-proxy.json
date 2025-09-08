@@ -4743,13 +4743,25 @@
           "regex": null
         },
         {
-          "name": "AttributesJson",
+          "name": "Color",
           "jsonName": null,
           "type": "System.String",
           "typeSimple": "string",
           "isRequired": false,
           "minLength": null,
-          "maxLength": null,
+          "maxLength": 50,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "Size",
+          "jsonName": null,
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": 20,
           "minimum": null,
           "maximum": null,
           "regex": null
@@ -4962,7 +4974,19 @@
           "regex": null
         },
         {
-          "name": "AttributesJson",
+          "name": "Color",
+          "jsonName": null,
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "Size",
           "jsonName": null,
           "type": "System.String",
           "typeSimple": "string",
@@ -5003,14 +5027,12 @@
       "baseType": "System.Enum",
       "isEnum": true,
       "enumNames": [
-        "Draft",
         "Inactive",
         "Active"
       ],
       "enumValues": [
         0,
-        1,
-        2
+        1
       ],
       "genericArguments": null,
       "properties": null

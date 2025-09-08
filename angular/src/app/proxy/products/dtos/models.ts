@@ -13,7 +13,8 @@ export interface CreateUpdateProductDto {
 
 export interface CreateUpdateProductVariantDto {
   sku?: string;
-  attributesJson?: string;
+  color?: string;
+  size?: string;
   price: number;
   stockQuantity: number;
 }
@@ -38,7 +39,8 @@ export interface ProductDto extends AuditedEntityDto<string> {
 export interface ProductVariantDto extends AuditedEntityDto<string> {
   productId?: string;
   sku?: string;
-  attributesJson?: string;
+  color?: string;
+  size?: string;
   price: number;
   stockQuantity: number;
 }

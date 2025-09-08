@@ -21,6 +21,7 @@ function configureRoutes(routesService: RoutesService) {
         iconClass: 'fa fa-box',
         order: 2,
         layout: eLayoutType.application,
+        requiredPolicy: 'MultiTenantProductManagementApp.Products',
       },
       {
         path: '/stocks',
@@ -36,6 +37,7 @@ function configureRoutes(routesService: RoutesService) {
         iconClass: 'fa fa-users',
         order: 2,
         layout: eLayoutType.application,
+        requiredPolicy: 'AbpIdentity.Users',
       },
       {
         path: '/identity/roles',
@@ -43,6 +45,7 @@ function configureRoutes(routesService: RoutesService) {
         iconClass: 'fa fa-user-secret',
         order: 2,
         layout: eLayoutType.application,
+        requiredPolicy: 'AbpIdentity.Roles',
       }
     ]);
   };

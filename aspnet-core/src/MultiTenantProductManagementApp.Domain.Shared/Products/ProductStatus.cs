@@ -4,7 +4,6 @@ namespace MultiTenantProductManagementApp.Products;
 
 public enum ProductStatus
 {
-    Draft = 0,
-    Inactive = 1,
-    Active = 2
+    Inactive = 0,
+    Active = 1
 }

@@ -18,7 +18,7 @@ public class Product : FullAuditedAggregateRoot<Guid>, IMultiTenant
 
     public string? Category { get; protected set; }
 
-    public ProductStatus Status { get; protected set; } = ProductStatus.Draft;
+    public ProductStatus Status { get; protected set; } = ProductStatus.Inactive;
 
     public bool HasVariants { get; protected set; }
 
@@ -27,7 +27,7 @@ public class Product : FullAuditedAggregateRoot<Guid>, IMultiTenant
     protected Product() { }
 
     public Product(Guid id, Guid? tenantId, string name, string? description = null, decimal? basePrice = null,
-        string? category = null, ProductStatus status = ProductStatus.Draft, bool hasVariants = false)
+        string? category = null, ProductStatus status = ProductStatus.Inactive, bool hasVariants = false)
         : base(id)
     {
         TenantId = tenantId;

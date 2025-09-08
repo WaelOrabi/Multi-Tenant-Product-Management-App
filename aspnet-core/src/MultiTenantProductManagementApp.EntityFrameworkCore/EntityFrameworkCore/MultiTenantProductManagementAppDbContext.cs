@@ -99,6 +99,8 @@ public class MultiTenantProductManagementAppDbContext :
             b.ConfigureByConvention();
             b.Property(x => x.Sku).HasMaxLength(64);
             b.Property(x => x.Price).HasColumnType("decimal(18,2)");
+            b.Property(x => x.Color).HasMaxLength(50);
+            b.Property(x => x.Size).HasMaxLength(20);
             b.HasIndex(x => new { x.TenantId, x.ProductId, x.Sku });
         });
 

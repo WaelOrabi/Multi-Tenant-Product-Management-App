@@ -74,12 +74,16 @@ public class ProductAppService : ApplicationService, IProductAppService
                 queryable = queryable.OrderBy(x => x.Category);
             else if (input.Sorting!.Equals("Category desc", StringComparison.OrdinalIgnoreCase))
                 queryable = queryable.OrderByDescending(x => x.Category);
+            else if (input.Sorting!.Equals("CreationTime", StringComparison.OrdinalIgnoreCase))
+                queryable = queryable.OrderBy(x => x.CreationTime);
+            else if (input.Sorting!.Equals("CreationTime desc", StringComparison.OrdinalIgnoreCase))
+                queryable = queryable.OrderByDescending(x => x.CreationTime);
             else
                 queryable = queryable.OrderBy(x => x.Name);
         }
         else
         {
-            queryable = queryable.OrderBy(x => x.Name);
+            queryable = queryable.OrderByDescending(x => x.CreationTime);
         }
 
         var totalCount = await AsyncExecuter.CountAsync(queryable);
@@ -115,7 +119,8 @@ public class ProductAppService : ApplicationService, IProductAppService
                     v.Price,
                     v.StockQuantity,
                     v.Sku,
-                    v.AttributesJson
+                    v.Color,
+                    v.Size
                 );
                 product.Variants.Add(variant);
             }
@@ -154,7 +159,8 @@ public class ProductAppService : ApplicationService, IProductAppService
                     v.Price,
                     v.StockQuantity,
                     v.Sku,
-                    v.AttributesJson
+                    v.Color,
+                    v.Size
                 );
                 entity.Variants.Add(variant);
             }
@@ -181,7 +187,8 @@ public class ProductAppService : ApplicationService, IProductAppService
             input.Price,
             input.StockQuantity,
             input.Sku,
-            input.AttributesJson
+            input.Color,
+            input.Size
         );
         await _variantRepo.InsertAsync(variant, autoSave: true);
         return ObjectMapper.Map<ProductVariant, ProductVariantDto>(variant);
@@ -196,7 +203,8 @@ public class ProductAppService : ApplicationService, IProductAppService
             throw new BusinessException("ProductVariant.ProductMismatch").WithData("ProductId", productId).WithData("VariantId", variantId);
         }
         variant.SetSku(input.Sku);
-        variant.SetAttributes(input.AttributesJson);
+        variant.SetColor(input.Color);
+        variant.SetSize(input.Size);
         variant.SetPrice(input.Price);
         variant.SetStock(input.StockQuantity);
         await _variantRepo.UpdateAsync(variant, autoSave: true);
