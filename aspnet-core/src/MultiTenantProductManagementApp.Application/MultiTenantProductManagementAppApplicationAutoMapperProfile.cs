@@ -1,6 +1,8 @@
 using AutoMapper;
 using MultiTenantProductManagementApp.Products;
 using MultiTenantProductManagementApp.Products.Dtos;
+using MultiTenantProductManagementApp.Stocks.Dtos;
+using MultiTenantProductManagementApp.Stocks;
 
 namespace MultiTenantProductManagementApp;
 
@@ -8,16 +10,14 @@ public class MultiTenantProductManagementAppApplicationAutoMapperProfile : Profi
 {
     public MultiTenantProductManagementAppApplicationAutoMapperProfile()
     {
-        /* You can configure your AutoMapper mapping configuration here.
-         * Alternatively, you can split your mapping configurations
-         * into multiple profile classes for a better organization. */
-
-        // Entity -> DTO
+    
         CreateMap<Product, ProductDto>();
         CreateMap<ProductVariant, ProductVariantDto>();
 
-        // DTO -> Entity (for updates if needed)
         CreateMap<CreateUpdateProductVariantDto, ProductVariant>();
         CreateMap<CreateUpdateProductDto, Product>();
+
+        CreateMap<Stock, StockSummaryDto>()
+            .ForMember(d => d.Name, opt => opt.MapFrom(s => s.Name));
     }
 }
