@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MultiTenantProductManagementApp.EntityFrameworkCore;
 using Volo.Abp.EntityFrameworkCore;
@@ -12,9 +13,11 @@ using Volo.Abp.EntityFrameworkCore;
 namespace MultiTenantProductManagementApp.Migrations
 {
     [DbContext(typeof(MultiTenantProductManagementAppDbContext))]
-    partial class MultiTenantProductManagementAppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250908201749_AddStockName")]
+    partial class AddStockName
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -108,8 +111,9 @@ namespace MultiTenantProductManagementApp.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("AttributesJson")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<string>("Color")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<DateTime>("CreationTime")
                         .HasColumnType("datetime2")
@@ -146,6 +150,10 @@ namespace MultiTenantProductManagementApp.Migrations
 
                     b.Property<Guid>("ProductId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Size")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("Sku")
                         .HasMaxLength(64)
@@ -207,25 +215,14 @@ namespace MultiTenantProductManagementApp.Migrations
                         .HasMaxLength(128)
                         .HasColumnType("nvarchar(128)");
 
-                    b.Property<Guid?>("TenantId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("TenantId");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("AppStocks", (string)null);
-                });
-
-            modelBuilder.Entity("MultiTenantProductManagementApp.Stocks.StockProduct", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid>("ProductId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("StockId")
+                    b.Property<Guid?>("ProductVariantId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
 
                     b.Property<Guid?>("TenantId")
                         .HasColumnType("uniqueidentifier")
@@ -235,44 +232,13 @@ namespace MultiTenantProductManagementApp.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.HasIndex("StockId");
-
-                    b.HasIndex("TenantId", "StockId", "ProductId")
-                        .IsUnique()
-                        .HasFilter("[TenantId] IS NOT NULL");
-
-                    b.ToTable("AppStockProducts", (string)null);
-                });
-
-            modelBuilder.Entity("MultiTenantProductManagementApp.Stocks.StockProductVariant", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("ProductVariantId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("StockProductId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("TenantId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("TenantId");
-
-                    b.HasKey("Id");
-
                     b.HasIndex("ProductVariantId");
 
-                    b.HasIndex("StockProductId");
-
-                    b.HasIndex("TenantId", "StockProductId", "ProductVariantId")
+                    b.HasIndex("TenantId", "ProductId", "ProductVariantId")
                         .IsUnique()
                         .HasFilter("[TenantId] IS NOT NULL AND [ProductVariantId] IS NOT NULL");
 
-                    b.ToTable("AppStockProductVariants", (string)null);
+                    b.ToTable("AppStocks", (string)null);
                 });
 
             modelBuilder.Entity("Volo.Abp.AuditLogging.AuditLog", b =>
@@ -2064,7 +2030,7 @@ namespace MultiTenantProductManagementApp.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("MultiTenantProductManagementApp.Stocks.StockProduct", b =>
+            modelBuilder.Entity("MultiTenantProductManagementApp.Stocks.Stock", b =>
                 {
                     b.HasOne("MultiTenantProductManagementApp.Products.Product", null)
                         .WithMany()
@@ -2072,24 +2038,9 @@ namespace MultiTenantProductManagementApp.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("MultiTenantProductManagementApp.Stocks.Stock", null)
-                        .WithMany("Products")
-                        .HasForeignKey("StockId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("MultiTenantProductManagementApp.Stocks.StockProductVariant", b =>
-                {
                     b.HasOne("MultiTenantProductManagementApp.Products.ProductVariant", null)
                         .WithMany()
                         .HasForeignKey("ProductVariantId");
-
-                    b.HasOne("MultiTenantProductManagementApp.Stocks.StockProduct", null)
-                        .WithMany("Variants")
-                        .HasForeignKey("StockProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("Volo.Abp.AuditLogging.AuditLogAction", b =>
@@ -2235,16 +2186,6 @@ namespace MultiTenantProductManagementApp.Migrations
                 });
 
             modelBuilder.Entity("MultiTenantProductManagementApp.Products.Product", b =>
-                {
-                    b.Navigation("Variants");
-                });
-
-            modelBuilder.Entity("MultiTenantProductManagementApp.Stocks.Stock", b =>
-                {
-                    b.Navigation("Products");
-                });
-
-            modelBuilder.Entity("MultiTenantProductManagementApp.Stocks.StockProduct", b =>
                 {
                     b.Navigation("Variants");
                 });

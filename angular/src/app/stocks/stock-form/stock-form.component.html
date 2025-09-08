@@ -1,0 +1,87 @@
+<div class="container py-3">
+  <h2 class="mb-3">{{ title() }}</h2>
+
+  <form (ngSubmit)="save()" #f="ngForm" class="card p-3 shadow-sm">
+    <div class="mb-3">
+      <label class="form-label">Name</label>
+      <input class="form-control" name="name" [(ngModel)]="vm().name" required />
+    </div>
+
+    <div class="mb-3">
+      <div class="d-flex justify-content-between align-items-center">
+        <label class="form-label mb-0">Products</label>
+        <button type="button" class="btn btn-sm btn-outline-primary" (click)="addProduct()">
+          <i class="bi bi-plus"></i> Add product
+        </button>
+      </div>
+    </div>
+
+    @for (p of vm().products; let i = $index; track i) {
+      <div class="border rounded p-3 mb-3 bg-light">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <div class="flex-grow-1 me-2">
+            <label class="form-label">Product</label>
+            <select class="form-select" [name]="'productId_' + i" [(ngModel)]="vm().products[i].productId" (ngModelChange)="onProductChange(i, $event)" [disabled]="loadingProducts()" required>
+              <option value="" disabled>Select a product...</option>
+              @for (pr of products(); track pr.id) {
+                <option [value]="pr.id">{{ pr.name }}</option>
+              }
+            </select>
+          </div>
+          <button type="button" class="btn btn-outline-danger align-self-end" (click)="removeProduct(i)" [disabled]="vm().products.length === 1">
+            <i class="bi bi-trash"></i>
+          </button>
+        </div>
+
+        <div class="mb-2">
+          <div class="d-flex justify-content-between align-items-center">
+            <label class="form-label mb-0">Variants and quantities</label>
+            <button type="button" class="btn btn-sm btn-outline-secondary" (click)="addVariant(i)">
+              <i class="bi bi-plus"></i> Add line
+            </button>
+          </div>
+        </div>
+
+        @for (v of vm().products[i].variants; let j = $index; track j) {
+          <div class="row g-2 align-items-end mb-2">
+            <div class="col-md-7">
+              <label class="form-label">Variant (optional)</label>
+              <select class="form-select" [name]="'variant_' + i + '_' + j" [(ngModel)]="vm().products[i].variants[j].productVariantId" [disabled]="loadingVariants()[i] || !(variantsPerProduct()[i]?.length)">
+                <option [ngValue]="null">(No variant - product level stock)</option>
+                @for (vv of (variantsPerProduct()[i] || []); track vv.id) {
+                  <option [value]="vv.id">
+                    {{ vv.sku || (vv.color || '-') + ' ' + (vv.size || '-') }}
+                  </option>
+                }
+              </select>
+            </div>
+            <div class="col-md-3 ">
+              <label class="form-label  ">Quantity</label>
+              <input type="number" min="0" class="form-control select-quantity" [name]="'qty_' + i + '_' + j" [(ngModel)]="vm().products[i].variants[j].quantity" required />
+            </div>
+            <div class="col-md-2 text-end">
+              <button type="button" class="btn btn-outline-danger" (click)="removeVariant(i, j)">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+          </div>
+        }
+
+        @if (hasDuplicateVariants(i)) {
+          <div class="text-danger small">Duplicate variant lines detected for this product.</div>
+        }
+        @if (hasNegativeQuantity(i)) {
+          <div class="text-danger small">Quantity must be non-negative.</div>
+        }
+      </div>
+    }
+
+    <div class="d-flex justify-content-end gap-2">
+      <button type="button" class="btn btn-outline-secondary" (click)="cancel()">Cancel</button>
+      <button type="submit" class="btn btn-primary" [disabled]="saving() || f.invalid || productsInvalid()">
+        <span *ngIf="saving()" class="spinner-border spinner-border-sm me-2"></span>
+        Save
+      </button>
+    </div>
+  </form>
+</div>

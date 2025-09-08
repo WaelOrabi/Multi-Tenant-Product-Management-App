@@ -10,6 +10,7 @@ using Volo.Abp.MultiTenancy;
 using Volo.Abp.TenantManagement;
 using MultiTenantProductManagementApp.Products;
 using Volo.Abp.Guids;
+using Volo.Abp.PermissionManagement;
 
 namespace MultiTenantProductManagementApp.Data;
 
@@ -24,6 +25,7 @@ public class ProductDemoDataSeedContributor : IDataSeedContributor, ITransientDe
     private readonly IRepository<ProductVariant, Guid> _variantRepo;
     private readonly ILogger<ProductDemoDataSeedContributor> _logger;
     private readonly IGuidGenerator _guidGenerator;
+    private readonly IPermissionDataSeeder _permissionDataSeeder;
 
     public ProductDemoDataSeedContributor(
         ITenantRepository tenantRepository,
@@ -34,7 +36,8 @@ public class ProductDemoDataSeedContributor : IDataSeedContributor, ITransientDe
         IRepository<Product, Guid> productRepo,
         IRepository<ProductVariant, Guid> variantRepo,
         ILogger<ProductDemoDataSeedContributor> logger,
-        IGuidGenerator guidGenerator)
+        IGuidGenerator guidGenerator,
+        IPermissionDataSeeder permissionDataSeeder)
     {
         _tenantRepository = tenantRepository;
         _tenantManager = tenantManager;
@@ -45,6 +48,7 @@ public class ProductDemoDataSeedContributor : IDataSeedContributor, ITransientDe
         _variantRepo = variantRepo;
         _logger = logger;
         _guidGenerator = guidGenerator;
+        _permissionDataSeeder = permissionDataSeeder;
     }
 
     public async Task SeedAsync(DataSeedContext context)
@@ -94,6 +98,23 @@ public class ProductDemoDataSeedContributor : IDataSeedContributor, ITransientDe
                     _logger.LogWarning("Failed to create admin role for {Tenant}: {Errors}", tenant.Name, string.Join(", ", roleCreateResult.Errors.Select(e => e.Description)));
                 }
             }
+
+            await _permissionDataSeeder.SeedAsync(
+                "R",
+                adminRole.Name,
+                new string[]
+                {
+                    "MultiTenantProductManagementApp.Products",
+                    "MultiTenantProductManagementApp.Products.Create",
+                    "MultiTenantProductManagementApp.Products.Edit",
+                    "MultiTenantProductManagementApp.Products.Delete",
+                    "MultiTenantProductManagementApp.Stocks",
+                    "MultiTenantProductManagementApp.Stocks.Create",
+                    "MultiTenantProductManagementApp.Stocks.Edit",
+                    "MultiTenantProductManagementApp.Stocks.Delete"
+                },
+                tenant.Id
+            );
 
             if (!await _userManager.IsInRoleAsync(adminUser, "admin"))
             {

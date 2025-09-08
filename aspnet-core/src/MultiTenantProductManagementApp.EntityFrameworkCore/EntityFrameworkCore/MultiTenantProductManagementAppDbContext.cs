@@ -14,6 +14,7 @@ using Volo.Abp.SettingManagement.EntityFrameworkCore;
 using Volo.Abp.TenantManagement;
 using Volo.Abp.TenantManagement.EntityFrameworkCore;
 using MultiTenantProductManagementApp.Products;
+using MultiTenantProductManagementApp.Stocks;
 
 namespace MultiTenantProductManagementApp.EntityFrameworkCore;
 
@@ -28,6 +29,9 @@ public class MultiTenantProductManagementAppDbContext :
 
     public DbSet<Product> Products { get; set; } = default!;
     public DbSet<ProductVariant> ProductVariants { get; set; } = default!;
+    public DbSet<Stock> Stocks { get; set; } = default!;
+    public DbSet<StockProduct> StockProducts { get; set; } = default!;
+    public DbSet<StockProductVariant> StockProductVariants { get; set; } = default!;
 
     #region Entities from the modules
 
@@ -96,6 +100,53 @@ public class MultiTenantProductManagementAppDbContext :
             b.Property(x => x.Sku).HasMaxLength(64);
             b.Property(x => x.Price).HasColumnType("decimal(18,2)");
             b.HasIndex(x => new { x.TenantId, x.ProductId, x.Sku });
+        });
+
+        builder.Entity<Stock>(b =>
+        {
+            b.ToTable(MultiTenantProductManagementAppConsts.DbTablePrefix + "Stocks", MultiTenantProductManagementAppConsts.DbSchema);
+            b.ConfigureByConvention();
+            b.Property(x => x.Name).IsRequired().HasMaxLength(128);
+
+            // Relation to children configured on child sides
+        });
+
+        builder.Entity<StockProduct>(b =>
+        {
+            b.ToTable(MultiTenantProductManagementAppConsts.DbTablePrefix + "StockProducts", MultiTenantProductManagementAppConsts.DbSchema);
+            b.ConfigureByConvention();
+            b.HasOne<Stock>()
+                .WithMany(s => s.Products)
+                .HasForeignKey(sp => sp.StockId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .IsRequired();
+
+            b.HasOne<Product>()
+                .WithMany()
+                .HasForeignKey(sp => sp.ProductId)
+                .IsRequired();
+
+            b.HasIndex(x => new { x.TenantId, x.StockId, x.ProductId }).IsUnique();
+        });
+
+        builder.Entity<StockProductVariant>(b =>
+        {
+            b.ToTable(MultiTenantProductManagementAppConsts.DbTablePrefix + "StockProductVariants", MultiTenantProductManagementAppConsts.DbSchema);
+            b.ConfigureByConvention();
+            b.Property(x => x.Quantity).IsRequired();
+
+            b.HasOne<StockProduct>()
+                .WithMany(sp => sp.Variants)
+                .HasForeignKey(v => v.StockProductId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .IsRequired();
+
+            b.HasOne<ProductVariant>()
+                .WithMany()
+                .HasForeignKey(v => v.ProductVariantId)
+                .IsRequired(false);
+
+            b.HasIndex(x => new { x.TenantId, x.StockProductId, x.ProductVariantId }).IsUnique();
         });
     }
 }

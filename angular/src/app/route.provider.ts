@@ -23,6 +23,14 @@ function configureRoutes(routesService: RoutesService) {
         layout: eLayoutType.application,
       },
       {
+        path: '/stocks',
+        name: 'Stocks',
+        iconClass: 'fa fa-warehouse',
+        order: 3,
+        layout: eLayoutType.application,
+        requiredPolicy: 'MultiTenantProductManagementApp.Stocks',
+      },
+      {
         path: '/identity/users',
         name: 'Identity',
         iconClass: 'fa fa-users',
