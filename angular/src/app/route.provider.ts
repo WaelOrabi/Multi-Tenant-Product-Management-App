@@ -24,6 +24,14 @@ function configureRoutes(routesService: RoutesService) {
         requiredPolicy: 'MultiTenantProductManagementApp.Products',
       },
       {
+        path: '/stocks',
+        name: 'Stocks',
+        iconClass: 'fa fa-warehouse',
+        order: 3,
+        layout: eLayoutType.application,
+        requiredPolicy: 'MultiTenantProductManagementApp.Stocks',
+      },
+      {
         path: '/identity/users',
         name: 'Identity',
         iconClass: 'fa fa-users',

@@ -1,2 +1,5 @@
 import * as Products from './products';
-export { Products };
+
+
+import * as Stocks from './stocks';
+export { Products, Stocks };
