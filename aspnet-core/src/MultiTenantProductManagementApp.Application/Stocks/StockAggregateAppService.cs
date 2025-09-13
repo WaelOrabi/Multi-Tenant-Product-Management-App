@@ -11,6 +11,8 @@ using Volo.Abp.Domain.Repositories;
 using MultiTenantProductManagementApp.Permissions;
 using MultiTenantProductManagementApp.Products;
 using MultiTenantProductManagementApp.Stocks.Dtos;
+using Volo.Abp.Guids;
+using Volo.Abp.DependencyInjection;
 
 namespace MultiTenantProductManagementApp.Stocks;
 
@@ -43,7 +45,7 @@ public class StockAggregateAppService : ApplicationService, IStockAggregateAppSe
         queryable = queryable.OrderByDescending(x => x.CreationTime);
         var totalCount = await AsyncExecuter.CountAsync(queryable);
         var items = await AsyncExecuter.ToListAsync(queryable.Skip(input.SkipCount).Take(input.MaxResultCount));
-        var dtos = ObjectMapper.Map<List<Stock>, List<StockSummaryDto>>(items);
+        var dtos = items.Select(s => new StockSummaryDto { Id = s.Id, Name = s.Name }).ToList();
         return new PagedResultDto<StockSummaryDto>(totalCount, dtos);
     }
 
@@ -103,7 +105,7 @@ public class StockAggregateAppService : ApplicationService, IStockAggregateAppSe
     {
         ValidateInput(input);
 
-        var stock = new Stock(GuidGenerator.Create(), CurrentTenant.Id, input.Name);
+        var stock = new Stock(LazyServiceProvider.LazyGetRequiredService<IGuidGenerator>().Create(), CurrentTenant.Id, input.Name);
         await _stockRepo.InsertAsync(stock, autoSave: true);
 
         await UpsertChildrenAsync(stock, input);
@@ -172,7 +174,7 @@ public class StockAggregateAppService : ApplicationService, IStockAggregateAppSe
             if (!productMap.ContainsKey(p.ProductId))
                 throw new BusinessException("Stock.ProductNotFound").WithData("ProductId", p.ProductId);
 
-            var sp = new StockProduct(GuidGenerator.Create(), CurrentTenant.Id, stock.Id, p.ProductId);
+            var sp = new StockProduct(LazyServiceProvider.LazyGetRequiredService<IGuidGenerator>().Create(), CurrentTenant.Id, stock.Id, p.ProductId);
             await _stockProductRepo.InsertAsync(sp, autoSave: true);
 
             var variantIds = p.Variants.Where(v => v.ProductVariantId.HasValue).Select(v => v.ProductVariantId!.Value).Distinct().ToList();
@@ -194,7 +196,7 @@ public class StockAggregateAppService : ApplicationService, IStockAggregateAppSe
                             .WithData("RequestedQuantity", v.Quantity)
                             .WithData("AvailableStock", ve.StockQuantity);
                 }
-                var line = new StockProductVariant(GuidGenerator.Create(), CurrentTenant.Id, sp.Id, v.ProductVariantId, v.Quantity);
+                var line = new StockProductVariant(LazyServiceProvider.LazyGetRequiredService<IGuidGenerator>().Create(), CurrentTenant.Id, sp.Id, v.ProductVariantId, v.Quantity);
                 await _stockProductVariantRepo.InsertAsync(line, autoSave: true);
             }
         }

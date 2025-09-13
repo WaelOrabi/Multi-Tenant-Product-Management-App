@@ -14,6 +14,8 @@ using MultiTenantProductManagementApp.Products.Dtos;
 using MultiTenantProductManagementApp.Permissions;
 using Microsoft.AspNetCore.Authorization;
 using Volo.Abp.Domain.Entities;
+using Volo.Abp.Guids;
+using Volo.Abp.DependencyInjection;
 
 namespace MultiTenantProductManagementApp.Products;
 
@@ -31,6 +33,43 @@ public class ProductAppService : ApplicationService, IProductAppService
         _variantRepo = variantRepo;
     }
 
+    private static ProductDto MapProductToDto(Product entity)
+    {
+        var dto = new ProductDto
+        {
+            Id = entity.Id,
+            Name = entity.Name,
+            Description = entity.Description,
+            BasePrice = entity.BasePrice,
+            Category = entity.Category,
+            Status = entity.Status,
+            HasVariants = entity.HasVariants,
+            CreationTime = entity.CreationTime,
+            CreatorId = entity.CreatorId,
+            LastModificationTime = entity.LastModificationTime,
+            LastModifierId = entity.LastModifierId
+        };
+        if (entity.Variants != null && entity.Variants.Count > 0)
+        {
+            dto.Variants = entity.Variants.Select(MapVariantToDto).ToList();
+        }
+        return dto;
+    }
+
+    private static ProductVariantDto MapVariantToDto(ProductVariant v)
+    {
+        return new ProductVariantDto
+        {
+            Id = v.Id,
+            ProductId = v.ProductId,
+            Price = v.Price,
+            StockQuantity = v.StockQuantity,
+            Sku = v.Sku,
+            Color = v.Color,
+            Size = v.Size
+        };
+    }
+
     public virtual async Task<ProductDto> GetAsync(Guid id)
     {
         var queryable = await _productRepo.WithDetailsAsync(x => x.Variants);
@@ -39,7 +78,7 @@ public class ProductAppService : ApplicationService, IProductAppService
         {
             throw new EntityNotFoundException(typeof(Product), id);
         }
-        return ObjectMapper.Map<Product, ProductDto>(entity);
+        return MapProductToDto(entity);
     }
 
     public virtual async Task<PagedResultDto<ProductDto>> GetListAsync(GetProductListInput input)
@@ -89,7 +128,7 @@ public class ProductAppService : ApplicationService, IProductAppService
         var totalCount = await AsyncExecuter.CountAsync(queryable);
         var items = await AsyncExecuter.ToListAsync(queryable.Skip(input.SkipCount).Take(input.MaxResultCount));
 
-        var dtos = ObjectMapper.Map<List<Product>, List<ProductDto>>(items);
+        var dtos = items.Select(MapProductToDto).ToList();
         return new PagedResultDto<ProductDto>(totalCount, dtos);
     }
 
@@ -97,7 +136,7 @@ public class ProductAppService : ApplicationService, IProductAppService
     public virtual async Task<ProductDto> CreateAsync(CreateUpdateProductDto input)
     {
         var product = new Product(
-            GuidGenerator.Create(),
+            LazyServiceProvider.LazyGetRequiredService<IGuidGenerator>().Create(),
             CurrentTenant.Id,
             input.Name,
             input.Description,
@@ -113,7 +152,7 @@ public class ProductAppService : ApplicationService, IProductAppService
             foreach (var v in input.Variants)
             {
                 var variant = new ProductVariant(
-                    GuidGenerator.Create(),
+                    LazyServiceProvider.LazyGetRequiredService<IGuidGenerator>().Create(),
                     CurrentTenant.Id,
                     product.Id,
                     v.Price,
@@ -127,7 +166,7 @@ public class ProductAppService : ApplicationService, IProductAppService
         }
 
         await _productRepo.InsertAsync(product, autoSave: true);
-        return ObjectMapper.Map<Product, ProductDto>(product);
+        return MapProductToDto(product);
     }
 
     [Authorize(MultiTenantProductManagementAppPermissions.Products.Edit)]
@@ -153,7 +192,7 @@ public class ProductAppService : ApplicationService, IProductAppService
             foreach (var v in input.Variants)
             {
                 var variant = new ProductVariant(
-                    GuidGenerator.Create(),
+                    LazyServiceProvider.LazyGetRequiredService<IGuidGenerator>().Create(),
                     CurrentTenant.Id,
                     entity.Id,
                     v.Price,
@@ -167,7 +206,7 @@ public class ProductAppService : ApplicationService, IProductAppService
         }
 
         await _productRepo.UpdateAsync(entity, autoSave: true);
-        return ObjectMapper.Map<Product, ProductDto>(entity);
+        return MapProductToDto(entity);
     }
 
     [Authorize(MultiTenantProductManagementAppPermissions.Products.Delete)]
@@ -181,7 +220,7 @@ public class ProductAppService : ApplicationService, IProductAppService
     {
         var product = await _productRepo.GetAsync(productId);
         var variant = new ProductVariant(
-            GuidGenerator.Create(),
+            LazyServiceProvider.LazyGetRequiredService<IGuidGenerator>().Create(),
             CurrentTenant.Id,
             product.Id,
             input.Price,
@@ -191,7 +230,7 @@ public class ProductAppService : ApplicationService, IProductAppService
             input.Size
         );
         await _variantRepo.InsertAsync(variant, autoSave: true);
-        return ObjectMapper.Map<ProductVariant, ProductVariantDto>(variant);
+        return MapVariantToDto(variant);
     }
 
     [Authorize(MultiTenantProductManagementAppPermissions.Products.Edit)]
@@ -208,7 +247,7 @@ public class ProductAppService : ApplicationService, IProductAppService
         variant.SetPrice(input.Price);
         variant.SetStock(input.StockQuantity);
         await _variantRepo.UpdateAsync(variant, autoSave: true);
-        return ObjectMapper.Map<ProductVariant, ProductVariantDto>(variant);
+        return MapVariantToDto(variant);
     }
 
     [Authorize(MultiTenantProductManagementAppPermissions.Products.Delete)]
