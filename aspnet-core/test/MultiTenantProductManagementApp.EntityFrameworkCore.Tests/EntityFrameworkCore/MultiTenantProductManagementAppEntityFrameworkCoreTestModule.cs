@@ -1,12 +1,15 @@
-﻿using Microsoft.Data.Sqlite;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Threading;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using Volo.Abp;
+using Volo.Abp.Data;
 using Volo.Abp.EntityFrameworkCore;
-using Volo.Abp.EntityFrameworkCore.Sqlite;
+using Volo.Abp.EntityFrameworkCore.SqlServer;
 using Volo.Abp.FeatureManagement;
+using Volo.Abp.Identity;
 using Volo.Abp.Modularity;
 using Volo.Abp.PermissionManagement;
 using Volo.Abp.SettingManagement;
@@ -17,11 +20,14 @@ namespace MultiTenantProductManagementApp.EntityFrameworkCore;
 [DependsOn(
     typeof(MultiTenantProductManagementAppApplicationTestModule),
     typeof(MultiTenantProductManagementAppEntityFrameworkCoreModule),
-    typeof(AbpEntityFrameworkCoreSqliteModule)
+    typeof(AbpEntityFrameworkCoreSqlServerModule)
     )]
 public class MultiTenantProductManagementAppEntityFrameworkCoreTestModule : AbpModule
 {
-    private SqliteConnection? _sqliteConnection;
+    private string? _connectionString;
+    private static bool _dbInitialized;
+    private static bool _adminSeeded;
+    private static readonly object _initLock = new object();
 
     public override void ConfigureServices(ServiceConfigurationContext context)
     {
@@ -42,41 +48,93 @@ public class MultiTenantProductManagementAppEntityFrameworkCoreTestModule : AbpM
         });
         context.Services.AddAlwaysDisableUnitOfWorkTransaction();
 
-        ConfigureInMemorySqlite(context.Services);
+        ConfigureSqlServerLocalDb(context.Services);
     }
 
-    private void ConfigureInMemorySqlite(IServiceCollection services)
+    private void ConfigureSqlServerLocalDb(IServiceCollection services)
     {
-        _sqliteConnection = CreateDatabaseAndGetConnection();
+        var resetEnv = Environment.GetEnvironmentVariable("RESET_TEST_DB");
+        var resetDb = !string.IsNullOrWhiteSpace(resetEnv) && (resetEnv.Equals("1") || resetEnv.Equals("true", StringComparison.OrdinalIgnoreCase));
+
+        var dbName = "MultiTenantProductManagementApp_Tests_Debug"; 
+        _connectionString = $"Server=(localdb)\\MSSQLLocalDB;Database={dbName};Trusted_Connection=True;MultipleActiveResultSets=true";
 
         services.Configure<AbpDbContextOptions>(options =>
         {
             options.Configure(context =>
             {
-                context.DbContextOptions.UseSqlite(_sqliteConnection);
+                context.DbContextOptions.UseSqlServer(
+                    _connectionString,
+                    sql => sql.EnableRetryOnFailure()
+                );
             });
         });
+
+        var options = new DbContextOptionsBuilder<MultiTenantProductManagementAppDbContext>()
+            .UseSqlServer(_connectionString, sql => sql.EnableRetryOnFailure())
+            .Options;
+
+        var mutexName = "Global\\MultiTenantProductManagementApp_Tests_DB_Mutex";
+        using var mutex = new Mutex(false, mutexName);
+        mutex.WaitOne();
+        try
+        {
+            if (!_dbInitialized)
+            {
+                using (var db = new MultiTenantProductManagementAppDbContext(options))
+                {
+                    if (resetDb)
+                    {
+                        Console.WriteLine("[EFTest] RESET_TEST_DB is set. Recreating test database...");
+                        db.Database.EnsureDeleted();
+                    }
+                    db.Database.EnsureCreated();
+                }
+                lock (_initLock)
+                {
+                    _dbInitialized = true;
+                }
+            }
+        }
+        finally
+        {
+            mutex.ReleaseMutex();
+        }
+    }
+
+    public override void OnApplicationInitialization(ApplicationInitializationContext context)
+    {
+        using var scope = context.ServiceProvider.CreateScope();
+
+
+        var userManager = scope.ServiceProvider.GetService<Volo.Abp.Identity.IdentityUserManager>();
+        var guidGen = scope.ServiceProvider.GetService<Volo.Abp.Guids.IGuidGenerator>();
+        if (userManager != null && guidGen != null)
+        {
+            if (!_adminSeeded)
+            {
+                Task.Run(async () =>
+                {
+                    var adminUser = await userManager.FindByNameAsync("admin");
+                    if (adminUser == null)
+                    {
+                        adminUser = new Volo.Abp.Identity.IdentityUser(guidGen.Create(), "admin", "admin@tests.local");
+                        var createUserResult = await userManager.CreateAsync(adminUser, "1q2w3E*");
+                        if (!createUserResult.Succeeded)
+                        {
+                            throw new Exception("Failed to create admin user: " + string.Join(", ", createUserResult.Errors.Select(e => e.Description)));
+                        }
+                    }
+                }).GetAwaiter().GetResult();
+                lock (_initLock)
+                {
+                    _adminSeeded = true;
+                }
+            }
+        }
     }
 
     public override void OnApplicationShutdown(ApplicationShutdownContext context)
     {
-        _sqliteConnection?.Dispose();
-    }
-
-    private static SqliteConnection CreateDatabaseAndGetConnection()
-    {
-        var connection = new AbpUnitTestSqliteConnection("Data Source=:memory:");
-        connection.Open();
-
-        var options = new DbContextOptionsBuilder<MultiTenantProductManagementAppDbContext>()
-            .UseSqlite(connection)
-            .Options;
-
-        using (var context = new MultiTenantProductManagementAppDbContext(options))
-        {
-            context.GetService<IRelationalDatabaseCreator>().CreateTables();
-        }
-
-        return connection;
     }
 }
