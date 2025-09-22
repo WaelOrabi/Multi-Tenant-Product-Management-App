@@ -14,6 +14,7 @@ using Volo.Abp.Modularity;
 using Volo.Abp.PermissionManagement;
 using Volo.Abp.SettingManagement;
 using Volo.Abp.Uow;
+using MultiTenantProductManagementApp.Shared;
 
 namespace MultiTenantProductManagementApp.EntityFrameworkCore;
 
@@ -56,7 +57,7 @@ public class MultiTenantProductManagementAppEntityFrameworkCoreTestModule : AbpM
         var resetEnv = Environment.GetEnvironmentVariable("RESET_TEST_DB");
         var resetDb = !string.IsNullOrWhiteSpace(resetEnv) && (resetEnv.Equals("1") || resetEnv.Equals("true", StringComparison.OrdinalIgnoreCase));
 
-        var dbName = "MultiTenantProductManagementApp_Tests_Debug"; 
+        var dbName = "MultiTenantProductManagementApp_Tests_MySql"; 
         _connectionString = $"Server=(localdb)\\MSSQLLocalDB;Database={dbName};Trusted_Connection=True;MultipleActiveResultSets=true";
 
         services.Configure<AbpDbContextOptions>(options =>
@@ -88,7 +89,7 @@ public class MultiTenantProductManagementAppEntityFrameworkCoreTestModule : AbpM
                         Console.WriteLine("[EFTest] RESET_TEST_DB is set. Recreating test database...");
                         db.Database.EnsureDeleted();
                     }
-                    db.Database.EnsureCreated();
+                db.Database.EnsureCreated();
                 }
                 lock (_initLock)
                 {
@@ -105,31 +106,15 @@ public class MultiTenantProductManagementAppEntityFrameworkCoreTestModule : AbpM
     public override void OnApplicationInitialization(ApplicationInitializationContext context)
     {
         using var scope = context.ServiceProvider.CreateScope();
-
-
-        var userManager = scope.ServiceProvider.GetService<Volo.Abp.Identity.IdentityUserManager>();
-        var guidGen = scope.ServiceProvider.GetService<Volo.Abp.Guids.IGuidGenerator>();
-        if (userManager != null && guidGen != null)
+        if (!_adminSeeded)
         {
-            if (!_adminSeeded)
+            Task.Run(async () =>
             {
-                Task.Run(async () =>
-                {
-                    var adminUser = await userManager.FindByNameAsync("admin");
-                    if (adminUser == null)
-                    {
-                        adminUser = new Volo.Abp.Identity.IdentityUser(guidGen.Create(), "admin", "admin@tests.local");
-                        var createUserResult = await userManager.CreateAsync(adminUser, "1q2w3E*");
-                        if (!createUserResult.Succeeded)
-                        {
-                            throw new Exception("Failed to create admin user: " + string.Join(", ", createUserResult.Errors.Select(e => e.Description)));
-                        }
-                    }
-                }).GetAwaiter().GetResult();
-                lock (_initLock)
-                {
-                    _adminSeeded = true;
-                }
+                await TestAdminSeeder.EnsureAdminAsync(scope.ServiceProvider);
+            }).GetAwaiter().GetResult();
+            lock (_initLock)
+            {
+                _adminSeeded = true;
             }
         }
     }

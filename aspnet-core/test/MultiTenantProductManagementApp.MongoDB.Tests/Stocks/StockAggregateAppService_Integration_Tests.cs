@@ -1,0 +1,9 @@
+using MultiTenantProductManagementApp.Shared.Stocks;
+using MultiTenantProductManagementApp.MongoDB;
+
+namespace MultiTenantProductManagementApp.Application.Tests.Stocks;
+
+public class StockAggregateAppService_Integration_Tests : 
+StockAggregateAppService_Integration_Tests_Base<MultiTenantProductManagementAppMongoDbTestModule>
+{
+}

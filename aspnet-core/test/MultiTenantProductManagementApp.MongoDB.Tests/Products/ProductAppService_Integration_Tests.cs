@@ -1,9 +1,9 @@
 using MultiTenantProductManagementApp.Shared.Products;
-using MultiTenantProductManagementApp.EntityFrameworkCore;
+using MultiTenantProductManagementApp.MongoDB;
 
 namespace MultiTenantProductManagementApp.Application.Tests.Products;
 
 public class ProductAppService_Integration_Tests :
- ProductAppService_Integration_Tests_Base<MultiTenantProductManagementAppEntityFrameworkCoreTestModule>
+ ProductAppService_Integration_Tests_Base<MultiTenantProductManagementAppMongoDbTestModule>
 {
 }

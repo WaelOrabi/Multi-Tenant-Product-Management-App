@@ -1,0 +1,7 @@
+using Volo.Abp;
+
+namespace MultiTenantProductManagementApp.MongoDB;
+
+public abstract class MultiTenantProductManagementAppMongoDbTestBase : MultiTenantProductManagementAppTestBase<MultiTenantProductManagementAppMongoDbTestModule>
+{
+}
