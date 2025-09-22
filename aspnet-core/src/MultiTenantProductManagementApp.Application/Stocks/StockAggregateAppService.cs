@@ -104,6 +104,12 @@ public class StockAggregateAppService : ApplicationService, IStockAggregateAppSe
     public virtual async Task<StockDetailDto> CreateAsync(CreateUpdateStockAggregateDto input)
     {
         ValidateInput(input);
+        var createQueryable = await _stockRepo.GetQueryableAsync();
+        var exists = await AsyncExecuter.AnyAsync(
+            createQueryable.Where(x => x.TenantId == CurrentTenant.Id && !x.IsDeleted && x.Name == input.Name)
+        );
+        if (exists)
+            throw new BusinessException("MultiTenantProductManagementApp:StockDuplicateName").WithData("Name", input.Name);
 
         var stock = new Stock(LazyServiceProvider.LazyGetRequiredService<IGuidGenerator>().Create(), CurrentTenant.Id, input.Name);
         await _stockRepo.InsertAsync(stock, autoSave: true);
@@ -117,6 +123,12 @@ public class StockAggregateAppService : ApplicationService, IStockAggregateAppSe
     public virtual async Task<StockDetailDto> UpdateAsync(Guid id, CreateUpdateStockAggregateDto input)
     {
         ValidateInput(input);
+        var updateQueryable = await _stockRepo.GetQueryableAsync();
+        var existsWithName = await AsyncExecuter.AnyAsync(
+            updateQueryable.Where(x => x.TenantId == CurrentTenant.Id && !x.IsDeleted && x.Name == input.Name && x.Id != id)
+        );
+        if (existsWithName)
+            throw new BusinessException("MultiTenantProductManagementApp:StockDuplicateName").WithData("Name", input.Name);
 
         var stock = await _stockRepo.GetAsync(id);
         stock.SetName(input.Name);

@@ -15,6 +15,7 @@ using Volo.Abp.Uow;
 using Volo.Abp.Data;
 using Volo.Abp.MultiTenancy;
 using Xunit;
+using MultiTenantProductManagementApp.Testing;
 
 namespace MultiTenantProductManagementApp.Application.Tests.Stocks;
 
@@ -28,7 +29,7 @@ public class StockAggregateAppService_Integration_Tests : MultiTenantProductMana
     private IRepository<ProductVariant, Guid> _variantRepo = default!;
     private IDataFilter _dataFilter = default!;
 
-    private static readonly Guid _tenantId = Guid.NewGuid();
+    private static readonly Guid _tenantId = Guid.Parse("121ed384-0fbb-4a05-9a88-aaaaaaaaaaaa");
     private IDisposable? _tenantScope;
 
     private async Task InTenantAsync(Func<Task> action)
@@ -39,7 +40,6 @@ public class StockAggregateAppService_Integration_Tests : MultiTenantProductMana
             await action();
         }
     }
-
     private Product _testProduct1 = default!;
     private Product _testProduct2 = default!;
     private ProductVariant _testVariant1 = default!;
@@ -150,42 +150,43 @@ private async Task CleanupTestDataAsync()
 {
     await WithUnitOfWorkAsync(async () =>
     {
+        using (_dataFilter.Disable<IMultiTenant>())
+        {
+            var stockProductVariants = await _stockProductVariantRepo.GetListAsync();
+            foreach (var spv in stockProductVariants)
+            {
+                await _stockProductVariantRepo.DeleteAsync(spv);
+            }
+
+            var stockProducts = await _stockProductRepo.GetListAsync();
+            foreach (var sp in stockProducts)
+            {
+                await _stockProductRepo.DeleteAsync(sp);
+            }
+
+            var stocks = await _stockRepo.GetListAsync();
+            foreach (var s in stocks)
+            {
+                await _stockRepo.DeleteAsync(s);
+            }
+
+            var variants = await _variantRepo.GetListAsync();
+            foreach (var v in variants)
+            {
+                await _variantRepo.DeleteAsync(v);
+            }
+
+            var products = await _productRepo.GetListAsync();
+            foreach (var p in products)
+            {
+                await _productRepo.DeleteAsync(p);
+            }
+        });
+    }
+
    
-        var stockProductVariants = await _stockProductVariantRepo.GetListAsync();
-        foreach (var spv in stockProductVariants)
-        {
-            await _stockProductVariantRepo.DeleteAsync(spv);
-        }
 
-        var stockProducts = await _stockProductRepo.GetListAsync();
-        foreach (var sp in stockProducts)
-        {
-            await _stockProductRepo.DeleteAsync(sp);
-        }
-
-        var stocks = await _stockRepo.GetListAsync();
-        foreach (var s in stocks)
-        {
-            await _stockRepo.DeleteAsync(s);
-        }
-
-        var variants = await _variantRepo.GetListAsync();
-        foreach (var v in variants)
-        {
-            await _variantRepo.DeleteAsync(v);
-        }
-
-        var products = await _productRepo.GetListAsync();
-        foreach (var p in products)
-        {
-            await _productRepo.DeleteAsync(p);
-        }
-    });
-}
-
-   
-
-    [Fact]
+    [EfOnlyFact]
     public async Task CreateAsync_Should_Create_Stock_With_Products_And_Variants()
     {
         await InTenantAsync(async () =>

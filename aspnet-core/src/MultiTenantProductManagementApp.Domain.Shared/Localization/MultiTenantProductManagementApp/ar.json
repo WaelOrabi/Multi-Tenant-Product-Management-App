@@ -4,6 +4,8 @@
     "AppName": "MultiTenantProductManagementApp",
     "Menu:Home": "الصفحة الرئيسية",
     "Welcome": "مرحباً",
-    "LongWelcomeMessage": "مرحبا بكم في التطبيق. هذا مشروع بدء تشغيل يعتمد على إطار عمل ABP. لمزيد من المعلومات ، يرجى زيارة abp.io."
+    "LongWelcomeMessage": "مرحبا بكم في التطبيق. هذا مشروع بدء تشغيل يعتمد على إطار عمل ABP. لمزيد من المعلومات ، يرجى زيارة abp.io.",
+    "StockDuplicateName": "يوجد مخزون بنفس الاسم '{Name}'.",
+    "ProductDuplicateName": "يوجد منتج بنفس الاسم '{Name}'."
   }
 }

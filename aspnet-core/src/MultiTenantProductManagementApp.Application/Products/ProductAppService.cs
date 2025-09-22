@@ -135,6 +135,13 @@ public class ProductAppService : ApplicationService, IProductAppService
     [Authorize(MultiTenantProductManagementAppPermissions.Products.Create)]
     public virtual async Task<ProductDto> CreateAsync(CreateUpdateProductDto input)
     {
+        var createQueryable = await _productRepo.GetQueryableAsync();
+        var exists = await AsyncExecuter.AnyAsync(
+            createQueryable.Where(x => x.TenantId == CurrentTenant.Id && !x.IsDeleted && x.Name == input.Name)
+        );
+        if (exists)
+            throw new BusinessException("MultiTenantProductManagementApp:ProductDuplicateName").WithData("Name", input.Name);
+
         var product = new Product(
             LazyServiceProvider.LazyGetRequiredService<IGuidGenerator>().Create(),
             CurrentTenant.Id,
@@ -178,6 +185,13 @@ public class ProductAppService : ApplicationService, IProductAppService
         {
             throw new EntityNotFoundException(typeof(Product), id);
         }
+
+        var updateQueryable = await _productRepo.GetQueryableAsync();
+        var existsWithName = await AsyncExecuter.AnyAsync(
+            updateQueryable.Where(x => x.TenantId == CurrentTenant.Id && !x.IsDeleted && x.Name == input.Name && x.Id != id)
+        );
+        if (existsWithName)
+            throw new BusinessException("MultiTenantProductManagementApp:ProductDuplicateName").WithData("Name", input.Name);
 
         entity.SetName(input.Name);
         entity.SetDescription(input.Description);

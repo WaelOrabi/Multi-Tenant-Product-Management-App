@@ -4,6 +4,8 @@
     "AppName": "MultiTenantProductManagementApp",
     "Menu:Home": "Home",
     "Welcome": "Welcome",
-    "LongWelcomeMessage": "Welcome to the application. This is a startup project based on the ABP framework. For more information, visit abp.io."
+    "LongWelcomeMessage": "Welcome to the application. This is a startup project based on the ABP framework. For more information, visit abp.io.",
+    "StockDuplicateName": "A stock with the name '{Name}' already exists.",
+    "ProductDuplicateName": "A product with the name '{Name}' already exists."
   }
 }
