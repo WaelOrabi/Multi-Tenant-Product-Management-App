@@ -6,7 +6,7 @@ using Volo.Abp.MultiTenancy;
 
 namespace MultiTenantProductManagementApp.Stocks;
 
-public class Stock : FullAuditedEntity<Guid>, IMultiTenant
+public class Stock : FullAuditedAggregateRoot<Guid>, IMultiTenant
 {
     public Guid? TenantId { get; set; }
 
