@@ -50,8 +50,10 @@
                 <option [ngValue]="null">(No variant - product level stock)</option>
                 @for (vv of (variantsPerProduct()[i] || []); track vv.id) {
                   <option [value]="vv.id">
-                    {{ vv.sku || (vv.color || '-') + ' ' + (vv.size || '-') }}
+                    {{ vv.color  + '-' +vv.size }}
+                    
                   </option>
+
                 }
               </select>
             </div>

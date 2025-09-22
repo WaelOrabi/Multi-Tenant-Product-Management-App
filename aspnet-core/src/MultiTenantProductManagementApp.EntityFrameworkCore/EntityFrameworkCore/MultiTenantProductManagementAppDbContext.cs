@@ -90,7 +90,9 @@ public class MultiTenantProductManagementAppDbContext :
             b.Property(x => x.Category).HasMaxLength(64);
             b.Property(x => x.BasePrice).HasColumnType("decimal(18,2)");
             b.HasMany(x => x.Variants).WithOne().HasForeignKey(v => v.ProductId).IsRequired();
-            b.HasIndex(x => new { x.TenantId, x.Name });
+            b.HasIndex(x => new { x.TenantId, x.Name })
+                .IsUnique()
+                .HasFilter("[IsDeleted] = 0");
         });
 
         builder.Entity<ProductVariant>(b =>
@@ -109,8 +111,11 @@ public class MultiTenantProductManagementAppDbContext :
             b.ToTable(MultiTenantProductManagementAppConsts.DbTablePrefix + "Stocks", MultiTenantProductManagementAppConsts.DbSchema);
             b.ConfigureByConvention();
             b.Property(x => x.Name).IsRequired().HasMaxLength(128);
+          
+            b.HasIndex(x => new { x.TenantId, x.Name })
+                .IsUnique()
+                .HasFilter("[IsDeleted] = 0");
 
-            // Relation to children configured on child sides
         });
 
         builder.Entity<StockProduct>(b =>

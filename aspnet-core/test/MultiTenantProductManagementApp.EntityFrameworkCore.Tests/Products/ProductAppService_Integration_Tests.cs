@@ -12,6 +12,7 @@ using Volo.Abp.MultiTenancy;
 using Volo.Abp.Data;
 using Xunit;
 using MultiTenantProductManagementApp.Application.Tests;
+using MultiTenantProductManagementApp.Testing;
 
 namespace MultiTenantProductManagementApp.Application.Tests.Products;
 
@@ -63,8 +64,8 @@ public class ProductAppService_Integration_Tests : MultiTenantProductManagementA
         return Task.CompletedTask;
     }
 
-    [Fact]
-    public async Task Create_and_Get_product_with_variants_end_to_end()
+    [EfOnlyFact]
+    public async Task Create_and_Get_product_with_variants()
     {
         await InTenantAsync(async () =>
         {
@@ -103,7 +104,7 @@ public class ProductAppService_Integration_Tests : MultiTenantProductManagementA
         });
     }
 
-    [Fact]
+    [EfOnlyFact]
     public async Task Update_product_replaces_variants_and_updates_fields()
     {
         await InTenantAsync(async () =>
@@ -153,7 +154,7 @@ public class ProductAppService_Integration_Tests : MultiTenantProductManagementA
         });
     }
 
-    [Fact]
+    [EfOnlyFact]
     public async Task Get_non_existing_product_throws_EntityNotFoundException()
     {
         await InTenantAsync(async () =>
@@ -165,7 +166,7 @@ public class ProductAppService_Integration_Tests : MultiTenantProductManagementA
         });
     }
 
-    [Fact]
+    [EfOnlyFact]
     public async Task Add_Update_Delete_variant_flow_and_mismatch_failure()
     {
         await InTenantAsync(async () =>
@@ -226,7 +227,7 @@ public class ProductAppService_Integration_Tests : MultiTenantProductManagementA
         });
     }
 
-    [Fact]
+    [EfOnlyFact]
     public async Task Delete_product_removes_from_database()
     {
         await InTenantAsync(async () =>

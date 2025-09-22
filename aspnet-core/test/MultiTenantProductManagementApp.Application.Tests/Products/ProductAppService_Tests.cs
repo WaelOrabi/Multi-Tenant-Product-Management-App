@@ -165,7 +165,7 @@ public class ProductAppService_Tests
         var queryable = data.AsQueryable();
 
         _productRepo.WithDetailsAsync(Arg.Any<System.Linq.Expressions.Expression<Func<Product, object>>[]>()).Returns(Task.FromResult(queryable));
-        _asyncExecuter.FirstOrDefaultAsync(Arg.Any<IQueryable<Product>>()).Returns(Task.FromResult(existing));
+        _asyncExecuter.FirstOrDefaultAsync(Arg.Any<IQueryable<Product>>()).Returns(Task.FromResult<Product?>(existing));
 
         var input = new CreateUpdateProductDto
         {
@@ -241,7 +241,7 @@ public class ProductAppService_Tests
         var data = new List<Product> { product };
         var queryable = data.AsQueryable();
         _productRepo.WithDetailsAsync(Arg.Any<System.Linq.Expressions.Expression<Func<Product, object>>[]>()).Returns(Task.FromResult(queryable));
-        _asyncExecuter.FirstOrDefaultAsync(Arg.Any<IQueryable<Product>>()).Returns(Task.FromResult(product));
+        _asyncExecuter.FirstOrDefaultAsync(Arg.Any<IQueryable<Product>>()).Returns(Task.FromResult<Product?>(product));
 
         // Act
         var dto = await sut.GetAsync(id);
@@ -251,7 +251,7 @@ public class ProductAppService_Tests
         dto.Id.ShouldBe(id);
         dto.Variants.Count.ShouldBe(1);
 
-        _asyncExecuter.FirstOrDefaultAsync(Arg.Any<IQueryable<Product>>()).Returns(Task.FromResult((Product)null));
+        _asyncExecuter.FirstOrDefaultAsync(Arg.Any<IQueryable<Product>>()).Returns(Task.FromResult<Product?>(null));
         await Should.ThrowAsync<EntityNotFoundException>(() => sut.GetAsync(Guid.NewGuid()));
     }
 
@@ -368,7 +368,7 @@ public class ProductAppService_Tests
         var id = Guid.NewGuid();
         var emptyQueryable = new List<Product>().AsQueryable();
         _productRepo.WithDetailsAsync(Arg.Any<System.Linq.Expressions.Expression<Func<Product, object>>[]>()).Returns(Task.FromResult(emptyQueryable));
-        _asyncExecuter.FirstOrDefaultAsync(Arg.Any<IQueryable<Product>>()).Returns(Task.FromResult((Product)null));
+        _asyncExecuter.FirstOrDefaultAsync(Arg.Any<IQueryable<Product>>()).Returns(Task.FromResult<Product?>(null));
 
         var input = new CreateUpdateProductDto { Name = "X" };
 
@@ -394,7 +394,7 @@ public class ProductAppService_Tests
             Category = "Misc",
             Status = ProductStatus.Active,
             HasVariants = false,
-            Variants = null
+            Variants = new List<CreateUpdateProductVariantDto>()
         };
 
         // Act
