@@ -22,6 +22,7 @@
     <PackageReference Include="Volo.Abp.AspNetCore.Serilog" Version="9.3.2" />
     <PackageReference Include="Volo.Abp.Swashbuckle" Version="9.3.2" />
     <PackageReference Include="Volo.Abp.Account.Web.OpenIddict" Version="9.3.2" />
+    <PackageReference Include="Volo.Abp.AspNetCore.Mvc.UI" Version="9.3.2" />
   </ItemGroup>
 
   <ItemGroup>
@@ -32,6 +33,7 @@
     <ProjectReference Include="..\MultiTenantProductManagementApp.Application\MultiTenantProductManagementApp.Application.csproj" />
     <ProjectReference Include="..\MultiTenantProductManagementApp.EntityFrameworkCore\MultiTenantProductManagementApp.EntityFrameworkCore.csproj" />
     <ProjectReference Include="..\MultiTenantProductManagementApp.HttpApi\MultiTenantProductManagementApp.HttpApi.csproj" />
+    <ProjectReference Include="..\Modules\Products\Products.HttpApi\Products.HttpApi.csproj" />
   </ItemGroup>
 
   <ItemGroup>

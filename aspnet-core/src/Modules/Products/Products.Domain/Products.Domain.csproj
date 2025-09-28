@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\..\..\..\common.props" />
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <RootNamespace>MultiTenantProductManagementApp.Products</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Products.Domain.Shared\Products.Domain.Shared.csproj" />
+    <ProjectReference Include="..\..\..\MultiTenantProductManagementApp.Domain.Shared\MultiTenantProductManagementApp.Domain.Shared.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Volo.Abp.Ddd.Domain" Version="9.3.2" />
+  </ItemGroup>
+</Project>

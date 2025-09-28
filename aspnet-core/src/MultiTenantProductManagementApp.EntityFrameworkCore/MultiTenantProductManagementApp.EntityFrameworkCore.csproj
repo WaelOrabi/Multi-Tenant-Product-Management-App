@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MultiTenantProductManagementApp.Domain\MultiTenantProductManagementApp.Domain.csproj" />
+    <ProjectReference Include="..\Modules\Products\Products.EntityFrameworkCore\Products.EntityFrameworkCore.csproj" />
     <PackageReference Include="Volo.Abp.EntityFrameworkCore.SqlServer" Version="9.3.2" />
     <PackageReference Include="Volo.Abp.PermissionManagement.EntityFrameworkCore" Version="9.3.2" />
     <PackageReference Include="Volo.Abp.SettingManagement.EntityFrameworkCore" Version="9.3.2" />

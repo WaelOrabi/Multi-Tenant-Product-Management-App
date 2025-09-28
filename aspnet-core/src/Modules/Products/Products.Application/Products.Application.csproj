@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\..\..\..\common.props" />
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <RootNamespace>MultiTenantProductManagementApp.Products</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Products.Application.Contracts\Products.Application.Contracts.csproj" />
+    <ProjectReference Include="..\Products.Domain\Products.Domain.csproj" />
+    <ProjectReference Include="..\..\..\MultiTenantProductManagementApp.Application.Contracts\MultiTenantProductManagementApp.Application.Contracts.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Volo.Abp.Ddd.Application" Version="9.3.2" />
+    <PackageReference Include="Volo.Abp.AutoMapper" Version="9.3.2" />
+  </ItemGroup>
+</Project>

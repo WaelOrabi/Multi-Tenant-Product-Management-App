@@ -11,6 +11,8 @@
   <ItemGroup>
     <ProjectReference Include="..\MultiTenantProductManagementApp.Domain\MultiTenantProductManagementApp.Domain.csproj" />
     <ProjectReference Include="..\MultiTenantProductManagementApp.Application.Contracts\MultiTenantProductManagementApp.Application.Contracts.csproj" />
+    <ProjectReference Include="..\Modules\Products\Products.Application.Contracts\Products.Application.Contracts.csproj" />
+    <ProjectReference Include="..\Modules\Products\Products.Domain\Products.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>
