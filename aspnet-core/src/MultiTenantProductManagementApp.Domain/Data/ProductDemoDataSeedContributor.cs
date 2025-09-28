@@ -25,8 +25,7 @@ public class ProductDemoDataSeedContributor : IDataSeedContributor, ITransientDe
     private readonly IRepository<ProductVariant, Guid> _variantRepo;
     private readonly ILogger<ProductDemoDataSeedContributor> _logger;
     private readonly IGuidGenerator _guidGenerator;
-    private readonly IPermissionDataSeeder _permissionDataSeeder;
-
+   
     public ProductDemoDataSeedContributor(
         ITenantRepository tenantRepository,
         TenantManager tenantManager,
@@ -48,7 +47,6 @@ public class ProductDemoDataSeedContributor : IDataSeedContributor, ITransientDe
         _variantRepo = variantRepo;
         _logger = logger;
         _guidGenerator = guidGenerator;
-        _permissionDataSeeder = permissionDataSeeder;
     }
 
     public async Task SeedAsync(DataSeedContext context)
@@ -87,6 +85,7 @@ public class ProductDemoDataSeedContributor : IDataSeedContributor, ITransientDe
                     _logger.LogWarning("Failed to create admin user for {Tenant}: {Errors}", tenant.Name, string.Join(", ", createResult.Errors.Select(e => e.Description)));
                 }
             }
+    
 
             var adminRole = await _roleManager.FindByNameAsync("admin");
             if (adminRole == null)
@@ -99,29 +98,12 @@ public class ProductDemoDataSeedContributor : IDataSeedContributor, ITransientDe
                 }
             }
 
-            await _permissionDataSeeder.SeedAsync(
-                "R",
-                adminRole.Name,
-                new string[]
-                {
-                    "MultiTenantProductManagementApp.Products",
-                    "MultiTenantProductManagementApp.Products.Create",
-                    "MultiTenantProductManagementApp.Products.Edit",
-                    "MultiTenantProductManagementApp.Products.Delete",
-                    "MultiTenantProductManagementApp.Stocks",
-                    "MultiTenantProductManagementApp.Stocks.Create",
-                    "MultiTenantProductManagementApp.Stocks.Edit",
-                    "MultiTenantProductManagementApp.Stocks.Delete"
-                },
-                tenant.Id
-            );
-
             if (!await _userManager.IsInRoleAsync(adminUser, "admin"))
             {
-                var addToRoleResult = await _userManager.AddToRoleAsync(adminUser, "admin");
-                if (!addToRoleResult.Succeeded)
+                var addRoleResult = await _userManager.AddToRoleAsync(adminUser, "admin");
+                if (!addRoleResult.Succeeded)
                 {
-                    _logger.LogWarning("Failed to add {User} to admin role in {Tenant}: {Errors}", adminEmail, tenant.Name, string.Join(", ", addToRoleResult.Errors.Select(e => e.Description)));
+                    _logger.LogWarning("Failed to add user {User} to admin role for {Tenant}: {Errors}", adminEmail, tenant.Name, string.Join(", ", addRoleResult.Errors.Select(e => e.Description)));
                 }
             }
 
@@ -136,9 +118,9 @@ public class ProductDemoDataSeedContributor : IDataSeedContributor, ITransientDe
             var p2 = new Product(_guidGenerator.Create(), tenant.Id, "Sneakers Pro", "Lightweight running shoes", null, "Footwear", ProductStatus.Active, hasVariants: true);
             await _productRepo.InsertAsync(p2, autoSave: true);
 
-            var v1 = new ProductVariant(_guidGenerator.Create(), tenant.Id, p2.Id, 79.99m, 20, "SNK-BLK-42", "{\"color\":\"Black\",\"size\":\"42\"}");
-            var v2 = new ProductVariant(_guidGenerator.Create(), tenant.Id, p2.Id, 79.99m, 15, "SNK-BLK-43", "{\"color\":\"Black\",\"size\":\"43\"}");
-            var v3 = new ProductVariant(_guidGenerator.Create(), tenant.Id, p2.Id, 84.99m, 10, "SNK-RED-42", "{\"color\":\"Red\",\"size\":\"42\"}");
+            var v1 = new ProductVariant(_guidGenerator.Create(), tenant.Id, p2.Id, 79.99m,  "SNK-BLK-42", "{\"color\":\"Black\",\"size\":\"42\"}");
+            var v2 = new ProductVariant(_guidGenerator.Create(), tenant.Id, p2.Id, 79.99m,  "SNK-BLK-43", "{\"color\":\"Black\",\"size\":\"43\"}");
+            var v3 = new ProductVariant(_guidGenerator.Create(), tenant.Id, p2.Id, 84.99m,  "SNK-RED-42", "{\"color\":\"Red\",\"size\":\"42\"}");
 
             await _variantRepo.InsertManyAsync(new[] { v1, v2, v3 }, autoSave: true);
         }

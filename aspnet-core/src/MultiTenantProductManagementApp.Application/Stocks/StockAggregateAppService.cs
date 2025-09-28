@@ -201,12 +201,7 @@ public class StockAggregateAppService : ApplicationService, IStockAggregateAppSe
                         throw new BusinessException("Stock.VariantNotFound").WithData("ProductVariantId", v.ProductVariantId);
                     if (ve.ProductId != p.ProductId)
                         throw new BusinessException("Stock.ProductVariantMismatch").WithData("ProductId", p.ProductId).WithData("ProductVariantId", v.ProductVariantId);
-                    if (v.Quantity > ve.StockQuantity)
-                        throw new BusinessException("Stock.QuantityExceedsVariantStock")
-                            .WithData("ProductId", p.ProductId)
-                            .WithData("ProductVariantId", v.ProductVariantId)
-                            .WithData("RequestedQuantity", v.Quantity)
-                            .WithData("AvailableStock", ve.StockQuantity);
+    
                 }
                 var line = new StockProductVariant(LazyServiceProvider.LazyGetRequiredService<IGuidGenerator>().Create(), CurrentTenant.Id, sp.Id, v.ProductVariantId, v.Quantity);
                 await _stockProductVariantRepo.InsertAsync(line, autoSave: true);

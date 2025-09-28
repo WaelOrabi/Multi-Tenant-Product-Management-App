@@ -1,19 +1,20 @@
+using MultiTenantProductManagementApp.Products;
+using MultiTenantProductManagementApp.Products.Dtos;
+using MultiTenantProductManagementApp.Stocks;
+using MultiTenantProductManagementApp.Stocks.Dtos;
+using Shouldly;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MultiTenantProductManagementApp.Products;
-using MultiTenantProductManagementApp.Stocks;
-using MultiTenantProductManagementApp.Stocks.Dtos;
-using Shouldly;
 using Volo.Abp;
 using Volo.Abp.Application.Dtos;
-using Volo.Abp.Domain.Entities;
-using Volo.Abp.Uow;
 using Volo.Abp.Data;
-using Volo.Abp.MultiTenancy;
-using Xunit;
+using Volo.Abp.Domain.Entities;
 using Volo.Abp.Modularity;
+using Volo.Abp.MultiTenancy;
+using Volo.Abp.Uow;
+using Xunit;
 
 namespace MultiTenantProductManagementApp.Shared.Stocks;
 
@@ -76,75 +77,55 @@ public abstract class StockAggregateAppService_Integration_Tests_Base<TStartupMo
 
     protected async Task SeedTestDataAsync()
     {
-        await InTenantAsync(async () =>
+
+        var phoneInput = new CreateUpdateProductDto
         {
-
-            var phoneInput = new MultiTenantProductManagementApp.Products.Dtos.CreateUpdateProductDto
+            Name = "Phone X",
+            Description = "Flagship phone",
+            BasePrice = 999.99m,
+            Category = "Electronics",
+            Status = ProductStatus.Active,
+            HasVariants = true,
+            Variants = new List<CreateUpdateProductVariantDto>
             {
-                Name = "Test Phone",
-                Description = "Test smartphone",
-                BasePrice = 999.99m,
-                Category = "Electronics",
-                Status = ProductStatus.Active,
-                HasVariants = true,
-                Variants = new List<MultiTenantProductManagementApp.Products.Dtos.CreateUpdateProductVariantDto>
-                {
-                    new() { Price = 1199.99m, StockQuantity = 10, Sku = "PHONE-BLK-128", Color = "Black", Size = "128GB" },
-                    new() { Price = 1299.99m, StockQuantity = 5, Sku = "PHONE-SLV-256", Color = "Silver", Size = "256GB" }
-                }
-            };
-
-            var laptopInput = new MultiTenantProductManagementApp.Products.Dtos.CreateUpdateProductDto
-            {
-                Name = "Test Laptop",
-                Description = "Test laptop computer",
-                BasePrice = 1499.99m,
-                Category = "Electronics",
-                Status = ProductStatus.Active,
-                HasVariants = true,
-                Variants = new List<MultiTenantProductManagementApp.Products.Dtos.CreateUpdateProductVariantDto>
-                {
-                    new() { Price = 1699.99m, StockQuantity = 8, Sku = "LAPTOP-GRY-16", Color = "Gray", Size = "16GB" }
-                }
-            };
-
-            MultiTenantProductManagementApp.Products.Dtos.ProductDto p1;
-            MultiTenantProductManagementApp.Products.Dtos.ProductDto p2;
-
-            try
-            {
-                p1 = await _productAppService.CreateAsync(phoneInput);
+                new() { Price = 1099.99m,  Sku = "PX-BLK-128", Color = "Black", Size = "128GB" },
+                new() { Price = 1199.99m,  Sku = "PX-SLV-256", Color = "Silver", Size = "256GB" }
             }
-            catch (BusinessException ex) when (ex.Code == "MultiTenantProductManagementApp:ProductDuplicateName")
+        };
+        var existingPhones = (await _productAppService.GetListAsync(new GetProductListInput { Name = phoneInput.Name, SkipCount = 0, MaxResultCount = 100 })).Items;
+        foreach (var prod in existingPhones)
+        {
+            await _productAppService.DeleteAsync(prod.Id);
+        }
+        var laptopInput = new CreateUpdateProductDto
+        {
+            Name = "Laptop Pro",
+            Description = "High-performance laptop",
+            BasePrice = 1999.99m,
+            Category = "Electronics",
+            Status = ProductStatus.Active,
+            HasVariants = true,
+            Variants = new List<CreateUpdateProductVariantDto>
             {
-                var existing = await _productAppService.GetListAsync(new MultiTenantProductManagementApp.Products.Dtos.GetProductListInput { Name = phoneInput.Name, SkipCount = 0, MaxResultCount = 1 });
-                if (existing.Items.Count == 0) throw; 
-                await _productAppService.UpdateAsync(existing.Items[0].Id, phoneInput);
-                p1 = await _productAppService.GetAsync(existing.Items[0].Id);
+                new() { Price = 2099.99m,  Sku = "LP-BLK-16", Color = "Black", Size = "16GB" },
+                new() { Price = 2399.99m,  Sku = "LP-SLV-32", Color = "Silver", Size = "32GB" }
             }
+        };
+        var existingLaptop = (await _productAppService.GetListAsync(new GetProductListInput { Name = laptopInput.Name, SkipCount = 0, MaxResultCount = 100 })).Items;
+        foreach (var prod in existingPhones)
+        {
+            await _productAppService.DeleteAsync(prod.Id);
+        }
 
-            try
-            {
-                p2 = await _productAppService.CreateAsync(laptopInput);
-            }
-            catch (BusinessException ex) when (ex.Code == "MultiTenantProductManagementApp:ProductDuplicateName")
-            {
-                var existing = await _productAppService.GetListAsync(new MultiTenantProductManagementApp.Products.Dtos.GetProductListInput { Name = laptopInput.Name, SkipCount = 0, MaxResultCount = 1 });
-                if (existing.Items.Count == 0) throw;
-                await _productAppService.UpdateAsync(existing.Items[0].Id, laptopInput);
-                p2 = await _productAppService.GetAsync(existing.Items[0].Id);
-            }
+        ProductDto p1, p2;
 
-            _testProduct1 = new Product(p1.Id, _tenantId, p1.Name, p1.Description, p1.BasePrice, p1.Category, p1.Status, p1.HasVariants);
-            _testProduct2 = new Product(p2.Id, _tenantId, p2.Name, p2.Description, p2.BasePrice, p2.Category, p2.Status, p2.HasVariants);
-
-            var v1 = p1.Variants.First(x => x.Sku == "PHONE-BLK-128");
-            var v2 = p1.Variants.First(x => x.Sku == "PHONE-SLV-256");
-            var v3 = p2.Variants.First(x => x.Sku == "LAPTOP-GRY-16");
-            _testVariant1 = new ProductVariant(v1.Id, _tenantId, _testProduct1.Id, v1.Price, v1.StockQuantity, v1.Sku, v1.Color, v1.Size);
-            _testVariant2 = new ProductVariant(v2.Id, _tenantId, _testProduct1.Id, v2.Price, v2.StockQuantity, v2.Sku, v2.Color, v2.Size);
-            _testVariant3 = new ProductVariant(v3.Id, _tenantId, _testProduct2.Id, v3.Price, v3.StockQuantity, v3.Sku, v3.Color, v3.Size);
-        });
+     
+            p1 = await _productAppService.CreateAsync(phoneInput);
+        
+  
+            p2 = await _productAppService.CreateAsync(laptopInput);
+        
+       
     }
 
     protected async Task CleanupTestDataAsync()

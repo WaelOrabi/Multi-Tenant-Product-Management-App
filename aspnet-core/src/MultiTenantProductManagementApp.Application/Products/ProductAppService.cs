@@ -56,6 +56,7 @@ public class ProductAppService : ApplicationService, IProductAppService
         return dto;
     }
 
+
     private static ProductVariantDto MapVariantToDto(ProductVariant v)
     {
         return new ProductVariantDto
@@ -63,7 +64,6 @@ public class ProductAppService : ApplicationService, IProductAppService
             Id = v.Id,
             ProductId = v.ProductId,
             Price = v.Price,
-            StockQuantity = v.StockQuantity,
             Sku = v.Sku,
             Color = v.Color,
             Size = v.Size
@@ -166,7 +166,6 @@ public class ProductAppService : ApplicationService, IProductAppService
                     product.TenantId,
                     product.Id,
                     v.Price,
-                    v.StockQuantity,
                     v.Sku,
                     v.Color,
                     v.Size
@@ -230,7 +229,6 @@ public class ProductAppService : ApplicationService, IProductAppService
                     entity.TenantId,
                     entity.Id,
                     v.Price,
-                    v.StockQuantity,
                     v.Sku,
                     v.Color,
                     v.Size
@@ -263,7 +261,6 @@ public class ProductAppService : ApplicationService, IProductAppService
             CurrentTenant.Id,
             product.Id,
             input.Price,
-            input.StockQuantity,
             input.Sku,
             input.Color,
             input.Size
@@ -288,7 +285,6 @@ public class ProductAppService : ApplicationService, IProductAppService
         variant.SetColor(input.Color);
         variant.SetSize(input.Size);
         variant.SetPrice(input.Price);
-        variant.SetStock(input.StockQuantity);
         await _variantRepo.UpdateAsync(variant, autoSave: true);
         return MapVariantToDto(variant);
     }

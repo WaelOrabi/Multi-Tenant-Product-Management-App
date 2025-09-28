@@ -16,7 +16,6 @@ export interface CreateUpdateProductVariantDto {
   color?: string;
   size?: string;
   price: number;
-  stockQuantity: number;
 }
 
 export interface GetProductListInput extends PagedAndSortedResultRequestDto {
@@ -42,5 +41,4 @@ export interface ProductVariantDto extends AuditedEntityDto<string> {
   color?: string;
   size?: string;
   price: number;
-  stockQuantity: number;
 }

@@ -62,10 +62,10 @@ public class ProductAppService_Tests
         var productId = Guid.NewGuid();
         var otherProductId = Guid.NewGuid();
         var variantId = Guid.NewGuid();
-        var variant = new ProductVariant(variantId, null, otherProductId, 10m, 5, "SKU-1", "Red", "L");
+        var variant = new ProductVariant(variantId, null, otherProductId, 10m, "SKU-1", "Red", "L");
         _variantRepo.GetAsync(variantId).Returns(Task.FromResult(variant));
 
-        var input = new CreateUpdateProductVariantDto { Price = 12m, StockQuantity = 7, Sku = "SKU-2", Color = "Blue", Size = "M" };
+        var input = new CreateUpdateProductVariantDto { Price = 12m, Sku = "SKU-2", Color = "Blue", Size = "M" };
 
         // Act 
         var ex = await Should.ThrowAsync<BusinessException>(() => sut.UpdateVariantAsync(productId, variantId, input));
@@ -75,6 +75,7 @@ public class ProductAppService_Tests
         ex.Data["ProductId"].ShouldBe(productId);
         ex.Data["VariantId"].ShouldBe(variantId);
     }
+
 
     [Fact]
     public async Task AddVariantAsync_inserts_and_maps_variant()
@@ -90,7 +91,7 @@ public class ProductAppService_Tests
         var product = new Product(productId, tenantId, "Name", "Desc", 100m, "Cat", ProductStatus.Active, hasVariants: false);
         _productRepo.GetAsync(productId).Returns(Task.FromResult(product));
 
-        var input = new CreateUpdateProductVariantDto { Price = 15m, StockQuantity = 3, Sku = "SKU-3", Color = "Black", Size = "S" };
+        var input = new CreateUpdateProductVariantDto { Price = 15m, Sku = "SKU-3", Color = "Black", Size = "S" };
 
         // Act
         var dto = await sut.AddVariantAsync(productId, input);
@@ -99,7 +100,6 @@ public class ProductAppService_Tests
         await _variantRepo.Received(1).InsertAsync(Arg.Is<ProductVariant>(v =>
             v.ProductId == productId &&
             v.Price == input.Price &&
-            v.StockQuantity == input.StockQuantity &&
             v.Sku == input.Sku &&
             v.Color == input.Color &&
             v.Size == input.Size
@@ -129,7 +129,7 @@ public class ProductAppService_Tests
             Category = "Cat-1",
             Status = ProductStatus.Active,
             HasVariants = true,
-            Variants = new List<CreateUpdateProductVariantDto> { new() { Price = 55m, StockQuantity = 2, Sku = "SKU-A", Color = "Red", Size = "M" } }
+            Variants = new List<CreateUpdateProductVariantDto> { new() { Price = 55m, Sku = "SKU-A", Color = "Red", Size = "M" } }
         };
 
         // Act
@@ -159,7 +159,7 @@ public class ProductAppService_Tests
         _currentTenant.Id.Returns(tenantId);
 
         var existing = new Product(id, tenantId, "OldName", "OldDesc", 10m, "OldCat", ProductStatus.Inactive, hasVariants: true);
-        existing.Variants.Add(new ProductVariant(Guid.NewGuid(), tenantId, id, 9m, 1, "OLD", "Green", "S"));
+        existing.Variants.Add(new ProductVariant(Guid.NewGuid(), tenantId, id, 9m, "OLD", "Green", "S"));
 
         var data = new List<Product> { existing };
         var queryable = data.AsQueryable();
@@ -175,7 +175,7 @@ public class ProductAppService_Tests
             Category = "NewCat",
             Status = ProductStatus.Active,
             HasVariants = true,
-            Variants = new List<CreateUpdateProductVariantDto> { new() { Price = 22m, StockQuantity = 5, Sku = "NEW", Color = "Blue", Size = "M" } }
+            Variants = new List<CreateUpdateProductVariantDto> { new() { Price = 22m, Sku = "NEW", Color = "Blue", Size = "M" } }
         };
 
         // Act
@@ -236,7 +236,7 @@ public class ProductAppService_Tests
         _currentTenant.Id.Returns(tenantId);
 
         var product = new Product(id, tenantId, "ProdX", "DescX", 12m, "CatX", ProductStatus.Active, hasVariants: true);
-        product.Variants.Add(new ProductVariant(Guid.NewGuid(), tenantId, id, 13m, 4, "SKU-X", "Black", "L"));
+        product.Variants.Add(new ProductVariant(Guid.NewGuid(), tenantId, id, 13m, "SKU-X", "Black", "L"));
 
         var data = new List<Product> { product };
         var queryable = data.AsQueryable();
@@ -263,10 +263,10 @@ public class ProductAppService_Tests
         var tenantId = Guid.NewGuid();
         var productId = Guid.NewGuid();
         var variantId = Guid.NewGuid();
-        var variant = new ProductVariant(variantId, tenantId, productId, 10m, 5, "OLD", "Red", "L");
+        var variant = new ProductVariant(variantId, tenantId, productId, 10m, "OLD", "Red", "L");
         _variantRepo.GetAsync(variantId).Returns(Task.FromResult(variant));
 
-        var input = new CreateUpdateProductVariantDto { Price = 20m, StockQuantity = 10, Sku = "NEW", Color = "Blue", Size = "M" };
+        var input = new CreateUpdateProductVariantDto { Price = 20m, Sku = "NEW", Color = "Blue", Size = "M" };
 
         // Act
         var dto = await sut.UpdateVariantAsync(productId, variantId, input);
@@ -278,8 +278,7 @@ public class ProductAppService_Tests
             v.Sku == "NEW" &&
             v.Color == "Blue" &&
             v.Size == "M" &&
-            v.Price == 20m &&
-            v.StockQuantity == 10
+            v.Price == 20m
         ), true);
         dto.ShouldNotBeNull();
         dto.Id.ShouldBe(variantId);
@@ -294,7 +293,7 @@ public class ProductAppService_Tests
         var productId = Guid.NewGuid();
         var otherProductId = Guid.NewGuid();
         var variantId = Guid.NewGuid();
-        var variant = new ProductVariant(variantId, null, otherProductId, 10m, 5, "SKU-1", "Red", "L");
+        var variant = new ProductVariant(variantId, null, otherProductId, 10m, "SKU-1", "Red", "L");
         _variantRepo.GetAsync(variantId).Returns(Task.FromResult(variant));
 
         // Act , Assert
@@ -313,7 +312,7 @@ public class ProductAppService_Tests
         _currentTenant.Id.Returns(tenantId);
         var productId = Guid.NewGuid();
         var variantId = Guid.NewGuid();
-        var variant = new ProductVariant(variantId, tenantId, productId, 10m, 5, "SKU-1", "Red", "L");
+        var variant = new ProductVariant(variantId, tenantId, productId, 10m, "SKU-1", "Red", "L");
         _variantRepo.GetAsync(variantId).Returns(Task.FromResult(variant));
 
         // Act

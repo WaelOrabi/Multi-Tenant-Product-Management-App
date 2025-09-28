@@ -68,6 +68,12 @@ public class AdminRolePermissionDataSeedContributor : IDataSeedContributor, ITra
                     MultiTenantProductManagementAppPermissions.Products.Edit,
                     MultiTenantProductManagementAppPermissions.Products.Delete,
 
+                    // Stocks
+                    MultiTenantProductManagementAppPermissions.Stocks.Default,
+                    MultiTenantProductManagementAppPermissions.Stocks.Create,
+                    MultiTenantProductManagementAppPermissions.Stocks.Edit,
+                    MultiTenantProductManagementAppPermissions.Stocks.Delete,
+
                     // Identity - Users
                     IdentityPermissions.Users.Default,
                     IdentityPermissions.Users.Create,

@@ -26,7 +26,7 @@ public class EntityFrameworkCoreMultiTenantProductManagementAppDbSchemaMigrator
          * current scope.
          */
 
-        await _serviceProvider
+            await _serviceProvider
             .GetRequiredService<MultiTenantProductManagementAppDbContext>()
             .Database
             .MigrateAsync();
