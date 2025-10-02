@@ -76,7 +76,6 @@
               <th>Color</th>
               <th>Size</th>
               <th>Price</th>
-              <th>Stock</th>
               <th>Created</th>
             </tr>
           </thead>
@@ -103,11 +102,7 @@
               <td>
                 <span class="price">${{ variant.price | number:'1.2-2' }}</span>
               </td>
-              <td>
-                <span class="stock" [class.low-stock]="variant.stockQuantity < 10">
-                  {{ variant.stockQuantity }}
-                </span>
-              </td>
+              
               <td>
                 <span class="date">{{ variant.creationTime | date:'short' }}</span>
               </td>

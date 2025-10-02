@@ -18,8 +18,7 @@ public abstract class ProductAppService_Integration_Tests_Base<TStartupModule> :
 {
     protected IProductAppService _productAppService = default!;
 
-    protected static readonly Guid _tenantId = Guid.NewGuid();
-    private static bool KeepDb => string.Equals(Environment.GetEnvironmentVariable("KEEP_TEST_DB"), "1", StringComparison.OrdinalIgnoreCase);
+    protected static readonly Guid _tenantId = Guid.Parse("121ed384-0fbb-4a05-9a88-aaaaaaaaaaaa"); private static bool KeepDb => string.Equals(Environment.GetEnvironmentVariable("KEEP_TEST_DB"), "1", StringComparison.OrdinalIgnoreCase);
 
     protected async Task InTenantAsync(Func<Task> action)
     {
@@ -86,8 +85,8 @@ public abstract class ProductAppService_Integration_Tests_Base<TStartupModule> :
                 HasVariants = true,
                 Variants = new List<CreateUpdateProductVariantDto>
                 {
-                    new() { Price = 1099.99m, StockQuantity = 5, Sku = "PX-BLK-128", Color = "Black", Size = "128GB" },
-                    new() { Price = 1199.99m, StockQuantity = 3, Sku = "PX-SLV-256", Color = "Silver", Size = "256GB" }
+                    new() { Price = 1099.99m, Sku = "PX-BLK-128", Color = "Black", Size = "128GB" },
+                    new() { Price = 1199.99m, Sku = "PX-SLV-256", Color = "Silver", Size = "256GB" }
                 }
             };
 
@@ -124,7 +123,7 @@ public abstract class ProductAppService_Integration_Tests_Base<TStartupModule> :
                 HasVariants = true,
                 Variants = new List<CreateUpdateProductVariantDto>
                 {
-                    new() { Price = 12m, StockQuantity = 10, Sku = "TS-RED-M", Color = "Red", Size = "M" }
+                    new() { Price = 12m, Sku = "TS-RED-M", Color = "Red", Size = "M" }
                 }
             });
 
@@ -138,7 +137,7 @@ public abstract class ProductAppService_Integration_Tests_Base<TStartupModule> :
                 HasVariants = true,
                 Variants = new List<CreateUpdateProductVariantDto>
                 {
-                    new() { Price = 17m, StockQuantity = 7, Sku = "PTS-BLK-L", Color = "Black", Size = "L" }
+                    new() { Price = 17m, Sku = "PTS-BLK-L", Color = "Black", Size = "L" }
                 }
             };
 
@@ -190,7 +189,6 @@ public abstract class ProductAppService_Integration_Tests_Base<TStartupModule> :
             var vDto = await _productAppService.AddVariantAsync(product.Id, new CreateUpdateProductVariantDto
             {
                 Price = 1599m,
-                StockQuantity = 4,
                 Sku = "LP-GRY-16",
                 Color = "Gray",
                 Size = "16GB"
@@ -200,7 +198,6 @@ public abstract class ProductAppService_Integration_Tests_Base<TStartupModule> :
             var updatedVariant = await _productAppService.UpdateVariantAsync(product.Id, vDto.Id, new CreateUpdateProductVariantDto
             {
                 Price = 1699m,
-                StockQuantity = 2,
                 Sku = "LP-GRY-32",
                 Color = "Gray",
                 Size = "32GB"
@@ -218,7 +215,7 @@ public abstract class ProductAppService_Integration_Tests_Base<TStartupModule> :
             {
                 await _productAppService.UpdateVariantAsync(Guid.NewGuid(), vDto.Id, new CreateUpdateProductVariantDto
                 {
-                    Price = 1700m, StockQuantity = 1, Sku = "X", Color = "X", Size = "X"
+                    Price = 1700m, Sku = "X", Color = "X", Size = "X"
                 });
             });
 
@@ -256,4 +253,6 @@ public abstract class ProductAppService_Integration_Tests_Base<TStartupModule> :
                 });
         });
     }
+
+  
 }

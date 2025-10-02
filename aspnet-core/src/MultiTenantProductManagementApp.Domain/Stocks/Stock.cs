@@ -1,5 +1,4 @@
 using System;
-using System.ComponentModel.DataAnnotations;
 using System.Collections.Generic;
 using Volo.Abp.Domain.Entities.Auditing;
 using Volo.Abp.MultiTenancy;
@@ -10,8 +9,6 @@ public class Stock : FullAuditedAggregateRoot<Guid>, IMultiTenant
 {
     public Guid? TenantId { get; set; }
 
-    [Required]
-    [StringLength(128)]
     public string Name { get; protected set; } = default!;
 
     public ICollection<StockProduct> Products { get; protected set; } = new List<StockProduct>();

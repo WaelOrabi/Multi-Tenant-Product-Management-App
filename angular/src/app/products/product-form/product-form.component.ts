@@ -76,7 +76,6 @@ export class ProductFormComponent implements OnInit {
     return this.fb.group({
       sku: [v?.sku || '', Validators.required],
       price: [v?.price ?? 0, [Validators.required, Validators.min(0)]],
-      stockQuantity: [v?.stockQuantity ?? 0, [Validators.required, Validators.min(0)]],
       color: [v?.color || ''],
       size: [v?.size || ''],
     });

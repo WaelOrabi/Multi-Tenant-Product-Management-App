@@ -198,32 +198,22 @@ export class StockFormComponent {
   productsInvalid(): boolean {
     const data = this.vm();
     for (let i = 0; i < data.products.length; i++) {
-      if (this.hasDuplicateVariants(i) || this.hasNegativeQuantity(i) || this.hasExceedVariantStock(i)) return true;
+      if (this.hasDuplicateVariants(i) || this.hasNegativeQuantity(i)) return true;
     }
     return false;
   }
 
   hasExceedVariantStock(pIndex: number): boolean {
-    const map = this.variantsPerProduct();
-    const list = map[pIndex] || [];
-    const byId = new Map<string, ProductVariantDto>();
-    list.forEach(v => byId.set(v.id, v));
-    for (const line of this.vm().products[pIndex].variants) {
-      if (line.productVariantId) {
-        const pv = byId.get(line.productVariantId);
-        if (pv && typeof pv.stockQuantity === 'number' && line.quantity > pv.stockQuantity) return true;
-      }
-    }
     return false;
   }
 
   save() {
     this.saving.set(true);
     const input = this.vm();
-    const invalid = this.vm().products.some((_, i) => this.hasDuplicateVariants(i) || this.hasNegativeQuantity(i) || this.hasExceedVariantStock(i));
+    const invalid = this.vm().products.some((_, i) => this.hasDuplicateVariants(i) || this.hasNegativeQuantity(i));
     if (invalid) {
       this.saving.set(false);
-      alert('Please fix duplicate variants, negative quantities, and quantities exceeding variant stock before saving.');
+      alert('Please fix duplicate variants and negative quantities before saving.');
       return;
     }
 

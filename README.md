@@ -17,13 +17,13 @@ A demo multi‑tenant product management application built with ABP Framework (A
    ```bash
    dotnet run
    ```
-   This applies migrations and seeds data (tenants, users, sample products).
+   This applies migrations and seeds data (tenants, users, sample products, role permissions, OpenIddict clients).
 
 3. Start the API Host from `aspnet-core/src/MultiTenantProductManagementApp.HttpApi.Host`:
    ```bash
    dotnet run
    ```
-   Default URL (per ABP defaults): `https://localhost:44307` / `http://localhost:22742` (your ports may differ; check console output).
+   The API will listen on `https://localhost:44320` (check console output to confirm the port).
 
 ### 2) Frontend: run Angular dev server
 1. Open a terminal in `angular/`
@@ -35,7 +35,7 @@ A demo multi‑tenant product management application built with ABP Framework (A
    ```bash
    npm run start
    ```
-   App will open at `http://localhost:4200/`.
+   The app opens at `http://localhost:4200/`.
 
 ## Demo Tenants and Admins
 Seeded by `aspnet-core/src/MultiTenantProductManagementApp.Domain/Data/ProductDemoDataSeedContributor.cs`:
@@ -43,36 +43,36 @@ Seeded by `aspnet-core/src/MultiTenantProductManagementApp.Domain/Data/ProductDe
 - Tenant: `store-two`, Admin: `admin2@demo.com`, Password: `1q2w3E*`
 
 ### Important: Select a Tenant before Login
-- Credentials are tenant‑scoped. Use the tenant selector in the UI or add to URL:
-  - `http://localhost:4200/?__tenant=store-one`
-  - `http://localhost:4200/?__tenant=store-two`
-- Logging in at host context (no tenant) will fail with "Invalid username or password".
+- Credentials are tenant‑scoped. Use one of the following methods:
+  UI method (recommended): open the top‑right user menu and choose "Switch Tenant" (or the tenant selector), then enter:
+     - `store-one`
+     - `store-two`
+
 
 ## Features
 - Multi‑tenant separation via ABP `ICurrentTenant`
-- Product CRUD with single or multi‑variant support
-- Variant attributes, price, and stock
-- Search/filter on listing
+- Products and Stocks modules with permissions
+- Product CRUD with variants (attributes, price)
 - Responsive UI (LeptonX Lite)
+- Identity and Roles management via ABP
 
-## Common Tasks
-- Create/Edit Products and Variants in Angular UI under `Products`
-- Backend entities/services under:
-  - `aspnet-core/src/MultiTenantProductManagementApp.Domain/`
-  - `aspnet-core/src/MultiTenantProductManagementApp.Application/`
+## Menus and Permissions
+Menus in `angular/src/app/route.provider.ts` are shown only if the logged‑in user has required policies:
+- Products: `MultiTenantProductManagementApp.Products`
+- Stocks: `MultiTenantProductManagementApp.Stocks`
+- Identity (Users): `AbpIdentity.Users`
+- Roles: `AbpIdentity.Roles`
+
+DbMigrator seeds these permissions to the `admin` role and assigns the seeded admin users to that role per tenant. After running DbMigrator and logging in as the tenant admin, these menus should appear.
 
 ## Configuration
-- API base URL is provided by ABP Angular packages. Ensure backend is running and CORS allows `http://localhost:4200`.
-- Adjust database connection in `aspnet-core/src/MultiTenantProductManagementApp.HttpApi.Host/appsettings.json` if needed.
+- Backend base URL (issuer) in the Angular environment should match the host: `https://localhost:44320`.
+- CORS must allow `http://localhost:4200` (configured by ABP template).
+- Database connection can be updated in `aspnet-core/src/MultiTenantProductManagementApp.HttpApi.Host/appsettings.json`.
 
-## Troubleshooting
-- "Invalid username or password": ensure tenant selected (`?__tenant=store-two`) and that seeding ran (check `AbpTenants` and `AbpUsers`).
-- Angular not picking global styles: repository uses `angular/src/styles.css` configured in `angular/angular.json`.
-- If migrations fail, delete/recreate dev DB, then re‑run DbMigrator.
 
 ## Scripts
 - Backend migrate/seed: `dotnet run` in `aspnet-core/src/MultiTenantProductManagementApp.DbMigrator`
 - Backend run: `dotnet run` in `aspnet-core/src/MultiTenantProductManagementApp.HttpApi.Host`
 - Frontend run: `npm run start` in `angular/`
-
 

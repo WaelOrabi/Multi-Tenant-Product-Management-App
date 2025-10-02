@@ -19,18 +19,15 @@ public class ProductVariant : FullAuditedEntity<Guid>, IMultiTenant
 
     public decimal Price { get; protected set; }
 
-    public int StockQuantity { get; protected set; }
-
     protected ProductVariant() { }
 
-    public ProductVariant(Guid id, Guid? tenantId, Guid productId, decimal price, int stockQuantity,
+    public ProductVariant(Guid id, Guid? tenantId, Guid productId, decimal price,
         string? sku = null, string? color = null, string? size = null)
         : base(id)
     {
         TenantId = tenantId;
         ProductId = productId;
         SetPrice(price);
-        SetStock(stockQuantity);
         SetSku(sku);
         SetColor(color);
         SetSize(size);
@@ -48,12 +45,6 @@ public class ProductVariant : FullAuditedEntity<Guid>, IMultiTenant
     {
         if (price < 0) throw new ArgumentOutOfRangeException(nameof(price));
         Price = price;
-    }
-
-    public void SetStock(int qty)
-    {
-        if (qty < 0) throw new ArgumentOutOfRangeException(nameof(qty));
-        StockQuantity = qty;
     }
 
     public void SetColor(string? color)
