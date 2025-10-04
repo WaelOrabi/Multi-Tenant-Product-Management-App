@@ -85,8 +85,8 @@ public abstract class ProductAppService_Integration_Tests_Base<TStartupModule> :
                 HasVariants = true,
                 Variants = new List<CreateUpdateProductVariantDto>
                 {
-                    new() { Price = 1099.99m, Sku = "PX-BLK-128", Color = "Black", Size = "128GB" },
-                    new() { Price = 1199.99m, Sku = "PX-SLV-256", Color = "Silver", Size = "256GB" }
+                    new() { Price = 1099.99m, Sku = "PX-BLK-128", Options = new List<ProductVariantOptionDto>{ new(){ Name = "Color", Value = "Black" }, new(){ Name = "Size", Value = "128GB" } } },
+                    new() { Price = 1199.99m, Sku = "PX-SLV-256", Options = new List<ProductVariantOptionDto>{ new(){ Name = "Color", Value = "Silver" }, new(){ Name = "Size", Value = "256GB" } } }
                 }
             };
 
@@ -123,7 +123,7 @@ public abstract class ProductAppService_Integration_Tests_Base<TStartupModule> :
                 HasVariants = true,
                 Variants = new List<CreateUpdateProductVariantDto>
                 {
-                    new() { Price = 12m, Sku = "TS-RED-M", Color = "Red", Size = "M" }
+                    new() { Price = 12m, Sku = "TS-RED-M", Options = new List<ProductVariantOptionDto>{ new(){ Name = "Color", Value = "Red" }, new(){ Name = "Size", Value = "M" } } }
                 }
             });
 
@@ -137,7 +137,7 @@ public abstract class ProductAppService_Integration_Tests_Base<TStartupModule> :
                 HasVariants = true,
                 Variants = new List<CreateUpdateProductVariantDto>
                 {
-                    new() { Price = 17m, Sku = "PTS-BLK-L", Color = "Black", Size = "L" }
+                    new() { Price = 17m, Sku = "PTS-BLK-L", Options = new List<ProductVariantOptionDto>{ new(){ Name = "Color", Value = "Black" }, new(){ Name = "Size", Value = "L" } } }
                 }
             };
 
@@ -190,8 +190,7 @@ public abstract class ProductAppService_Integration_Tests_Base<TStartupModule> :
             {
                 Price = 1599m,
                 Sku = "LP-GRY-16",
-                Color = "Gray",
-                Size = "16GB"
+                Options = new List<ProductVariantOptionDto>{ new(){ Name = "Color", Value = "Gray" }, new(){ Name = "Size", Value = "16GB" } }
             });
             vDto.ProductId.ShouldBe(product.Id);
 
@@ -199,8 +198,7 @@ public abstract class ProductAppService_Integration_Tests_Base<TStartupModule> :
             {
                 Price = 1699m,
                 Sku = "LP-GRY-32",
-                Color = "Gray",
-                Size = "32GB"
+                Options = new List<ProductVariantOptionDto>{ new(){ Name = "Color", Value = "Gray" }, new(){ Name = "Size", Value = "32GB" } }
             });
             updatedVariant.Sku.ShouldBe("LP-GRY-32");
 
@@ -215,7 +213,7 @@ public abstract class ProductAppService_Integration_Tests_Base<TStartupModule> :
             {
                 await _productAppService.UpdateVariantAsync(Guid.NewGuid(), vDto.Id, new CreateUpdateProductVariantDto
                 {
-                    Price = 1700m, Sku = "X", Color = "X", Size = "X"
+                    Price = 1700m, Sku = "X", Options = new List<ProductVariantOptionDto>{ new(){ Name = "Color", Value = "X" }, new(){ Name = "Size", Value = "X" } }
                 });
             });
 

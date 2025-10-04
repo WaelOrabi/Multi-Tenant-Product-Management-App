@@ -13,8 +13,7 @@ export interface CreateUpdateProductDto {
 
 export interface CreateUpdateProductVariantDto {
   sku?: string;
-  color?: string;
-  size?: string;
+  options: ProductVariantOptionDto[];
   price: number;
 }
 
@@ -38,7 +37,16 @@ export interface ProductDto extends AuditedEntityDto<string> {
 export interface ProductVariantDto extends AuditedEntityDto<string> {
   productId?: string;
   sku?: string;
-  color?: string;
-  size?: string;
   price: number;
+  options: ProductVariantOptionDto[];
+}
+
+export interface ProductVariantOptionDto {
+  name: string;
+  value: string;
+}
+
+export interface ProductLookupDto {
+  id: string;
+  name?: string;
 }

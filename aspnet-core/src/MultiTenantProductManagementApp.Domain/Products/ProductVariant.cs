@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Volo.Abp.Domain.Entities.Auditing;
 using Volo.Abp.MultiTenancy;
 
@@ -12,25 +13,24 @@ public class ProductVariant : FullAuditedEntity<Guid>, IMultiTenant
 
     public string? Sku { get; protected set; }
 
-    
-    public string? Color { get; protected set; }
-    
-    public string? Size { get; protected set; } 
-
     public decimal Price { get; protected set; }
+
+    public List<ProductVariantOption> Options { get; private set; } = new();
 
     protected ProductVariant() { }
 
     public ProductVariant(Guid id, Guid? tenantId, Guid productId, decimal price,
-        string? sku = null, string? color = null, string? size = null)
+        string? sku = null, IEnumerable<ProductVariantOption>? options = null)
         : base(id)
     {
         TenantId = tenantId;
         ProductId = productId;
         SetPrice(price);
         SetSku(sku);
-        SetColor(color);
-        SetSize(size);
+        if (options != null)
+        {
+            ReplaceOptions(options);
+        }
     }
 
     public void SetSku(string? sku)
@@ -47,17 +47,32 @@ public class ProductVariant : FullAuditedEntity<Guid>, IMultiTenant
         Price = price;
     }
 
-    public void SetColor(string? color)
+    public void AddOrUpdateOption(string name, string value)
     {
-        if (color != null && color.Length > 50)
-            throw new ArgumentException("Color max length is 50", nameof(color));
-        Color = color;
+        var existingIndex = Options.FindIndex(o => string.Equals(o.Name, name, StringComparison.OrdinalIgnoreCase));
+        if (existingIndex >= 0)
+        {
+            Options[existingIndex].SetValue(value);
+        }
+        else
+        {
+            Options.Add(new ProductVariantOption(name, value));
+        }
     }
 
-    public void SetSize(string? size)
+    public void RemoveOption(string name)
     {
-        if (size != null && size.Length > 20)
-            throw new ArgumentException("Size max length is 20", nameof(size));
-        Size = size;
+        Options.RemoveAll(o => string.Equals(o.Name, name, StringComparison.OrdinalIgnoreCase));
+    }
+
+    public void ReplaceOptions(IEnumerable<ProductVariantOption> options)
+    {
+        Options.Clear();
+        foreach (var o in options)
+        {
+            // enforce validation through setters
+            var item = new ProductVariantOption(o.Name, o.Value);
+            Options.Add(item);
+        }
     }
 }

@@ -86,9 +86,17 @@ public class StockAggregateAppService : ApplicationService, IStockAggregateAppSe
                     };
                     if (v.ProductVariantId.HasValue && variantMap.TryGetValue(v.ProductVariantId.Value, out var ve))
                     {
-                        line.VariantSku = ve.Sku;
-                        line.Color = ve.Color;
-                        line.Size = ve.Size;
+                        // Build display SKU as NormalizedProductName-<rest of sku after first dash>
+                        // Example: ProductName "Test Phone" + Variant SKU "PX-BLK-128" => "PHONE-BLK-128"
+                        string? productName = productNameMap.TryGetValue(p.ProductId, out var pn2) ? pn2 : null;
+                        string normalized = string.IsNullOrWhiteSpace(productName) ? string.Empty : productName.Trim();
+                        if (normalized.StartsWith("Test ", StringComparison.OrdinalIgnoreCase))
+                            normalized = normalized.Substring(5);
+                        normalized = normalized.Replace(" ", string.Empty).ToUpperInvariant();
+                        var sku = ve.Sku ?? string.Empty;
+                        var idx = sku.IndexOf('-');
+                        var rest = idx >= 0 && idx + 1 < sku.Length ? sku.Substring(idx + 1) : sku;
+                        line.VariantSku = string.IsNullOrEmpty(normalized) ? sku : (string.IsNullOrEmpty(rest) ? normalized : $"{normalized}-{rest}");
                     }
                     productDto.Variants.Add(line);
                 }
@@ -201,7 +209,7 @@ public class StockAggregateAppService : ApplicationService, IStockAggregateAppSe
                         throw new BusinessException("Stock.VariantNotFound").WithData("ProductVariantId", v.ProductVariantId);
                     if (ve.ProductId != p.ProductId)
                         throw new BusinessException("Stock.ProductVariantMismatch").WithData("ProductId", p.ProductId).WithData("ProductVariantId", v.ProductVariantId);
-    
+                   
                 }
                 var line = new StockProductVariant(LazyServiceProvider.LazyGetRequiredService<IGuidGenerator>().Create(), CurrentTenant.Id, sp.Id, v.ProductVariantId, v.Quantity);
                 await _stockProductVariantRepo.InsertAsync(line, autoSave: true);

@@ -101,9 +101,18 @@ public class MultiTenantProductManagementAppDbContext :
             b.ConfigureByConvention();
             b.Property(x => x.Sku).HasMaxLength(64);
             b.Property(x => x.Price).HasColumnType("decimal(18,2)");
-            b.Property(x => x.Color).HasMaxLength(50);
-            b.Property(x => x.Size).HasMaxLength(20);
             b.HasIndex(x => new { x.TenantId, x.ProductId, x.Sku });
+
+            b.OwnsMany<ProductVariantOption>(p => p.Options, o =>
+            {
+                o.WithOwner().HasForeignKey("ProductVariantId");
+                o.ToTable(MultiTenantProductManagementAppConsts.DbTablePrefix + "ProductVariantOptions", MultiTenantProductManagementAppConsts.DbSchema);
+                o.Property<int>("Id").ValueGeneratedOnAdd();
+                o.HasKey("Id");
+                o.Property(x => x.Name).IsRequired().HasMaxLength(64);
+                o.Property(x => x.Value).IsRequired().HasMaxLength(128);
+                o.HasIndex("ProductVariantId", "Name");
+            });
         });
 
         builder.Entity<Stock>(b =>

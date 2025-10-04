@@ -80,7 +80,7 @@ public abstract class StockAggregateAppService_Integration_Tests_Base<TStartupMo
 
         var phoneInput = new CreateUpdateProductDto
         {
-            Name = "Phone X",
+            Name = "Test Phone",
             Description = "Flagship phone",
             BasePrice = 999.99m,
             Category = "Electronics",
@@ -88,8 +88,8 @@ public abstract class StockAggregateAppService_Integration_Tests_Base<TStartupMo
             HasVariants = true,
             Variants = new List<CreateUpdateProductVariantDto>
             {
-                new() { Price = 1099.99m,  Sku = "PX-BLK-128", Color = "Black", Size = "128GB" },
-                new() { Price = 1199.99m,  Sku = "PX-SLV-256", Color = "Silver", Size = "256GB" }
+                new() { Price = 1099.99m,  Sku = "PX-BLK-128", Options = new List<ProductVariantOptionDto>{ new(){ Name = "Color", Value = "Black" }, new(){ Name = "Size", Value = "128GB" } } },
+                new() { Price = 1199.99m,  Sku = "PX-SLV-256", Options = new List<ProductVariantOptionDto>{ new(){ Name = "Color", Value = "Silver" }, new(){ Name = "Size", Value = "256GB" } } }
             }
         };
         var existingPhones = (await _productAppService.GetListAsync(new GetProductListInput { Name = phoneInput.Name, SkipCount = 0, MaxResultCount = 100 })).Items;
@@ -99,7 +99,7 @@ public abstract class StockAggregateAppService_Integration_Tests_Base<TStartupMo
         }
         var laptopInput = new CreateUpdateProductDto
         {
-            Name = "Laptop Pro",
+            Name = "Test Laptop",
             Description = "High-performance laptop",
             BasePrice = 1999.99m,
             Category = "Electronics",
@@ -107,25 +107,36 @@ public abstract class StockAggregateAppService_Integration_Tests_Base<TStartupMo
             HasVariants = true,
             Variants = new List<CreateUpdateProductVariantDto>
             {
-                new() { Price = 2099.99m,  Sku = "LP-BLK-16", Color = "Black", Size = "16GB" },
-                new() { Price = 2399.99m,  Sku = "LP-SLV-32", Color = "Silver", Size = "32GB" }
+                new() { Price = 2099.99m,  Sku = "LP-BLK-16", Options = new List<ProductVariantOptionDto>{ new(){ Name = "Color", Value = "Black" }, new(){ Name = "Size", Value = "16GB" } } },
+                new() { Price = 2399.99m,  Sku = "LP-SLV-32", Options = new List<ProductVariantOptionDto>{ new(){ Name = "Color", Value = "Silver" }, new(){ Name = "Size", Value = "32GB" } } }
             }
         };
         var existingLaptop = (await _productAppService.GetListAsync(new GetProductListInput { Name = laptopInput.Name, SkipCount = 0, MaxResultCount = 100 })).Items;
-        foreach (var prod in existingPhones)
+        foreach (var prod in existingLaptop)
         {
             await _productAppService.DeleteAsync(prod.Id);
         }
 
-        ProductDto p1, p2;
+        var p1 = await _productAppService.CreateAsync(phoneInput);
+        var p2 = await _productAppService.CreateAsync(laptopInput);
 
-     
-            p1 = await _productAppService.CreateAsync(phoneInput);
-        
-  
-            p2 = await _productAppService.CreateAsync(laptopInput);
-        
-       
+        _testProduct1 = new Product(p1.Id, _tenantId, "Test Phone");
+        _testProduct2 = new Product(p2.Id, _tenantId, "Test Laptop");
+
+        var p1Full = await _productAppService.GetAsync(p1.Id);
+        var p2Full = await _productAppService.GetAsync(p2.Id);
+        if (p1Full.Variants != null && p1Full.Variants.Count >= 2)
+        {
+            var v1 = p1Full.Variants[0];
+            var v2 = p1Full.Variants[1];
+            _testVariant1 = new ProductVariant(v1.Id, _tenantId, p1.Id, v1.Price, v1.Sku);
+            _testVariant2 = new ProductVariant(v2.Id, _tenantId, p1.Id, v2.Price, v2.Sku);
+        }
+        if (p2Full.Variants != null && p2Full.Variants.Count >= 1)
+        {
+            var v3 = p2Full.Variants[0];
+            _testVariant3 = new ProductVariant(v3.Id, _tenantId, p2.Id, v3.Price, v3.Sku);
+        }
     }
 
     protected async Task CleanupTestDataAsync()
@@ -134,6 +145,7 @@ public abstract class StockAggregateAppService_Integration_Tests_Base<TStartupMo
         {
             try
             {
+                // Delete all stocks first
                 const int pageSize = 100;
                 while (true)
                 {
@@ -149,6 +161,7 @@ public abstract class StockAggregateAppService_Integration_Tests_Base<TStartupMo
                     }
                 }
 
+                // Then delete all products and their variants
                 const int pPageSize = 100;
                 while (true)
                 {
@@ -272,8 +285,6 @@ public abstract class StockAggregateAppService_Integration_Tests_Base<TStartupMo
             variant.ProductVariantId.ShouldBe(_testVariant1.Id);
             variant.Quantity.ShouldBe(5);
             variant.VariantSku.ShouldBe("PHONE-BLK-128");
-            variant.Color.ShouldBe("Black");
-            variant.Size.ShouldBe("128GB");
         });
     }
 

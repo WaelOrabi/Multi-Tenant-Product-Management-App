@@ -30,7 +30,7 @@ export class StockFormComponent {
     ],
   });
 
-  products = signal<ProductDto[]>([]);
+  products = signal<Array<{ id: string; name?: string }>>([]);
   variantsPerProduct = signal<Record<number, ProductVariantDto[]>>({});
   loadingProducts = signal(false);
   loadingVariants = signal<Record<number, boolean>>({});
@@ -62,24 +62,15 @@ export class StockFormComponent {
       };
       if (!vm.products.length) vm.products.push({ productId: '', variants: [{ productVariantId: null, quantity: 0 }] });
       this.vm.set(vm);
-      vm.products.forEach((p, idx) => this.preloadVariantsFor(idx, p.productId));
+      vm.products.forEach((_, idx) => this.ensureVariantsLoaded(idx));
     });
   }
 
   loadProducts() {
     this.loadingProducts.set(true);
-    const input: GetProductListInput = {
-      filterText: undefined,
-      name: undefined,
-      category: undefined,
-      status: undefined,
-      sorting: 'Name',
-      skipCount: 0,
-      maxResultCount: 1000,
-    };
-    this.productService.getList(input).subscribe({
+    this.productService.getLookup().subscribe({
       next: res => {
-        this.products.set(res.items);
+        this.products.set((res.items || []).map(p => ({ id: p.id, name: p.name })));
         this.loadingProducts.set(false);
       },
       error: _ => this.loadingProducts.set(false),
@@ -93,35 +84,19 @@ export class StockFormComponent {
       clone.products[index].variants = [{ productVariantId: null, quantity: 0 }];
       return clone;
     });
-    if (!productId) {
-      const map = { ...this.variantsPerProduct() };
-      delete map[index];
-      this.variantsPerProduct.set(map);
-      return;
-    }
-    const loading = { ...this.loadingVariants() };
-    loading[index] = true;
-    this.loadingVariants.set(loading);
-    this.productService.get(productId).subscribe({
-      next: p => {
-        const list = (p as any).variants as ProductVariantDto[] | undefined;
-        const map = { ...this.variantsPerProduct() };
-        map[index] = list ?? [];
-        this.variantsPerProduct.set(map);
-        const l = { ...this.loadingVariants() };
-        l[index] = false;
-        this.loadingVariants.set(l);
-      },
-      error: _ => {
-        const l = { ...this.loadingVariants() };
-        l[index] = false;
-        this.loadingVariants.set(l);
-      },
-    });
+    // Clear any cached variants for this line; they will be loaded on demand
+    const map = { ...this.variantsPerProduct() };
+    delete map[index];
+    this.variantsPerProduct.set(map);
   }
 
-  preloadVariantsFor(index: number, productId: string) {
+  // Ensure variants for a given product row are loaded (called when variant dropdown is opened)
+  ensureVariantsLoaded(index: number) {
+    const productId = this.vm().products[index]?.productId;
     if (!productId) return;
+    // If already loaded or currently loading, do nothing
+    if (this.variantsPerProduct()[index]?.length || this.loadingVariants()[index]) return;
+
     const loading = { ...this.loadingVariants() };
     loading[index] = true;
     this.loadingVariants.set(loading);
@@ -205,6 +180,19 @@ export class StockFormComponent {
 
   hasExceedVariantStock(pIndex: number): boolean {
     return false;
+  }
+
+  // Builds a human-friendly label for a variant to show in the dropdown
+  getVariantLabel(v: ProductVariantDto): string {
+    const sku = v.sku?.trim() || 'no-sku';
+    const price = typeof v.price === 'number' ? v.price.toFixed(2) : '';
+    const options = (v.options || [])
+      .map(o => `${o.name} : ${o.value}`)
+      .join(' - ');
+    const parts = ['sku : '+sku];
+    if (price) parts.push('price : '+price+'$');
+    if (options) parts.push(options);
+    return parts.join(' - ');
   }
 
   save() {

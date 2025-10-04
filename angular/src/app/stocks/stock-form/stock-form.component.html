@@ -1,5 +1,10 @@
 <div class="container py-3">
-  <h2 class="mb-3">{{ title() }}</h2>
+  <div class="d-flex align-items-center mb-3 gap-2">
+    <button type="button" class="btn btn-outline-secondary btn-sm" title="Back to list" (click)="cancel()">
+      <i class="bi bi-arrow-left"></i>
+    </button>
+    <h2 class="m-0">{{ title() }}</h2>
+  </div>
 
   <form (ngSubmit)="save()" #f="ngForm" class="card p-3 shadow-sm">
     <div class="mb-3">
@@ -46,14 +51,21 @@
           <div class="row g-2 align-items-end mb-2">
             <div class="col-md-7">
               <label class="form-label">Variant (optional)</label>
-              <select class="form-select" [name]="'variant_' + i + '_' + j" [(ngModel)]="vm().products[i].variants[j].productVariantId" [disabled]="loadingVariants()[i] || !(variantsPerProduct()[i]?.length)">
+              <select class="form-select"
+                      [name]="'variant_' + i + '_' + j"
+                      [(ngModel)]="vm().products[i].variants[j].productVariantId"
+                      [disabled]="!vm().products[i].productId"
+                      (focus)="ensureVariantsLoaded(i)"
+                      (click)="ensureVariantsLoaded(i)">
                 <option [ngValue]="null">(No variant - product level stock)</option>
-                @for (vv of (variantsPerProduct()[i] || []); track vv.id) {
-                  <option [value]="vv.id">
-                    {{ vv.color  + '-' +vv.size }}
-                    
-                  </option>
-
+                @if (loadingVariants()[i]) {
+                  <option disabled>Loading variants...</option>
+                } @else if ((variantsPerProduct()[i]?.length || 0) > 0) {
+                  @for (vv of (variantsPerProduct()[i] || []); track vv.id) {
+                    <option [value]="vv.id">{{ getVariantLabel(vv) }}</option>
+                  }
+                } @else {
+                  <option disabled>No variants found</option>
                 }
               </select>
             </div>

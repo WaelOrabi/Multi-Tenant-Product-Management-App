@@ -27,8 +27,6 @@ public class StockVariantDto
     public Guid? ProductVariantId { get; set; }
     public int Quantity { get; set; }
     public string? VariantSku { get; set; }
-    public string? Color { get; set; }
-    public string? Size { get; set; }
 }
 
 public class CreateUpdateStockAggregateDto

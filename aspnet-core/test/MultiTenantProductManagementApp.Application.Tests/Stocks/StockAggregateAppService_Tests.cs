@@ -97,7 +97,7 @@ public class StockAggregateAppService_Tests
             .Returns(Task.FromResult(new List<StockProductVariant> { new StockProductVariant(Guid.NewGuid(), tenantId, Guid.NewGuid(), variantId, 3) }));
 
         _variantRepo.GetListAsync(Arg.Any<System.Linq.Expressions.Expression<Func<ProductVariant, bool>>>())
-            .Returns(Task.FromResult(new List<ProductVariant> { new ProductVariant(variantId, tenantId, productId, 10m, "SKU-1", "Red", "M") }));
+            .Returns(Task.FromResult(new List<ProductVariant> { new ProductVariant(variantId, tenantId, productId, 10m, "SKU-1", new[] { new ProductVariantOption("Color", "Red"), new ProductVariantOption("Size", "M") }) }));
 
         // Act
         var dto = await sut.GetAsync(stockId);
@@ -110,7 +110,7 @@ public class StockAggregateAppService_Tests
         dto.Products[0].ProductName.ShouldBe("Prod-1");
         dto.Products[0].Variants.Count.ShouldBe(1);
         dto.Products[0].Variants[0].ProductVariantId.ShouldBe(variantId);
-        dto.Products[0].Variants[0].VariantSku.ShouldBe("SKU-1");
+        dto.Products[0].Variants[0].VariantSku.ShouldBe("PROD-1-1");
     }
 
     [Fact]
@@ -146,7 +146,7 @@ public class StockAggregateAppService_Tests
             .Returns(Task.FromResult(new List<Product> { new Product(productId, tenantId, "P1") }));
 
         _variantRepo.GetListAsync(Arg.Any<System.Linq.Expressions.Expression<Func<ProductVariant, bool>>>())
-            .Returns(Task.FromResult(new List<ProductVariant> { new ProductVariant(variantId, tenantId, productId, 1m, "SKU-1", "Red", "M") }));
+            .Returns(Task.FromResult(new List<ProductVariant> { new ProductVariant(variantId, tenantId, productId, 1m, "SKU-1", new[] { new ProductVariantOption("Color", "Red"), new ProductVariantOption("Size", "M") }) }));
 
         _stockRepo.GetAsync(Arg.Any<Guid>()).Returns(ci => Task.FromResult(new Stock(ci.Arg<Guid>(), tenantId, "Main")));
 
@@ -160,7 +160,7 @@ public class StockAggregateAppService_Tests
             .Returns(Task.FromResult(new List<StockProductVariant> { new StockProductVariant(spvId, tenantId, spId, variantId, 2) }));
 
         _variantRepo.GetListAsync(Arg.Any<System.Linq.Expressions.Expression<Func<ProductVariant, bool>>>())
-            .Returns(Task.FromResult(new List<ProductVariant> { new ProductVariant(variantId, tenantId, productId, 1m, "SKU-1", "Red", "M") }));
+            .Returns(Task.FromResult(new List<ProductVariant> { new ProductVariant(variantId, tenantId, productId, 1m, "SKU-1", new[] { new ProductVariantOption("Color", "Red"), new ProductVariantOption("Size", "M") }) }));
 
         // Act
         var dto = await sut.CreateAsync(input);
@@ -230,7 +230,7 @@ public class StockAggregateAppService_Tests
             .Returns(Task.FromResult(new List<Product> { new Product(productId, tenantId, "P1") }));
 
         _variantRepo.GetListAsync(Arg.Any<System.Linq.Expressions.Expression<Func<ProductVariant, bool>>>())
-            .Returns(Task.FromResult(new List<ProductVariant> { new ProductVariant(variantId, tenantId, productId, 1m, "SKU-1", "Red", "M") }));
+            .Returns(Task.FromResult(new List<ProductVariant> { new ProductVariant(variantId, tenantId, productId, 1m, "SKU-1", new[] { new ProductVariantOption("Color", "Red"), new ProductVariantOption("Size", "M") }) }));
 
         _stockRepo.GetAsync(stockId).Returns(Task.FromResult(new Stock(stockId, tenantId, "NewName")));
 
@@ -244,7 +244,7 @@ public class StockAggregateAppService_Tests
             .Returns(Task.FromResult(new List<StockProductVariant> { new StockProductVariant(newSpvId, tenantId, newSpId, variantId, 3) }));
 
         _variantRepo.GetListAsync(Arg.Any<System.Linq.Expressions.Expression<Func<ProductVariant, bool>>>())
-            .Returns(Task.FromResult(new List<ProductVariant> { new ProductVariant(variantId, tenantId, productId, 1m, "SKU-1", "Red", "M") }));
+            .Returns(Task.FromResult(new List<ProductVariant> { new ProductVariant(variantId, tenantId, productId, 1m, "SKU-1", new[] { new ProductVariantOption("Color", "Red"), new ProductVariantOption("Size", "M") }) }));
 
         // Act
         var dto = await sut.UpdateAsync(stockId, input);
@@ -294,7 +294,7 @@ public class StockAggregateAppService_Tests
         }));
 
         _variantRepo.GetListAsync(Arg.Any<System.Linq.Expressions.Expression<Func<ProductVariant, bool>>>())
-            .Returns(Task.FromResult(new List<ProductVariant> { new ProductVariant(variantId, tenantId, otherProductId, 1m, "SKU-1", "Red", "M") }));
+            .Returns(Task.FromResult(new List<ProductVariant> { new ProductVariant(variantId, tenantId, otherProductId, 1m, "SKU-1", new[] { new ProductVariantOption("Color", "Red"), new ProductVariantOption("Size", "M") }) }));
         await Should.ThrowAsync<BusinessException>(() => sut.UpdateAsync(stockId, new CreateUpdateStockAggregateDto
         {
             Name = "Main",
@@ -302,7 +302,7 @@ public class StockAggregateAppService_Tests
         }));
 
         _variantRepo.GetListAsync(Arg.Any<System.Linq.Expressions.Expression<Func<ProductVariant, bool>>>())
-            .Returns(Task.FromResult(new List<ProductVariant> { new ProductVariant(variantId, tenantId, productId, 1m, "SKU-1", "Red", "M") }));
+            .Returns(Task.FromResult(new List<ProductVariant> { new ProductVariant(variantId, tenantId, productId, 1m, "SKU-1", new[] { new ProductVariantOption("Color", "Red"), new ProductVariantOption("Size", "M") }) }));
         await Should.ThrowAsync<BusinessException>(() => sut.UpdateAsync(stockId, new CreateUpdateStockAggregateDto
         {
             Name = "Main",

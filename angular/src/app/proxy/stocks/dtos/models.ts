@@ -29,8 +29,6 @@ export interface StockVariantDto {
   productVariantId?: string;
   quantity: number;
   variantSku?: string;
-  color?: string;
-  size?: string;
 }
 
 export interface StockVariantInputDto {

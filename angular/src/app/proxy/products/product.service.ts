@@ -1,6 +1,6 @@
-import type { CreateUpdateProductDto, CreateUpdateProductVariantDto, GetProductListInput, ProductDto, ProductVariantDto } from './dtos/models';
+import type { CreateUpdateProductDto, CreateUpdateProductVariantDto, GetProductListInput, ProductDto, ProductVariantDto, ProductLookupDto } from './dtos/models';
 import { RestService, Rest } from '@abp/ng.core';
-import type { PagedResultDto } from '@abp/ng.core';
+import type { PagedResultDto, ListResultDto } from '@abp/ng.core';
 import { Injectable } from '@angular/core';
 
 @Injectable({
@@ -51,6 +51,13 @@ export class ProductService {
       url: `/api/app/product/${id}`,
     },
     { apiName: this.apiName,...config });
+  
+  getLookup = (config?: Partial<Rest.Config>) =>
+    this.restService.request<any, ListResultDto<ProductLookupDto>>({
+      method: 'GET',
+      url: '/api/app/product/lookup',
+    },
+    { apiName: this.apiName, ...config });
   
 
   getList = (input: GetProductListInput, config?: Partial<Rest.Config>) =>

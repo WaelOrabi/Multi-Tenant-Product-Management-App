@@ -7,51 +7,55 @@
     </button>
   </div>
 
-      <div class="col-sm-7 col-md-5 col-lg-4 ">
-        <input class="form-control form-control-sm search-card" [(ngModel)]="filterText" (ngModelChange)="onFilterChange($event)" placeholder="Search by name..." />
+  <div class="list-card">
+    <div class="row mb-3 mt-4 justify-content-center">
+      <div class="col-12 col-md-6 col-lg-5 mx-auto">
+        <input class="form-control form-control-sm search-input" [(ngModel)]="filterText" (ngModelChange)="onFilterChange($event)" placeholder="Search by name..." />
       </div>
+    </div>
 
-  <div class="table-responsive">
-    <table class="table table-hover table-sm align-middle mb-2">
-      <thead>
-        <tr>
-          <th class="text-muted small text-uppercase">Name</th>
-          <th class="text-end text-muted small text-uppercase actions-col">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (item of items(); track item.id) {
+    <div class="table-responsive">
+      <table class="table table-hover table-sm align-middle mb-2">
+        <thead>
           <tr>
-            <td class="text-truncate name-col" [title]="item.name">
-              <span>{{ item.name }}</span>
-            </td>
-            <td class="text-end actions-col">
-              <button class="btn btn-outline-primary btn-icon" title="Edit" (click)="edit(item)">
-                <i class="bi bi-pencil"></i>
-              </button>
-              <button class="btn btn-outline-danger btn-icon" title="Delete" (click)="remove(item)">
-                <i class="bi bi-trash"></i>
-              </button>
-            </td>
+            <th class="text-muted small text-uppercase">Name</th>
+            <th class="text-end text-muted small text-uppercase actions-col">Actions</th>
           </tr>
-        } @empty {
-          <tr>
-            <td colspan="2" class="text-center text-muted py-4">No stock records found</td>
-          </tr>
-        }
-      </tbody>
-    </table>
-  </div>
+        </thead>
+        <tbody>
+          @for (item of items(); track item.id) {
+            <tr class="clickable-row" (click)="edit(item)" role="button">
+              <td class="text-truncate name-col" [title]="item.name">
+                <div class="item-name">{{ item.name }}</div>
+              </td>
+              <td class="text-end actions-col">
+                <button class="btn btn-outline-primary btn-icon" title="Edit" (click)="edit(item);">
+                  <i class="bi bi-pencil"></i>
+                </button>
+                <button class="btn btn-outline-danger btn-icon" title="Delete" (click)="remove(item);">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="2" class="text-center text-muted py-4">No stock records found</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
 
-  <div class="d-flex justify-content-between align-items-center">
-    <div class="text-muted small">Total: {{ total() }}</div>
-    <div>
-      <button class="btn btn-outline-secondary btn-sm me-2" (click)="onPageChange('prev')" [disabled]="pageIndex === 1" title="Previous">
-        <i class="bi bi-chevron-left"></i>
-      </button>
-      <button class="btn btn-outline-secondary btn-sm" (click)="onPageChange('next')" [disabled]="pageIndex >= lastPage()" title="Next">
-        <i class="bi bi-chevron-right"></i>
-      </button>
+    <div class="d-flex justify-content-between align-items-center mt-4">
+      <div class="text-muted small">Total: {{ total() }}</div>
+      <div>
+        <button class="btn btn-outline-secondary btn-sm me-2" (click)="onPageChange('prev')" [disabled]="pageIndex === 1" title="Previous">
+          <i class="bi bi-chevron-left"></i>
+        </button>
+        <button class="btn btn-outline-secondary btn-sm" (click)="onPageChange('next')" [disabled]="pageIndex >= lastPage()" title="Next">
+          <i class="bi bi-chevron-right"></i>
+        </button>
+      </div>
     </div>
   </div>
 </div>

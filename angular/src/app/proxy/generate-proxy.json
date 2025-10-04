@@ -4743,25 +4743,13 @@
           "regex": null
         },
         {
-          "name": "Color",
+          "name": "Options",
           "jsonName": null,
-          "type": "System.String",
-          "typeSimple": "string",
+          "type": "[MultiTenantProductManagementApp.Products.Dtos.ProductVariantOptionDto]",
+          "typeSimple": "[MultiTenantProductManagementApp.Products.Dtos.ProductVariantOptionDto]",
           "isRequired": false,
           "minLength": null,
-          "maxLength": 50,
-          "minimum": null,
-          "maximum": null,
-          "regex": null
-        },
-        {
-          "name": "Size",
-          "jsonName": null,
-          "type": "System.String",
-          "typeSimple": "string",
-          "isRequired": false,
-          "minLength": null,
-          "maxLength": 20,
+          "maxLength": null,
           "minimum": null,
           "maximum": null,
           "regex": null
@@ -4776,18 +4764,6 @@
           "maxLength": null,
           "minimum": "0",
           "maximum": "1.7976931348623157E+308",
-          "regex": null
-        },
-        {
-          "name": "StockQuantity",
-          "jsonName": null,
-          "type": "System.Int32",
-          "typeSimple": "number",
-          "isRequired": false,
-          "minLength": null,
-          "maxLength": null,
-          "minimum": "0",
-          "maximum": "2147483647",
           "regex": null
         }
       ]
@@ -4974,30 +4950,6 @@
           "regex": null
         },
         {
-          "name": "Color",
-          "jsonName": null,
-          "type": "System.String",
-          "typeSimple": "string",
-          "isRequired": false,
-          "minLength": null,
-          "maxLength": null,
-          "minimum": null,
-          "maximum": null,
-          "regex": null
-        },
-        {
-          "name": "Size",
-          "jsonName": null,
-          "type": "System.String",
-          "typeSimple": "string",
-          "isRequired": false,
-          "minLength": null,
-          "maxLength": null,
-          "minimum": null,
-          "maximum": null,
-          "regex": null
-        },
-        {
           "name": "Price",
           "jsonName": null,
           "type": "System.Decimal",
@@ -5010,13 +4962,46 @@
           "regex": null
         },
         {
-          "name": "StockQuantity",
+          "name": "Options",
           "jsonName": null,
-          "type": "System.Int32",
-          "typeSimple": "number",
+          "type": "[MultiTenantProductManagementApp.Products.Dtos.ProductVariantOptionDto]",
+          "typeSimple": "[MultiTenantProductManagementApp.Products.Dtos.ProductVariantOptionDto]",
           "isRequired": false,
           "minLength": null,
           "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        }
+      ]
+    },
+    "MultiTenantProductManagementApp.Products.Dtos.ProductVariantOptionDto": {
+      "baseType": null,
+      "isEnum": false,
+      "enumNames": null,
+      "enumValues": null,
+      "genericArguments": null,
+      "properties": [
+        {
+          "name": "Name",
+          "jsonName": null,
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": true,
+          "minLength": null,
+          "maxLength": 64,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "Value",
+          "jsonName": null,
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": true,
+          "minLength": null,
+          "maxLength": 128,
           "minimum": null,
           "maximum": null,
           "regex": null
@@ -5235,30 +5220,6 @@
         },
         {
           "name": "VariantSku",
-          "jsonName": null,
-          "type": "System.String",
-          "typeSimple": "string",
-          "isRequired": false,
-          "minLength": null,
-          "maxLength": null,
-          "minimum": null,
-          "maximum": null,
-          "regex": null
-        },
-        {
-          "name": "Color",
-          "jsonName": null,
-          "type": "System.String",
-          "typeSimple": "string",
-          "isRequired": false,
-          "minLength": null,
-          "maxLength": null,
-          "minimum": null,
-          "maximum": null,
-          "regex": null
-        },
-        {
-          "name": "Size",
           "jsonName": null,
           "type": "System.String",
           "typeSimple": "string",

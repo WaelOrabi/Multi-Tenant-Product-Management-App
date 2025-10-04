@@ -118,9 +118,9 @@ public class ProductDemoDataSeedContributor : IDataSeedContributor, ITransientDe
             var p2 = new Product(_guidGenerator.Create(), tenant.Id, "Sneakers Pro", "Lightweight running shoes", null, "Footwear", ProductStatus.Active, hasVariants: true);
             await _productRepo.InsertAsync(p2, autoSave: true);
 
-            var v1 = new ProductVariant(_guidGenerator.Create(), tenant.Id, p2.Id, 79.99m,  "SNK-BLK-42", "{\"color\":\"Black\",\"size\":\"42\"}");
-            var v2 = new ProductVariant(_guidGenerator.Create(), tenant.Id, p2.Id, 79.99m,  "SNK-BLK-43", "{\"color\":\"Black\",\"size\":\"43\"}");
-            var v3 = new ProductVariant(_guidGenerator.Create(), tenant.Id, p2.Id, 84.99m,  "SNK-RED-42", "{\"color\":\"Red\",\"size\":\"42\"}");
+            var v1 = new ProductVariant(_guidGenerator.Create(), tenant.Id, p2.Id, 79.99m,  "SNK-BLK-42");
+            var v2 = new ProductVariant(_guidGenerator.Create(), tenant.Id, p2.Id, 79.99m,  "SNK-BLK-43");
+            var v3 = new ProductVariant(_guidGenerator.Create(), tenant.Id, p2.Id, 84.99m,  "SNK-RED-42");
 
             await _variantRepo.InsertManyAsync(new[] { v1, v2, v3 }, autoSave: true);
         }
