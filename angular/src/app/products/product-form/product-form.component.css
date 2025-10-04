@@ -63,9 +63,9 @@
 .v-header,
 .v-row {
   display: grid;
-  grid-template-columns: 1.2fr 0.8fr 0.6fr 1fr 0.8fr auto;
-  gap: var(--space-2, 0.5rem);
-  align-items: center;
+  /* Wider Options column, compact action columns */
+  grid-template-columns: 1.2fr 0.8fr 2fr auto auto auto;
+  gap: var(--space-5, 1.25rem); /* more space between SKU, Price, and Options */
 }
 
 .v-header {
@@ -78,7 +78,26 @@
 
 .v-row {
   margin-bottom: var(--space-4, 1rem);
+  align-items: start; /* align SKU/Price to the top */
 }
+
+.v-header { align-items: center; }
+
+
+.option-row {
+  display: flex;
+  gap: var(--space-3, 0.75rem); /* more space between name/value inputs */
+  align-items: end;
+}
+.option-row .opt-field {
+  flex: 1 1 0; /* make both inputs wider */
+  display: flex;
+  flex-direction: column;
+}
+/* Add vertical spacing between consecutive option rows */
+.options-col .option-row + .option-row { margin-top: var(--space-2, 0.5rem); }
+
+
 
 
 .actions {
@@ -88,6 +107,14 @@
   margin-top: var(--space-6, 1.5rem);
   padding-top: var(--space-4, 1rem);
   border-top: 1px solid var(--color-border, #e5e7eb);
+}
+
+/* Spacing for Add/Delete Variant buttons */
+.variant-actions {
+  display: flex;
+  gap: var(--space-3, 0.75rem);
+  align-items: center;
+  margin-top: var(--space-3, 0.75rem);
 }
 
 .secondary, .danger { all: unset; }
@@ -103,5 +130,7 @@
     align-items: center; 
     justify-content: space-between; 
   }
+  .option-row { flex-direction: column; align-items: stretch; }
+  .option-row .opt-remove { align-self: flex-end; }
   .actions { flex-direction: column; align-items: stretch; }
 }

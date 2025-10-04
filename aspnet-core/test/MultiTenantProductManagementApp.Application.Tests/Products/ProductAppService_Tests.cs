@@ -62,10 +62,10 @@ public class ProductAppService_Tests
         var productId = Guid.NewGuid();
         var otherProductId = Guid.NewGuid();
         var variantId = Guid.NewGuid();
-        var variant = new ProductVariant(variantId, null, otherProductId, 10m, "SKU-1", "Red", "L");
+        var variant = new ProductVariant(variantId, null, otherProductId, 10m, "SKU-1", new[] { new ProductVariantOption("Color", "Red"), new ProductVariantOption("Size", "L") });
         _variantRepo.GetAsync(variantId).Returns(Task.FromResult(variant));
 
-        var input = new CreateUpdateProductVariantDto { Price = 12m, Sku = "SKU-2", Color = "Blue", Size = "M" };
+        var input = new CreateUpdateProductVariantDto { Price = 12m, Sku = "SKU-2", Options = new List<ProductVariantOptionDto> { new() { Name = "Color", Value = "Blue" }, new() { Name = "Size", Value = "M" } } };
 
         // Act 
         var ex = await Should.ThrowAsync<BusinessException>(() => sut.UpdateVariantAsync(productId, variantId, input));
@@ -91,7 +91,7 @@ public class ProductAppService_Tests
         var product = new Product(productId, tenantId, "Name", "Desc", 100m, "Cat", ProductStatus.Active, hasVariants: false);
         _productRepo.GetAsync(productId).Returns(Task.FromResult(product));
 
-        var input = new CreateUpdateProductVariantDto { Price = 15m, Sku = "SKU-3", Color = "Black", Size = "S" };
+        var input = new CreateUpdateProductVariantDto { Price = 15m, Sku = "SKU-3", Options = new List<ProductVariantOptionDto> { new() { Name = "Color", Value = "Black" }, new() { Name = "Size", Value = "S" } } };
 
         // Act
         var dto = await sut.AddVariantAsync(productId, input);
@@ -101,8 +101,8 @@ public class ProductAppService_Tests
             v.ProductId == productId &&
             v.Price == input.Price &&
             v.Sku == input.Sku &&
-            v.Color == input.Color &&
-            v.Size == input.Size
+            v.Options.Any(o => o.Name == "Color" && o.Value == "Black") &&
+            v.Options.Any(o => o.Name == "Size" && o.Value == "S")
         ), true);
 
         dto.ShouldNotBeNull();
@@ -129,7 +129,7 @@ public class ProductAppService_Tests
             Category = "Cat-1",
             Status = ProductStatus.Active,
             HasVariants = true,
-            Variants = new List<CreateUpdateProductVariantDto> { new() { Price = 55m, Sku = "SKU-A", Color = "Red", Size = "M" } }
+            Variants = new List<CreateUpdateProductVariantDto> { new() { Price = 55m, Sku = "SKU-A", Options = new List<ProductVariantOptionDto> { new() { Name = "Color", Value = "Red" }, new() { Name = "Size", Value = "M" } } } }
         };
 
         // Act
@@ -159,7 +159,7 @@ public class ProductAppService_Tests
         _currentTenant.Id.Returns(tenantId);
 
         var existing = new Product(id, tenantId, "OldName", "OldDesc", 10m, "OldCat", ProductStatus.Inactive, hasVariants: true);
-        existing.Variants.Add(new ProductVariant(Guid.NewGuid(), tenantId, id, 9m, "OLD", "Green", "S"));
+        existing.Variants.Add(new ProductVariant(Guid.NewGuid(), tenantId, id, 9m, "OLD", new[] { new ProductVariantOption("Color", "Green"), new ProductVariantOption("Size", "S") }));
 
         var data = new List<Product> { existing };
         var queryable = data.AsQueryable();
@@ -175,7 +175,7 @@ public class ProductAppService_Tests
             Category = "NewCat",
             Status = ProductStatus.Active,
             HasVariants = true,
-            Variants = new List<CreateUpdateProductVariantDto> { new() { Price = 22m, Sku = "NEW", Color = "Blue", Size = "M" } }
+            Variants = new List<CreateUpdateProductVariantDto> { new() { Price = 22m, Sku = "NEW", Options = new List<ProductVariantOptionDto> { new() { Name = "Color", Value = "Blue" }, new() { Name = "Size", Value = "M" } } } }
         };
 
         // Act
@@ -236,7 +236,7 @@ public class ProductAppService_Tests
         _currentTenant.Id.Returns(tenantId);
 
         var product = new Product(id, tenantId, "ProdX", "DescX", 12m, "CatX", ProductStatus.Active, hasVariants: true);
-        product.Variants.Add(new ProductVariant(Guid.NewGuid(), tenantId, id, 13m, "SKU-X", "Black", "L"));
+        product.Variants.Add(new ProductVariant(Guid.NewGuid(), tenantId, id, 13m, "SKU-X", new[] { new ProductVariantOption("Color", "Black"), new ProductVariantOption("Size", "L") }));
 
         var data = new List<Product> { product };
         var queryable = data.AsQueryable();
@@ -263,10 +263,10 @@ public class ProductAppService_Tests
         var tenantId = Guid.NewGuid();
         var productId = Guid.NewGuid();
         var variantId = Guid.NewGuid();
-        var variant = new ProductVariant(variantId, tenantId, productId, 10m, "OLD", "Red", "L");
+        var variant = new ProductVariant(variantId, tenantId, productId, 10m, "OLD", new[] { new ProductVariantOption("Color", "Red"), new ProductVariantOption("Size", "L") });
         _variantRepo.GetAsync(variantId).Returns(Task.FromResult(variant));
 
-        var input = new CreateUpdateProductVariantDto { Price = 20m, Sku = "NEW", Color = "Blue", Size = "M" };
+        var input = new CreateUpdateProductVariantDto { Price = 20m, Sku = "NEW", Options = new List<ProductVariantOptionDto> { new() { Name = "Color", Value = "Blue" }, new() { Name = "Size", Value = "M" } } };
 
         // Act
         var dto = await sut.UpdateVariantAsync(productId, variantId, input);
@@ -276,8 +276,8 @@ public class ProductAppService_Tests
             v.Id == variantId &&
             v.ProductId == productId &&
             v.Sku == "NEW" &&
-            v.Color == "Blue" &&
-            v.Size == "M" &&
+            v.Options.Any(o => o.Name == "Color" && o.Value == "Blue") &&
+            v.Options.Any(o => o.Name == "Size" && o.Value == "M") &&
             v.Price == 20m
         ), true);
         dto.ShouldNotBeNull();
@@ -293,7 +293,7 @@ public class ProductAppService_Tests
         var productId = Guid.NewGuid();
         var otherProductId = Guid.NewGuid();
         var variantId = Guid.NewGuid();
-        var variant = new ProductVariant(variantId, null, otherProductId, 10m, "SKU-1", "Red", "L");
+        var variant = new ProductVariant(variantId, null, otherProductId, 10m, "SKU-1", new[] { new ProductVariantOption("Color", "Red"), new ProductVariantOption("Size", "L") });
         _variantRepo.GetAsync(variantId).Returns(Task.FromResult(variant));
 
         // Act , Assert
@@ -312,7 +312,7 @@ public class ProductAppService_Tests
         _currentTenant.Id.Returns(tenantId);
         var productId = Guid.NewGuid();
         var variantId = Guid.NewGuid();
-        var variant = new ProductVariant(variantId, tenantId, productId, 10m, "SKU-1", "Red", "L");
+        var variant = new ProductVariant(variantId, tenantId, productId, 10m, "SKU-1", new[] { new ProductVariantOption("Color", "Red"), new ProductVariantOption("Size", "L") });
         _variantRepo.GetAsync(variantId).Returns(Task.FromResult(variant));
 
         // Act

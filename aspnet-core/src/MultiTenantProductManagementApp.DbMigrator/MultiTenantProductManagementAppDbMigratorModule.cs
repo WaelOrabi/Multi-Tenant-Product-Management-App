@@ -1,4 +1,5 @@
-﻿using MultiTenantProductManagementApp.EntityFrameworkCore;
+using MultiTenantProductManagementApp.EntityFrameworkCore;
+using MultiTenantProductManagementApp;
 using Volo.Abp.Autofac;
 using Volo.Abp.Modularity;
 

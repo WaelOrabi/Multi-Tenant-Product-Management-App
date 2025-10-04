@@ -45,6 +45,16 @@
             <div class="price">Price: {{ p.basePrice | currency }}</div>
           } @else {
             <div class="variants">Variants: {{ p.variants?.length || 0 }}</div>
+            @if (p.variants?.length) {
+              <div class="variant-options">
+                @if (p.variants[0]?.options?.length) {
+                  <span class="badge badge-light" *ngFor="let opt of p.variants[0].options | slice:0:3">{{ opt.name }}: {{ opt.value }}</span>
+                  @if (p.variants[0].options.length > 3) { <span class="text-muted">+{{ p.variants[0].options.length - 3 }} more</span> }
+                } @else {
+                  <span class="text-muted">No options defined</span>
+                }
+              </div>
+            }
           }
           <div class="status">Status: {{ p.status === 1 ? 'Active' : 'Inactive' }}</div>
         </div>

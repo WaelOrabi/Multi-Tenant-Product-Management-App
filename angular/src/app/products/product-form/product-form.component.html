@@ -39,44 +39,57 @@
     @if (form.value.hasVariants) {
     <div class="variants">
       <div class="v-header">
-        <div>SKU</div><div>Price</div><div>Color</div><div>Size</div><div></div>
+        <div>SKU</div>
+        <div>Price</div>
+        <div class="full-width">Options</div>
+        <div></div>
       </div>
       @for (v of variants.controls; track $index; let i = $index) {
         <div class="v-row" [formGroup]="v">
           <input class="form-control form-control-sm" formControlName="sku" placeholder="SKU" />
           <input class="form-control form-control-sm" type="number" step="0.01" min="0" formControlName="price" />
-          <select class="form-select form-select-sm" formControlName="color">
-            <option value="">Select Color</option>
-            <option value="Black">Black</option>
-            <option value="White">White</option>
-            <option value="Red">Red</option>
-            <option value="Blue">Blue</option>
-            <option value="Green">Green</option>
-            <option value="Yellow">Yellow</option>
-            <option value="Purple">Purple</option>
-            <option value="Orange">Orange</option>
-            <option value="Pink">Pink</option>
-            <option value="Gray">Gray</option>
-            <option value="Brown">Brown</option>
-            <option value="Navy">Navy</option>
-          </select>
-          <select class="form-select form-select-sm" formControlName="size">
-            <option value="">Select Size</option>
-            <option value="Small">Small</option>
-            <option value="Medium">Medium</option>
-            <option value="Large">Large</option>
-            <option value="X-Large">X-Large</option>
-            <option value="XX-Large">XX-Large</option>
-          </select>
 
-          <button type="button" class="btn btn-danger btn-sm" (click)="removeVariant(i)">
-            <i class="bi bi-trash "></i> 
+          <div class="options-col">
+
+            @for (opt of optionsAt(i).controls; track $index; let j = $index) {
+              <div class="option-row" [formGroup]="opt">
+                <div class="opt-field">
+                  <input class="form-control form-control-sm" formControlName="name" placeholder="e.g. Color" />
+                  @if (opt.get('name')?.hasError('duplicate')) {
+                    <div class="error-txt">Duplicate option name</div>
+                  }
+                </div>
+                <div class="opt-field">
+                  <input class="form-control form-control-sm" formControlName="value" placeholder="e.g. Red" />
+                </div>
+              </div>
+            }
+    
+          </div>
+          <button type="button" class="btn btn-primary btn-sm" (click)="addOption(i)">
+            <i class="bi "></i> Add option
           </button>
+          @if (optionsAt(i).length > 0) {
+            <button class="btn btn-danger btn-sm" (click)="removeLastOption(i)" title="Delete option">
+              <i class="bi "></i>Delete option
+            </button>
+          }
+ 
+     
+
+      
         </div>
       }
-      <button type="button" class="btn btn-outline-primary btn-sm" (click)="addVariant()">
-        <i class="bi bi-plus-lg"></i> Add Variant
-      </button>
+      <div class="variant-actions">
+        <button type="button" class="btn btn-outline-primary btn-xs" (click)="addVariant()">
+          Add 
+        </button>
+        @if (variants.length > 0) {
+          <button type="button" class="btn btn-danger btn-xs" (click)="removeLastVariant()">
+            Delete 
+          </button>
+        }
+      </div>
     </div>
     }
 

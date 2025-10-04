@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ProductService } from 'src/app/proxy/products';
-import { ProductDto } from 'src/app/proxy/products/dtos';
+import { ProductDto, ProductVariantOptionDto } from 'src/app/proxy/products/dtos';
 import { ToasterService } from '@abp/ng.theme.shared';
 
 @Component({
@@ -21,7 +21,6 @@ export class ProductDetailsComponent implements OnInit {
   product: ProductDto | null = null;
   loading = false;
   id: string | null = null;
-
   ngOnInit(): void {
     this.id = this.route.snapshot.paramMap.get('id');
     if (this.id) {
@@ -29,7 +28,7 @@ export class ProductDetailsComponent implements OnInit {
     }
   }
 
-  loadProduct(): void {
+  private loadProduct(): void {
     if (!this.id) return;
     
     this.loading = true;
@@ -46,7 +45,12 @@ export class ProductDetailsComponent implements OnInit {
     });
   }
 
-  confirmDelete(): void {
+  private formatOptions(options?: ProductVariantOptionDto[] | null): string {
+    const list = options ?? [];
+    return list.map(o => `${o.name}: ${o.value}`).join(', ');
+  }
+
+  private confirmDelete(): void {
     if (!this.product || !confirm(`Delete product "${this.product.name}"?`)) return;
     
     this.loading = true;
