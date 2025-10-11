@@ -1,5 +1,6 @@
 using MultiTenantProductManagementApp.Products;
 using MultiTenantProductManagementApp.Products.Dtos;
+using ProductService.Products;
 using NSubstitute;
 using Shouldly;
 using System;
@@ -10,6 +11,7 @@ using Volo.Abp;
 using Volo.Abp.DependencyInjection;
 using Volo.Abp.Domain.Entities;
 using Volo.Abp.Domain.Repositories;
+using Volo.Abp.EventBus.Distributed;
 using Volo.Abp.Guids;
 using Volo.Abp.Linq;
 using Volo.Abp.MultiTenancy;
@@ -24,12 +26,13 @@ public class ProductAppService_Tests
     private readonly IRepository<ProductVariant, Guid> _variantRepo = Substitute.For<IRepository<ProductVariant, Guid>>();
     private readonly IObjectMapper<ProductAppService> _typedObjectMapper = Substitute.For<IObjectMapper<ProductAppService>>();
     private readonly ICurrentTenant _currentTenant = Substitute.For<ICurrentTenant>();
+    private readonly IDistributedEventBus _distributedEventBus = Substitute.For<IDistributedEventBus>();
     private readonly IGuidGenerator _guidGenerator = Substitute.For<IGuidGenerator>();
     private readonly IAsyncQueryableExecuter _asyncExecuter = Substitute.For<IAsyncQueryableExecuter>();
 
     private ProductAppService CreateService()
     {
-        var svc = new ProductAppService(_productRepo, _variantRepo);
+        var svc = new ProductAppService(_productRepo, _variantRepo, _distributedEventBus);
         var lazy = Substitute.For<IAbpLazyServiceProvider>();
 
         lazy.LazyGetRequiredService<IObjectMapper<ProductAppService>>().Returns(_typedObjectMapper);

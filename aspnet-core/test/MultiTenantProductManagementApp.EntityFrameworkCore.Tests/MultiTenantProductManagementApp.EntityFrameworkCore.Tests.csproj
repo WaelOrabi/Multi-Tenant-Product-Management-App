@@ -10,13 +10,25 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\MultiTenantProductManagementApp.EntityFrameworkCore\MultiTenantProductManagementApp.EntityFrameworkCore.csproj" />
-    <ProjectReference Include="..\MultiTenantProductManagementApp.Application.Tests\MultiTenantProductManagementApp.Application.Tests.csproj" />
+    <ProjectReference Include="..\MultiTenantProductManagementApp.TestBase\MultiTenantProductManagementApp.TestBase.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.0.2" />
+    <PackageReference Include="Shouldly" Version="4.3.0" />
+    <PackageReference Include="Volo.Abp.TestBase" Version="9.3.2" />
+    <PackageReference Include="Volo.Abp.Castle.Core" Version="9.3.2" />
     <PackageReference Include="Volo.Abp.EntityFrameworkCore.SqlServer" Version="9.3.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Products\**\*.cs" />
+    <Compile Remove="Stocks\**\*.cs" />
+    <Compile Remove="EntityFrameworkCore\Applications\**\*.cs" />
+    <Compile Remove="EntityFrameworkCore\Domains\**\*.cs" />
   </ItemGroup>
 
 </Project>

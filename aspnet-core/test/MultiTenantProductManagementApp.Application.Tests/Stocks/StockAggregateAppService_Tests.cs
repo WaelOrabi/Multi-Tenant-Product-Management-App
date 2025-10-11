@@ -1,6 +1,8 @@
 using MultiTenantProductManagementApp.Products;
 using MultiTenantProductManagementApp.Stocks;
 using MultiTenantProductManagementApp.Stocks.Dtos;
+using ProductService.Products;
+using StockService.Stocks;
 using NSubstitute;
 using Shouldly;
 using System;

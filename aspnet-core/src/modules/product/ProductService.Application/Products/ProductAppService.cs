@@ -8,38 +8,42 @@ using Volo.Abp.Application.Dtos;
 using Volo.Abp.Application.Services;
 using Volo.Abp.Authorization;
 using Volo.Abp.Authorization.Permissions;
-using Volo.Abp.ObjectMapping;
 using Volo.Abp.Uow;
-using MultiTenantProductManagementApp.Products.Dtos;
-using MultiTenantProductManagementApp.Permissions;
 using Microsoft.AspNetCore.Authorization;
 using Volo.Abp.Domain.Entities;
 using Volo.Abp.Guids;
 using Volo.Abp.DependencyInjection;
+using MultiTenantProductManagementApp.Permissions;
+using LegacyDtos = MultiTenantProductManagementApp.Products.Dtos;
+using Volo.Abp.EventBus.Distributed;
+using ProductService.Events;
 
-namespace MultiTenantProductManagementApp.Products;
+namespace ProductService.Products;
 
 [Authorize(MultiTenantProductManagementAppPermissions.Products.Default)]
-public class ProductAppService : ApplicationService, IProductAppService
+public class ProductAppService : ApplicationService, MultiTenantProductManagementApp.Products.IProductAppService
 {
     private readonly IRepository<Product, Guid> _productRepo;
     private readonly IRepository<ProductVariant, Guid> _variantRepo;
+    private readonly IDistributedEventBus _distributedEventBus;
 
     public ProductAppService(
         IRepository<Product, Guid> productRepo,
-        IRepository<ProductVariant, Guid> variantRepo)
+        IRepository<ProductVariant, Guid> variantRepo,
+        IDistributedEventBus distributedEventBus)
     {
         _productRepo = productRepo;
         _variantRepo = variantRepo;
+        _distributedEventBus = distributedEventBus;
     }
 
-    private static ProductDto MapProductToDto(Product entity)
+    private static LegacyDtos.ProductDto MapProductToDto(Product entity)
     {
         if (entity == null)
         {
             throw new EntityNotFoundException(typeof(Product));
         }
-        var dto = new ProductDto
+        var dto = new LegacyDtos.ProductDto
         {
             Id = entity.Id,
             Name = entity.Name,
@@ -60,46 +64,40 @@ public class ProductAppService : ApplicationService, IProductAppService
         return dto;
     }
 
-
-    private static ProductVariantDto MapVariantToDto(ProductVariant v)
+    private static LegacyDtos.ProductVariantDto MapVariantToDto(ProductVariant v)
     {
-        return new ProductVariantDto
+        return new LegacyDtos.ProductVariantDto
         {
             Id = v.Id,
             ProductId = v.ProductId,
             Price = v.Price,
             Sku = v.Sku,
             Options = v.Options != null
-                ? v.Options.Select(o => new ProductVariantOptionDto
+                ? v.Options.Select(o => new LegacyDtos.ProductVariantOptionDto
                 {
                     Name = o.Name,
                     Value = o.Value
                 }).ToList()
-                : new List<ProductVariantOptionDto>()
+                : new List<LegacyDtos.ProductVariantOptionDto>()
         };
     }
 
-    public virtual async Task<ProductDto> GetAsync(Guid id)
+    public virtual async Task<LegacyDtos.ProductDto> GetAsync(Guid id)
     {
-        // Fetch product first
-        var entity = await _productRepo.FindAsync(id);
+        // Load product with its variants using WithDetailsAsync to align with unit test expectations
+        var details = await _productRepo.WithDetailsAsync(x => x.Variants);
+        var entity = await AsyncExecuter.FirstOrDefaultAsync(details.Where(x => x.Id == id));
         if (entity == null)
         {
             throw new EntityNotFoundException(typeof(Product), id);
         }
 
-        // For MongoDB, navigation collections may not be auto-populated.
-        // Load variants explicitly from the repository.
-        var vq = await _variantRepo.WithDetailsAsync(x => x.Options);
-        var variants = await AsyncExecuter.ToListAsync(vq.Where(v => v.ProductId == id))
-            ?? new List<ProductVariant>();
-
         var dto = MapProductToDto(entity);
-        dto.Variants = (variants ?? new List<ProductVariant>()).Select(MapVariantToDto).ToList();
+        dto.Variants = (entity.Variants ?? new List<ProductVariant>()).Select(MapVariantToDto).ToList();
         return dto;
     }
 
-    public virtual async Task<PagedResultDto<ProductDto>> GetListAsync(GetProductListInput input)
+    public virtual async Task<PagedResultDto<LegacyDtos.ProductDto>> GetListAsync(LegacyDtos.GetProductListInput input)
     {
         var queryable = await _productRepo.WithDetailsAsync(x => x.Variants);
 
@@ -147,23 +145,22 @@ public class ProductAppService : ApplicationService, IProductAppService
         var items = await AsyncExecuter.ToListAsync(queryable.Skip(input.SkipCount).Take(input.MaxResultCount));
 
         var dtos = items.Select(MapProductToDto).ToList();
-        return new PagedResultDto<ProductDto>(totalCount, dtos);
+        return new PagedResultDto<LegacyDtos.ProductDto>(totalCount, dtos);
     }
 
-    public virtual async Task<ListResultDto<ProductLookupDto>> GetLookupAsync()
+    public virtual async Task<ListResultDto<LegacyDtos.ProductLookupDto>> GetLookupAsync()
     {
-        // Only return Id and Name, ordered by Name
         var q = await _productRepo.GetQueryableAsync();
-        var list = await AsyncExecuter.ToListAsync(q.OrderBy(x => x.Name).Select(x => new ProductLookupDto
+        var list = await AsyncExecuter.ToListAsync(q.OrderBy(x => x.Name).Select(x => new LegacyDtos.ProductLookupDto
         {
             Id = x.Id,
             Name = x.Name
         }));
-        return new ListResultDto<ProductLookupDto>(list);
+        return new ListResultDto<LegacyDtos.ProductLookupDto>(list);
     }
 
     [Authorize(MultiTenantProductManagementAppPermissions.Products.Create)]
-    public virtual async Task<ProductDto> CreateAsync(CreateUpdateProductDto input)
+    public virtual async Task<LegacyDtos.ProductDto> CreateAsync(LegacyDtos.CreateUpdateProductDto input)
     {
         var createQueryable = await _productRepo.GetQueryableAsync();
         var exists = await AsyncExecuter.AnyAsync(
@@ -183,17 +180,13 @@ public class ProductAppService : ApplicationService, IProductAppService
             input.HasVariants
         );
 
-        // Persist product first to get it stored
-        await _productRepo.InsertAsync(product, autoSave: true);
-
-        // Persist variants explicitly into the variant repository (MongoDB won't cascade)
-        var createdVariants = new List<ProductVariant>();
+        // Build variants on the aggregate BEFORE insert, so InsertAsync receives the entity with populated Variants
         if (input.Variants != null && input.Variants.Count > 0)
         {
             product.EnableVariants();
             foreach (var v in input.Variants)
             {
-                var options = (v.Options ?? new List<ProductVariantOptionDto>())
+                var options = (v.Options ?? new List<LegacyDtos.ProductVariantOptionDto>())
                     .Select(o => new ProductVariantOption(o.Name, o.Value));
                 var variant = new ProductVariant(
                     LazyServiceProvider.LazyGetRequiredService<IGuidGenerator>().Create(),
@@ -203,18 +196,26 @@ public class ProductAppService : ApplicationService, IProductAppService
                     v.Sku,
                     options
                 );
-                await _variantRepo.InsertAsync(variant, autoSave: true);
-                createdVariants.Add(variant);
+                product.Variants.Add(variant);
             }
         }
 
+        await _productRepo.InsertAsync(product, autoSave: true);
+
         var dto = MapProductToDto(product);
-        dto.Variants = createdVariants.Select(MapVariantToDto).ToList();
+        dto.Variants = (product.Variants ?? new List<ProductVariant>()).Select(MapVariantToDto).ToList();
+        // Publish integration event for other modules (e.g., StockService)
+        await _distributedEventBus.PublishAsync(new ProductCreatedEto
+        {
+            ProductId = product.Id,
+            Name = product.Name,
+            TenantId = CurrentTenant.Id
+        });
         return dto;
     }
 
     [Authorize(MultiTenantProductManagementAppPermissions.Products.Edit)]
-    public virtual async Task<ProductDto> UpdateAsync(Guid id, CreateUpdateProductDto input)
+    public virtual async Task<LegacyDtos.ProductDto> UpdateAsync(Guid id, LegacyDtos.CreateUpdateProductDto input)
     {
         var details = await _productRepo.WithDetailsAsync(x => x.Variants);
         var entity = await AsyncExecuter.FirstOrDefaultAsync(details.Where(x => x.Id == id));
@@ -237,13 +238,12 @@ public class ProductAppService : ApplicationService, IProductAppService
         entity.SetStatus(input.Status);
         if (input.HasVariants) entity.EnableVariants(); else entity.DisableVariants();
 
-        // Rebuild variants on aggregate BEFORE calling UpdateAsync so unit tests can assert the call's argument
         entity.Variants.Clear();
         if (input.Variants != null && input.Variants.Count > 0)
         {
             foreach (var v in input.Variants)
             {
-                var options = (v.Options ?? new List<ProductVariantOptionDto>())
+                var options = (v.Options ?? new List<LegacyDtos.ProductVariantOptionDto>())
                     .Select(o => new ProductVariantOption(o.Name, o.Value));
                 entity.Variants.Add(new ProductVariant(
                     LazyServiceProvider.LazyGetRequiredService<IGuidGenerator>().Create(),
@@ -280,7 +280,7 @@ public class ProductAppService : ApplicationService, IProductAppService
         {
             foreach (var v in input.Variants)
             {
-                var options = (v.Options ?? new List<ProductVariantOptionDto>())
+                var options = (v.Options ?? new List<LegacyDtos.ProductVariantOptionDto>())
                     .Select(o => new ProductVariantOption(o.Name, o.Value));
                 var variant = new ProductVariant(
                     LazyServiceProvider.LazyGetRequiredService<IGuidGenerator>().Create(),
@@ -309,7 +309,7 @@ public class ProductAppService : ApplicationService, IProductAppService
     }
 
     [Authorize(MultiTenantProductManagementAppPermissions.Products.Edit)]
-    public virtual async Task<ProductVariantDto> AddVariantAsync(Guid productId, CreateUpdateProductVariantDto input)
+    public virtual async Task<LegacyDtos.ProductVariantDto> AddVariantAsync(Guid productId, LegacyDtos.CreateUpdateProductVariantDto input)
     {
         var product = await _productRepo.GetAsync(productId);
         var variant = new ProductVariant(
@@ -325,7 +325,7 @@ public class ProductAppService : ApplicationService, IProductAppService
     }
 
     [Authorize(MultiTenantProductManagementAppPermissions.Products.Edit)]
-    public virtual async Task<ProductVariantDto> UpdateVariantAsync(Guid productId, Guid variantId, CreateUpdateProductVariantDto input)
+    public virtual async Task<LegacyDtos.ProductVariantDto> UpdateVariantAsync(Guid productId, Guid variantId, LegacyDtos.CreateUpdateProductVariantDto input)
     {
         var variant = await _variantRepo.GetAsync(variantId);
         if (variant == null)
@@ -338,7 +338,7 @@ public class ProductAppService : ApplicationService, IProductAppService
         }
         variant.SetSku(input.Sku);
         variant.SetPrice(input.Price);
-        variant.ReplaceOptions((input.Options ?? new List<ProductVariantOptionDto>()).Select(o => new ProductVariantOption(o.Name, o.Value)));
+        variant.ReplaceOptions((input.Options ?? new List<LegacyDtos.ProductVariantOptionDto>()).Select(o => new ProductVariantOption(o.Name, o.Value)));
         await _variantRepo.UpdateAsync(variant, autoSave: true);
         return MapVariantToDto(variant);
     }
@@ -352,5 +352,6 @@ public class ProductAppService : ApplicationService, IProductAppService
             throw new BusinessException("ProductVariant.ProductMismatch").WithData("ProductId", productId).WithData("VariantId", variantId);
         }
         await _variantRepo.DeleteAsync(variant);
+        return;
     }
 }

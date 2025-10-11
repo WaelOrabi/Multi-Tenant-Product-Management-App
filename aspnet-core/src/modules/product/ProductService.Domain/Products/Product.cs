@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using Volo.Abp.Domain.Entities.Auditing;
 using Volo.Abp.MultiTenancy;
-using MultiTenantProductManagementApp.Products;
 using Volo.Abp;
+using MultiTenantProductManagementApp.Products; // for ProductStatus enum (shared)
 
-namespace MultiTenantProductManagementApp.Products;
+namespace ProductService.Products;
 
 public class Product : FullAuditedAggregateRoot<Guid>, IMultiTenant
 {

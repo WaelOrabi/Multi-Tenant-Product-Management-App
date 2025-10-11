@@ -8,11 +8,24 @@
     <RootNamespace>MultiTenantProductManagementApp</RootNamespace>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\MultiTenantProductManagementApp.Application\MultiTenantProductManagementApp.Application.csproj" />
-    <ProjectReference Include="..\MultiTenantProductManagementApp.Domain.Tests\MultiTenantProductManagementApp.Domain.Tests.csproj" />
-    <ProjectReference Include="..\MultiTenantProductManagementApp.TestBase\MultiTenantProductManagementApp.TestBase.csproj" />
-  </ItemGroup>
+<ItemGroup>
+  <ProjectReference Include="..\..\src\MultiTenantProductManagementApp.Application\MultiTenantProductManagementApp.Application.csproj" />
+  <ProjectReference Include="..\MultiTenantProductManagementApp.Domain.Tests\MultiTenantProductManagementApp.Domain.Tests.csproj" />
+  <ProjectReference Include="..\MultiTenantProductManagementApp.TestBase\MultiTenantProductManagementApp.TestBase.csproj" />
+
+  <!-- Corrected path: folder is ProductService.Application.Contracts -->
+  <ProjectReference Include="..\..\src\modules\product\ProductService.Application.Contracts\ProductService.Application.Contracts.csproj" />
+  <ProjectReference Include="..\..\src\modules\product\ProductService.Application\ProductService.Application.csproj" />
+  <ProjectReference Include="..\..\src\modules\product\ProductService.Domain\ProductService.Domain.csproj" />
+  <ProjectReference Include="..\..\src\modules\product\ProductService.EntityFrameworkCore\ProductService.EntityFrameworkCore.csproj" />
+
+  <ProjectReference Include="..\..\src\modules\stock\StockService.Application.Contracts\StockService.Application.Contracts.csproj" />
+  <ProjectReference Include="..\..\src\modules\stock\StockService.Application\StockService.Application.csproj" />
+  <ProjectReference Include="..\..\src\modules\stock\StockService.Domain\StockService.Domain.csproj" />
+  <ProjectReference Include="..\..\src\MultiTenantProductManagementApp.EntityFrameworkCore\MultiTenantProductManagementApp.EntityFrameworkCore.csproj" />
+  <ProjectReference Include="..\..\src\modules\stock\StockService.EntityFrameworkCore\StockService.EntityFrameworkCore.csproj" />
+
+</ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />

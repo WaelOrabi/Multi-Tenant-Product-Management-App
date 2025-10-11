@@ -8,8 +8,6 @@ using Microsoft.AspNetCore.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using MultiTenantProductManagementApp.EntityFrameworkCore;
-using MultiTenantProductManagementApp.MultiTenancy;
 using Volo.Abp.AspNetCore.Mvc.UI.Theme.LeptonXLite;
 using Volo.Abp.AspNetCore.Mvc.UI.Theme.LeptonXLite.Bundling;
 using Microsoft.OpenApi.Models;
@@ -23,12 +21,16 @@ using Volo.Abp.AspNetCore.Mvc.UI.Bundling;
 using Volo.Abp.AspNetCore.Mvc.UI.Theme.Shared;
 using Volo.Abp.AspNetCore.Serilog;
 using Volo.Abp.Autofac;
-using Volo.Abp.Localization;
 using Volo.Abp.Modularity;
 using Volo.Abp.Security.Claims;
 using Volo.Abp.Swashbuckle;
 using Volo.Abp.UI.Navigation.Urls;
 using Volo.Abp.VirtualFileSystem;
+using Volo.Abp.EventBus.RabbitMq;
+using MultiTenantProductManagementApp.EntityFrameworkCore;
+using ProductService;
+using StockService;
+using MultiTenantProductManagementApp.MultiTenancy;
 
 namespace MultiTenantProductManagementApp;
 
@@ -41,7 +43,12 @@ namespace MultiTenantProductManagementApp;
     typeof(AbpAspNetCoreMvcUiLeptonXLiteThemeModule),
     typeof(AbpAccountWebOpenIddictModule),
     typeof(AbpAspNetCoreSerilogModule),
-    typeof(AbpSwashbuckleModule)
+    typeof(AbpSwashbuckleModule),
+    // typeof(AbpEventBusRabbitMqModule),
+    typeof(ProductServiceHttpApiModule),
+    typeof(ProductServiceEntityFrameworkCoreModule),
+    typeof(StockServiceHttpApiModule),
+    typeof(StockServiceEntityFrameworkCoreModule)
 )]
 public class MultiTenantProductManagementAppHttpApiHostModule : AbpModule
 {
@@ -136,6 +143,8 @@ public class MultiTenantProductManagementAppHttpApiHostModule : AbpModule
         Configure<AbpAspNetCoreMvcOptions>(options =>
         {
             options.ConventionalControllers.Create(typeof(MultiTenantProductManagementAppApplicationModule).Assembly);
+            options.ConventionalControllers.Create(typeof(ProductServiceApplicationModule).Assembly);
+            options.ConventionalControllers.Create(typeof(StockServiceApplicationModule).Assembly);
         });
     }
 

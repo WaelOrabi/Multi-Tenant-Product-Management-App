@@ -2,15 +2,14 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using ProductService.Products;
 using Volo.Abp.Data;
 using Volo.Abp.DependencyInjection;
-using Volo.Abp.Domain.Repositories;
+using Volo.Abp.Guids;
 using Volo.Abp.Identity;
 using Volo.Abp.MultiTenancy;
 using Volo.Abp.TenantManagement;
-using MultiTenantProductManagementApp.Products;
-using Volo.Abp.Guids;
-using Volo.Abp.PermissionManagement;
+using Volo.Abp.Domain.Repositories;
 
 namespace MultiTenantProductManagementApp.Data;
 
@@ -21,32 +20,31 @@ public class ProductDemoDataSeedContributor : IDataSeedContributor, ITransientDe
     private readonly ICurrentTenant _currentTenant;
     private readonly IdentityUserManager _userManager;
     private readonly IdentityRoleManager _roleManager;
-    private readonly IRepository<Product, Guid> _productRepo;
-    private readonly IRepository<ProductVariant, Guid> _variantRepo;
     private readonly ILogger<ProductDemoDataSeedContributor> _logger;
     private readonly IGuidGenerator _guidGenerator;
-   
+    private readonly IRepository<Product, Guid> _productRepo;
+    private readonly IRepository<ProductVariant, Guid> _variantRepo;
+
     public ProductDemoDataSeedContributor(
         ITenantRepository tenantRepository,
         TenantManager tenantManager,
         ICurrentTenant currentTenant,
         IdentityUserManager userManager,
         IdentityRoleManager roleManager,
-        IRepository<Product, Guid> productRepo,
-        IRepository<ProductVariant, Guid> variantRepo,
         ILogger<ProductDemoDataSeedContributor> logger,
         IGuidGenerator guidGenerator,
-        IPermissionDataSeeder permissionDataSeeder)
+        IRepository<Product, Guid> productRepo,
+        IRepository<ProductVariant, Guid> variantRepo)
     {
         _tenantRepository = tenantRepository;
         _tenantManager = tenantManager;
         _currentTenant = currentTenant;
         _userManager = userManager;
         _roleManager = roleManager;
-        _productRepo = productRepo;
-        _variantRepo = variantRepo;
         _logger = logger;
         _guidGenerator = guidGenerator;
+        _productRepo = productRepo;
+        _variantRepo = variantRepo;
     }
 
     public async Task SeedAsync(DataSeedContext context)
@@ -75,6 +73,7 @@ public class ProductDemoDataSeedContributor : IDataSeedContributor, ITransientDe
     {
         using (_currentTenant.Change(tenant.Id))
         {
+            // Ensure admin user/role exist in tenant
             var adminUser = await _userManager.FindByEmailAsync(adminEmail);
             if (adminUser == null)
             {
@@ -85,44 +84,52 @@ public class ProductDemoDataSeedContributor : IDataSeedContributor, ITransientDe
                     _logger.LogWarning("Failed to create admin user for {Tenant}: {Errors}", tenant.Name, string.Join(", ", createResult.Errors.Select(e => e.Description)));
                 }
             }
-    
 
-            var adminRole = await _roleManager.FindByNameAsync("admin");
-            if (adminRole == null)
-            {
-                adminRole = new IdentityRole(_guidGenerator.Create(), "admin", tenant.Id);
-                var roleCreateResult = await _roleManager.CreateAsync(adminRole);
-                if (!roleCreateResult.Succeeded)
-                {
-                    _logger.LogWarning("Failed to create admin role for {Tenant}: {Errors}", tenant.Name, string.Join(", ", roleCreateResult.Errors.Select(e => e.Description)));
-                }
-            }
+            // var adminRole = await _roleManager.FindByNameAsync("admin");
+            // if (adminRole == null)
+            // {
+            //     adminRole = new IdentityRole(_guidGenerator.Create(), "admin", tenant.Id);
+            //     var roleCreateResult = await _roleManager.CreateAsync(adminRole);
+            //     if (!roleCreateResult.Succeeded)
+            //     {
+            //         _logger.LogWarning("Failed to create admin role for {Tenant}: {Errors}", tenant.Name, string.Join(", ", roleCreateResult.Errors.Select(e => e.Description)));
+            //     }
+            // }
 
-            if (!await _userManager.IsInRoleAsync(adminUser, "admin"))
-            {
-                var addRoleResult = await _userManager.AddToRoleAsync(adminUser, "admin");
-                if (!addRoleResult.Succeeded)
-                {
-                    _logger.LogWarning("Failed to add user {User} to admin role for {Tenant}: {Errors}", adminEmail, tenant.Name, string.Join(", ", addRoleResult.Errors.Select(e => e.Description)));
-                }
-            }
+            // if (!await _userManager.IsInRoleAsync(adminUser, "admin"))
+            // {
+            //     var addRoleResult = await _userManager.AddToRoleAsync(adminUser, "admin");
+            //     if (!addRoleResult.Succeeded)
+            //     {
+            //         _logger.LogWarning("Failed to add user {User} to admin role for {Tenant}: {Errors}", adminEmail, tenant.Name, string.Join(", ", addRoleResult.Errors.Select(e => e.Description)));
+            //     }
+            // }
 
-            if (await _productRepo.AnyAsync())
-            {
-                return;
-            }
+            // Seed products using repositories (idempotent)
+            await SeedProductsAsync(tenant.Id);
+        }
+    }
 
-            var p1 = new Product(_guidGenerator.Create(), tenant.Id, "Basic T-Shirt", "Soft cotton tee", 19.99m, "Apparel", ProductStatus.Active, hasVariants: false);
-            await _productRepo.InsertAsync(p1, autoSave: true);
+    private async Task SeedProductsAsync(Guid? tenantId)
+    {
+        // Basic T-Shirt (no variants)
+        if (!await _productRepo.AnyAsync(p => p.Name == "Basic T-Shirt"))
+        {
+            var tee = new Product(_guidGenerator.Create(), tenantId, name: "Basic T-Shirt", description: "Soft cotton tee", basePrice: 19.99m, category: "Apparel", status: MultiTenantProductManagementApp.Products.ProductStatus.Active, hasVariants: false);
+            await _productRepo.InsertAsync(tee, autoSave: true);
+        }
 
-            var p2 = new Product(_guidGenerator.Create(), tenant.Id, "Sneakers Pro", "Lightweight running shoes", null, "Footwear", ProductStatus.Active, hasVariants: true);
-            await _productRepo.InsertAsync(p2, autoSave: true);
+        // Sneakers Pro (with variants)
+        var sneakers = await _productRepo.FirstOrDefaultAsync(p => p.Name == "Sneakers Pro");
+        if (sneakers == null)
+        {
+            sneakers = new Product(_guidGenerator.Create(), tenantId, name: "Sneakers Pro", description: "Lightweight running shoes", category: "Footwear", status: MultiTenantProductManagementApp.Products.ProductStatus.Active, hasVariants: true);
+            await _productRepo.InsertAsync(sneakers, autoSave: true);
 
-            var v1 = new ProductVariant(_guidGenerator.Create(), tenant.Id, p2.Id, 79.99m,  "SNK-BLK-42");
-            var v2 = new ProductVariant(_guidGenerator.Create(), tenant.Id, p2.Id, 79.99m,  "SNK-BLK-43");
-            var v3 = new ProductVariant(_guidGenerator.Create(), tenant.Id, p2.Id, 84.99m,  "SNK-RED-42");
-
-            await _variantRepo.InsertManyAsync(new[] { v1, v2, v3 }, autoSave: true);
+            // Add variants
+            await _variantRepo.InsertAsync(new ProductVariant(_guidGenerator.Create(), tenantId, sneakers.Id, 79.99m, "SNK-BLK-42"), autoSave: true);
+            await _variantRepo.InsertAsync(new ProductVariant(_guidGenerator.Create(), tenantId, sneakers.Id, 79.99m, "SNK-BLK-43"), autoSave: true);
+            await _variantRepo.InsertAsync(new ProductVariant(_guidGenerator.Create(), tenantId, sneakers.Id, 84.99m, "SNK-RED-42"), autoSave: true);
         }
     }
 }

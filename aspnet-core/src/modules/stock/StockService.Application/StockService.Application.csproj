@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\..\..\..\common.props" />
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <RootNamespace>StockService</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Volo.Abp.Ddd.Application" Version="9.3.2" />
+    <PackageReference Include="Volo.Abp.AutoMapper" Version="9.3.2" />
+    <PackageReference Include="Volo.Abp.EventBus" Version="9.3.2" />
+    <PackageReference Include="Volo.Abp.EventBus.RabbitMQ" Version="9.3.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\StockService.Domain\StockService.Domain.csproj" />
+    <ProjectReference Include="..\StockService.Application.Contracts\StockService.Application.Contracts.csproj" />
+    <ProjectReference Include="..\..\product\ProductService.Application.Contracts\ProductService.Application.Contracts.csproj" />
+    <ProjectReference Include="..\..\product\ProductService.Domain\ProductService.Domain.csproj" />
+    <ProjectReference Include="..\..\..\MultiTenantProductManagementApp.Application.Contracts\MultiTenantProductManagementApp.Application.Contracts.csproj" />
+  </ItemGroup>
+
+</Project>

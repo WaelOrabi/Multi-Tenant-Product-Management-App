@@ -8,13 +8,15 @@ using Volo.Abp.Application.Dtos;
 using Volo.Abp.Application.Services;
 using Volo.Abp.Domain.Entities;
 using Volo.Abp.Domain.Repositories;
-using MultiTenantProductManagementApp.Permissions;
-using MultiTenantProductManagementApp.Products;
-using MultiTenantProductManagementApp.Stocks.Dtos;
 using Volo.Abp.Guids;
 using Volo.Abp.DependencyInjection;
+using MultiTenantProductManagementApp.Permissions;
+using MultiTenantProductManagementApp.Stocks;
+using MultiTenantProductManagementApp.Stocks.Dtos;
+using StockService.Stocks;
+using ProductService.Products;
 
-namespace MultiTenantProductManagementApp.Stocks;
+namespace StockService.Stocks;
 
 [Authorize(MultiTenantProductManagementAppPermissions.Stocks.Default)]
 public class StockAggregateAppService : ApplicationService, IStockAggregateAppService
@@ -86,8 +88,6 @@ public class StockAggregateAppService : ApplicationService, IStockAggregateAppSe
                     };
                     if (v.ProductVariantId.HasValue && variantMap.TryGetValue(v.ProductVariantId.Value, out var ve))
                     {
-                        // Build display SKU as NormalizedProductName-<rest of sku after first dash>
-                        // Example: ProductName "Test Phone" + Variant SKU "PX-BLK-128" => "PHONE-BLK-128"
                         string? productName = productNameMap.TryGetValue(p.ProductId, out var pn2) ? pn2 : null;
                         string normalized = string.IsNullOrWhiteSpace(productName) ? string.Empty : productName.Trim();
                         if (normalized.StartsWith("Test ", StringComparison.OrdinalIgnoreCase))
@@ -209,8 +209,10 @@ public class StockAggregateAppService : ApplicationService, IStockAggregateAppSe
                         throw new BusinessException("Stock.VariantNotFound").WithData("ProductVariantId", v.ProductVariantId);
                     if (ve.ProductId != p.ProductId)
                         throw new BusinessException("Stock.ProductVariantMismatch").WithData("ProductId", p.ProductId).WithData("ProductVariantId", v.ProductVariantId);
-                   
                 }
+            
+                if (v.Quantity > 5)
+                    throw new BusinessException("Stock.QuantityExceedsAvailableStock").WithData("Quantity", v.Quantity);
                 var line = new StockProductVariant(LazyServiceProvider.LazyGetRequiredService<IGuidGenerator>().Create(), CurrentTenant.Id, sp.Id, v.ProductVariantId, v.Quantity);
                 await _stockProductVariantRepo.InsertAsync(line, autoSave: true);
             }

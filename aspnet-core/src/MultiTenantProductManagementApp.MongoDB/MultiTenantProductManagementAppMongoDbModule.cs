@@ -2,8 +2,6 @@ using System;
 using Microsoft.Extensions.DependencyInjection;
 using Volo.Abp.Modularity;
 using Volo.Abp.MongoDB;
-using MultiTenantProductManagementApp.Products;
-using MultiTenantProductManagementApp.Stocks;
 
 namespace MultiTenantProductManagementApp;
 

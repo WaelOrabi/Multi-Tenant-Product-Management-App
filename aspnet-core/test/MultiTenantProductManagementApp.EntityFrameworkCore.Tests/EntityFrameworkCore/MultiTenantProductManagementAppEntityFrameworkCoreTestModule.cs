@@ -3,6 +3,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Threading;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using Volo.Abp;
 using Volo.Abp.Data;
@@ -14,14 +16,18 @@ using Volo.Abp.Modularity;
 using Volo.Abp.PermissionManagement;
 using Volo.Abp.SettingManagement;
 using Volo.Abp.Uow;
-using MultiTenantProductManagementApp.Shared;
+using Volo.Abp.Autofac;
+using Volo.Abp.Castle;
+
 
 namespace MultiTenantProductManagementApp.EntityFrameworkCore;
 
 [DependsOn(
-    typeof(MultiTenantProductManagementAppApplicationTestModule),
     typeof(MultiTenantProductManagementAppEntityFrameworkCoreModule),
-    typeof(AbpEntityFrameworkCoreSqlServerModule)
+    typeof(AbpEntityFrameworkCoreSqlServerModule),
+    typeof(AbpAutofacModule),
+    typeof(AbpCastleCoreModule) 
+
     )]
 public class MultiTenantProductManagementAppEntityFrameworkCoreTestModule : AbpModule
 {
@@ -82,15 +88,63 @@ public class MultiTenantProductManagementAppEntityFrameworkCoreTestModule : AbpM
         {
             if (!_dbInitialized)
             {
+                // If resetting, delete the database ONCE using the main app DbContext
+                if (resetDb)
+                {
+                    Console.WriteLine("[EFTest] RESET_TEST_DB is set. Recreating test database...");
+                    using (var deleteDb = new MultiTenantProductManagementAppDbContext(options))
+                    {
+                        deleteDb.Database.EnsureDeleted();
+                    }
+                }
+
+                // Create main app database (includes Identity/Abp tables)
                 using (var db = new MultiTenantProductManagementAppDbContext(options))
                 {
-                    if (resetDb)
+                    try
                     {
-                        Console.WriteLine("[EFTest] RESET_TEST_DB is set. Recreating test database...");
-                        db.Database.EnsureDeleted();
+                        db.Database.Migrate();
                     }
-                db.Database.EnsureCreated();
+                    catch
+                    {
+                        // Fallback for environments without migrations
+                        db.Database.EnsureCreated();
+                    }
                 }
+
+                // Also ensure module databases exist (no deletions here, same database/connection)
+                var productDbOptions = new DbContextOptionsBuilder<ProductService.ProductServiceDbContext>()
+                    .UseSqlServer(_connectionString, sql => sql.EnableRetryOnFailure())
+                    .Options;
+                using (var productDb = new ProductService.ProductServiceDbContext(productDbOptions))
+                {
+                    // Apply migrations if available (no-op when there are none)
+                    productDb.Database.Migrate();
+                    // Ensure tables exist even when there are zero migrations
+                    var ensured = productDb.Database.EnsureCreated();
+                    if (!ensured)
+                    {
+                        var creator = productDb.Database.GetService<IRelationalDatabaseCreator>();
+                        creator.CreateTables();
+                    }
+                }
+                
+                var stockDbOptions = new DbContextOptionsBuilder<StockService.StockServiceDbContext>()
+                    .UseSqlServer(_connectionString, sql => sql.EnableRetryOnFailure())
+                    .Options;
+                using (var stockDb = new StockService.StockServiceDbContext(stockDbOptions))
+                {
+                    // Apply migrations if available (no-op when there are none)
+                    stockDb.Database.Migrate();
+                    // Ensure tables exist even when there are zero migrations
+                    var ensuredStock = stockDb.Database.EnsureCreated();
+                    if (!ensuredStock)
+                    {
+                        var creator = stockDb.Database.GetService<IRelationalDatabaseCreator>();
+                        creator.CreateTables();
+                    }
+                }
+                
                 lock (_initLock)
                 {
                     _dbInitialized = true;
@@ -110,7 +164,16 @@ public class MultiTenantProductManagementAppEntityFrameworkCoreTestModule : AbpM
         {
             Task.Run(async () =>
             {
-                await TestAdminSeeder.EnsureAdminAsync(scope.ServiceProvider);
+                var userRepo = scope.ServiceProvider.GetRequiredService<IIdentityUserRepository>();
+                var userManager = scope.ServiceProvider.GetRequiredService<IdentityUserManager>();
+                var guidGen = scope.ServiceProvider.GetRequiredService<Volo.Abp.Guids.IGuidGenerator>();
+
+                var existing = await userRepo.FindByNormalizedUserNameAsync("ADMIN");
+                if (existing == null)
+                {
+                    var user = new IdentityUser(guidGen.Create(), "admin", "admin@local");
+                    await userManager.CreateAsync(user, "1q2w3E*");
+                }
             }).GetAwaiter().GetResult();
             lock (_initLock)
             {

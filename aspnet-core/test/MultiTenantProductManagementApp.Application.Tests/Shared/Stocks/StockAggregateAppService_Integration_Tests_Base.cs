@@ -2,6 +2,8 @@ using MultiTenantProductManagementApp.Products;
 using MultiTenantProductManagementApp.Products.Dtos;
 using MultiTenantProductManagementApp.Stocks;
 using MultiTenantProductManagementApp.Stocks.Dtos;
+using ProductService.Products;
+using StockService.Stocks;
 using Shouldly;
 using System;
 using System.Collections.Generic;
