@@ -1,10 +1,12 @@
 <div class="container py-3">
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h2 class="m-0 page-title">Stock</h2>
-    <button class="btn btn-primary btn-sm shadow-sm" (click)="create()">
-      <i class="bi bi-plus-lg me-1"></i>
-      New Stock
-    </button>
+    @if (canCreate) {
+      <button class="btn btn-primary btn-sm shadow-sm" (click)="create()">
+        <i class="bi bi-plus-lg me-1"></i>
+        New Stock
+      </button>
+    }
   </div>
 
   <div class="list-card">
@@ -29,12 +31,16 @@
                 <div class="item-name">{{ item.name }}</div>
               </td>
               <td class="text-end actions-col">
-                <button class="btn btn-outline-primary btn-icon" title="Edit" (click)="edit(item);">
-                  <i class="bi bi-pencil"></i>
-                </button>
-                <button class="btn btn-outline-danger btn-icon" title="Delete" (click)="remove(item);">
-                  <i class="bi bi-trash"></i>
-                </button>
+                @if (canEdit) {
+                  <button class="btn btn-outline-primary btn-icon" title="Edit" (click)="edit(item);">
+                    <i class="bi bi-pencil"></i>
+                  </button>
+                }
+                @if (canDelete) {
+                  <button class="btn btn-outline-danger btn-icon" title="Delete" (click)="remove(item);">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                }
               </td>
             </tr>
           } @empty {

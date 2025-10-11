@@ -5,6 +5,7 @@ import { Router, RouterModule } from '@angular/router';
 import { ProductService } from 'src/app/proxy/products';
 import { ProductDto } from 'src/app/proxy/products/dtos';
 import { ToasterService } from '@abp/ng.theme.shared';
+import { PermissionService } from '@abp/ng.core';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 
@@ -19,6 +20,7 @@ export class ProductsListComponent implements OnInit, OnDestroy {
   private service = inject(ProductService);
   private router = inject(Router);
   private toaster = inject(ToasterService);
+  private permission = inject(PermissionService);
   private destroy$ = new Subject<void>();
   private search$ = new Subject<string>();
 
@@ -36,8 +38,22 @@ export class ProductsListComponent implements OnInit, OnDestroy {
   private allCategoriesLoaded = false;
   filters: any = { filterText: '', category: '', status: '' };
   
+  canCreate = false;
+  canEdit = false;
+  canDelete = false;
+  
 
   ngOnInit(): void {
+    this.permission.getGrantedPolicy$('MultiTenantProductManagementApp.Products.Create')
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(granted => this.canCreate = !!granted);
+    this.permission.getGrantedPolicy$('MultiTenantProductManagementApp.Products.Edit')
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(granted => this.canEdit = !!granted);
+    this.permission.getGrantedPolicy$('MultiTenantProductManagementApp.Products.Delete')
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(granted => this.canDelete = !!granted);
+
     this.search$
       .pipe(
         debounceTime(300),

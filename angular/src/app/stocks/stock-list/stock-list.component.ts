@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { StockAggregateService } from '../../proxy/stocks/stock-aggregate.service';
 import type { StockSummaryDto } from '../../proxy/stocks/dtos/models';
+import { PermissionService } from '@abp/ng.core';
 
 @Component({
   selector: 'app-stock-list',
@@ -15,6 +16,7 @@ import type { StockSummaryDto } from '../../proxy/stocks/dtos/models';
 export class StockListComponent {
   private stockService = inject(StockAggregateService);
   private router = inject(Router);
+  private permission = inject(PermissionService);
 
   items = signal<StockSummaryDto[]>([]);
   total = signal(0);
@@ -25,7 +27,14 @@ export class StockListComponent {
   pageSize = 10;
   pageIndex = 1;
 
+  canCreate = false;
+  canEdit = false;
+  canDelete = false;
+
   ngOnInit() {
+    this.permission.getGrantedPolicy$('MultiTenantProductManagementApp.Stocks.Create').subscribe(g => this.canCreate = !!g);
+    this.permission.getGrantedPolicy$('MultiTenantProductManagementApp.Stocks.Edit').subscribe(g => this.canEdit = !!g);
+    this.permission.getGrantedPolicy$('MultiTenantProductManagementApp.Stocks.Delete').subscribe(g => this.canDelete = !!g);
     this.load();
   }
 

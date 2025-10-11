@@ -12,9 +12,11 @@
       <option value="1">Active</option>
       <option value="0">Inactive</option>
     </select>
-    <a class="btn btn-primary btn-sm" [routerLink]="['/products/create']">
-      New Product
-    </a>
+    @if (canCreate) {
+      <a class="btn btn-primary btn-sm" [routerLink]="['/products/create']">
+        New Product
+      </a>
+    }
   </form>
 
   @if (loading) {
@@ -30,12 +32,16 @@
           <div class="date">{{ p.creationTime | date:'short' }}</div>
         </div>
         <div class="actions inline-center" (click)="$event.stopPropagation()">
-          <a class="btn btn-primary btn-sm" [routerLink]="['/products', p.id, 'edit']" title="Edit">
-            <i class="bi bi-pencil"></i>
-          </a>
-          <button class="btn btn-danger btn-sm" (click)="confirmDelete(p)" title="Delete">
-            <i class="bi bi-trash"></i>
-          </button>
+          @if (canEdit) {
+            <a class="btn btn-primary btn-sm" [routerLink]="['/products', p.id, 'edit']" title="Edit">
+              <i class="bi bi-pencil"></i>
+            </a>
+          }
+          @if (canDelete) {
+            <button class="btn btn-danger btn-sm" (click)="confirmDelete(p)" title="Delete">
+              <i class="bi bi-trash"></i>
+            </button>
+          }
         </div>
       </div>
       <div class="card-body">

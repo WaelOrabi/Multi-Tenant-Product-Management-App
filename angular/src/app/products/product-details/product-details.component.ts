@@ -4,6 +4,7 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ProductService } from 'src/app/proxy/products';
 import { ProductDto, ProductVariantOptionDto } from 'src/app/proxy/products/dtos';
 import { ToasterService } from '@abp/ng.theme.shared';
+import { PermissionService } from '@abp/ng.core';
 
 @Component({
   selector: 'app-product-details',
@@ -17,12 +18,17 @@ export class ProductDetailsComponent implements OnInit {
   private router = inject(Router);
   private service = inject(ProductService);
   private toaster = inject(ToasterService);
+  private permission = inject(PermissionService);
 
   product: ProductDto | null = null;
   loading = false;
   id: string | null = null;
+  canEdit = false;
+  canDelete = false;
   ngOnInit(): void {
     this.id = this.route.snapshot.paramMap.get('id');
+    this.permission.getGrantedPolicy$('MultiTenantProductManagementApp.Products.Edit').subscribe(g => this.canEdit = !!g);
+    this.permission.getGrantedPolicy$('MultiTenantProductManagementApp.Products.Delete').subscribe(g => this.canDelete = !!g);
     if (this.id) {
       this.loadProduct();
     }

@@ -58,6 +58,7 @@ public class MultiTenantProductManagementAppDbContext :
         builder.ConfigureFeatureManagement();
         builder.ConfigureTenantManagement();
 
+        // Load module IEntityTypeConfiguration<> so migrator uses same mappings
         builder.ApplyConfigurationsFromAssembly(typeof(ProductServiceDbContext).Assembly);
         builder.ApplyConfigurationsFromAssembly(typeof(StockServiceDbContext).Assembly);
         builder.Ignore<ExtraPropertyDictionary>();
