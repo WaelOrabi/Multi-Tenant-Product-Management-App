@@ -18,6 +18,7 @@ namespace MultiTenantProductManagementApp;
     typeof(AbpTenantManagementApplicationModule),
     typeof(AbpFeatureManagementApplicationModule),
     typeof(AbpSettingManagementApplicationModule)
+ 
     )]
 public class MultiTenantProductManagementAppApplicationModule : AbpModule
 {

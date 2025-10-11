@@ -1,6 +1,6 @@
 using System;
 
-namespace MultiTenantProductManagementApp.Products;
+namespace ProductService.Products;
 
 public class ProductVariantOption
 {

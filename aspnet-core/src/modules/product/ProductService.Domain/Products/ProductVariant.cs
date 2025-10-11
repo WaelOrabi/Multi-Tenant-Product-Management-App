@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Volo.Abp.Domain.Entities.Auditing;
 using Volo.Abp.MultiTenancy;
 
-namespace MultiTenantProductManagementApp.Products;
+namespace ProductService.Products;
 
 public class ProductVariant : FullAuditedEntity<Guid>, IMultiTenant
 {

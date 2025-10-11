@@ -1,9 +1,8 @@
 using System;
-using System.ComponentModel.DataAnnotations;
 using Volo.Abp.Domain.Entities;
 using Volo.Abp.MultiTenancy;
 
-namespace MultiTenantProductManagementApp.Stocks;
+namespace StockService.Stocks;
 
 public class StockProductVariant : Entity<Guid>, IMultiTenant
 {

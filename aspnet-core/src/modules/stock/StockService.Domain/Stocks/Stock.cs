@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Volo.Abp.Domain.Entities.Auditing;
 using Volo.Abp.MultiTenancy;
 
-namespace MultiTenantProductManagementApp.Stocks;
+namespace StockService.Stocks;
 
 public class Stock : FullAuditedAggregateRoot<Guid>, IMultiTenant
 {

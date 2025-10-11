@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MultiTenantProductManagementApp.Domain.Shared\MultiTenantProductManagementApp.Domain.Shared.csproj" />
+    <ProjectReference Include="..\modules\product\ProductService.Domain\ProductService.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>
