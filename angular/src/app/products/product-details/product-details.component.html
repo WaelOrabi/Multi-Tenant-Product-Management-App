@@ -1,68 +1,68 @@
 <div class="page">
   <div class="header">
     <div class="header-content">
-      <h2>Product Details</h2>
+      <h2>{{ '::Product.Details.Title' | abpLocalization }}</h2>
       @if (product && !loading) {
       <div class="actions">
         @if (canEdit) {
           <a class="btn btn-outline-primary btn-sm" [routerLink]="['/products', product.id, 'edit']">
-            <i class="bi bi-pencil"></i> Edit
+            <i class="bi bi-pencil"></i> {{ '::Product.Details.Edit' | abpLocalization }}
           </a>
         }
         @if (canDelete) {
           <button type="button" class="btn btn-danger btn-xs" (click)="confirmDelete()">
-            <i class="bi bi-trash"></i> Delete
+            <i class="bi bi-trash"></i> {{ '::Product.Details.Delete' | abpLocalization }}
           </button>
         }
       </div>
       }
     </div>
     <a class="btn btn-ghost btn-sm" [routerLink]="['/products']">
-      <i class="bi bi-arrow-left"></i> Back to Products
+      <i class="bi bi-arrow-left"></i> {{ '::Product.Details.BackToProducts' | abpLocalization }}
     </a>
   </div>
 
   @if (loading) {
     <div class="loading">
       <div class="donut"></div>
-      <span>Loading product details...</span>
+      <span>{{ '::Product.Details.Loading' | abpLocalization }}</span>
     </div>
   }
 
   @if (!loading && product) {
   <div class="product-details">
     <div class="info-card">
-      <h3>Product Information</h3>
+      <h3>{{ '::Product.Details.Info' | abpLocalization }}</h3>
       <div class="info-grid">
         <div class="info-item">
-          <label>Name</label>
+          <label>{{ '::Product.Details.Name' | abpLocalization }}</label>
           <span>{{ product.name }}</span>
         </div>
         <div class="info-item">
-          <label>Category</label>
-          <span>{{ product.category || 'Uncategorized' }}</span>
+          <label>{{ '::Product.Details.Category' | abpLocalization }}</label>
+          <span>{{ product.category || ('::Product.Details.Uncategorized' | abpLocalization) }}</span>
         </div>
         <div class="info-item">
-          <label>Status</label>
+          <label>{{ '::Product.Details.Status' | abpLocalization }}</label>
           <span class="badge" [class]="product.status === 1 ? 'badge-success' : 'badge-secondary'">
-            {{ product.status === 1 ? 'Active' : 'Inactive' }}
+            {{ product.status === 1 ? ('::Product.Details.Active' | abpLocalization) : ('::Product.Details.Inactive' | abpLocalization) }}
           </span>
         </div>
         <div class="info-item">
-          <label>Has Variants</label>
+          <label>{{ '::Product.Details.HasVariants' | abpLocalization }}</label>
           <span class="badge" [class]="product.hasVariants ? 'badge-success' : 'badge-secondary'">
-            {{ product.hasVariants ? 'Yes' : 'No' }}
+            {{ product.hasVariants ? ('::Product.Details.Yes' | abpLocalization) : ('::Product.Details.No' | abpLocalization) }}
           </span>
         </div>
         @if (!product.hasVariants) {
         <div class="info-item">
-          <label>Base Price</label>
+          <label>{{ '::Product.Details.BasePrice' | abpLocalization }}</label>
           <span class="price">${{ product.basePrice | number:'1.2-2' }}</span>
         </div>
         }
         @if (product.description) {
         <div class="info-item full-width">
-          <label>Description</label>
+          <label>{{ '::Product.Details.Description' | abpLocalization }}</label>
           <p>{{ product.description }}</p>
         </div>
         }
@@ -71,22 +71,22 @@
 
     @if (product.hasVariants && product.variants?.length) {
     <div class="variants-card">
-      <h3>Product Variants</h3>
+      <h3>{{ '::Product.Details.Variants' | abpLocalization }}</h3>
       <div class="table-container ">
         <table class="variants-table">
           <thead>
             <tr>
-              <th>SKU</th>
-              <th>Options</th>
-              <th>Price</th>
-              <th>Created</th>
+              <th>{{ '::Product.Details.SKU' | abpLocalization }}</th>
+              <th>{{ '::Product.Details.Options' | abpLocalization }}</th>
+              <th>{{ '::Product.Details.Price' | abpLocalization }}</th>
+              <th>{{ '::Product.Details.Created' | abpLocalization }}</th>
             </tr>
           </thead>
           <tbody>
             @for (variant of product.variants; track variant.id; let i = $index) {
             <tr>
               <td>
-                <span class="sku">{{ variant.sku || 'N/A' }}</span>
+                <span class="sku">{{ variant.sku || ('::Product.Details.NA' | abpLocalization) }}</span>
               </td>
               <td>
                 @if (variant.options?.length) {
@@ -114,11 +114,11 @@
     <div class="no-variants">
       <div class="empty-state">
         <i class="bi bi-box"></i>
-        <h4>No Variants Found</h4>
-        <p>This product is configured to use variants, but none have been created yet.</p>
+        <h4>{{ '::Product.Details.NoVariantsFoundTitle' | abpLocalization }}</h4>
+        <p>{{ '::Product.Details.NoVariantsFoundText' | abpLocalization }}</p>
         @if (canEdit) {
           <a class="btn btn-primary" [routerLink]="['/products', product.id, 'edit']">
-            <i class="bi bi-plus-lg"></i> Add Variants
+            <i class="bi bi-plus-lg"></i> {{ '::Product.Details.AddVariants' | abpLocalization }}
           </a>
         }
       </div>
@@ -131,10 +131,10 @@
   <div class="error-state">
     <div class="empty-state">
       <i class="bi bi-exclamation-triangle"></i>
-      <h4>Product Not Found</h4>
-      <p>The requested product could not be found.</p>
+      <h4>{{ '::Product.Details.NotFoundTitle' | abpLocalization }}</h4>
+      <p>{{ '::Product.Details.NotFoundText' | abpLocalization }}</p>
       <a class="btn btn-primary" [routerLink]="['/products']">
-        <i class="bi bi-arrow-left"></i> Back to Products
+        <i class="bi bi-arrow-left"></i> {{ '::Product.Details.BackToProducts' | abpLocalization }}
       </a>
     </div>
   </div>

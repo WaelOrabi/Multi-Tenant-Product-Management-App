@@ -1,36 +1,39 @@
 <div class="page">
-  <h2>{{ isEdit ? 'Edit' : 'Create' }} Product</h2>
+  <h2>
+    {{ isEdit ? ('::Product.Form.Edit' | abpLocalization) : ('::Product.Form.Create' | abpLocalization) }}
+    {{ '::Product.Form.Product' | abpLocalization }}
+  </h2>
 
   <form [formGroup]="form" (ngSubmit)="save()" class="form">
     <div class="grid2">
       <div class="form-group">
-        <label>Name</label>
+        <label>{{ '::Product.Form.Name' | abpLocalization }}</label>
         <input class="form-control" formControlName="name" required />
       </div>
       <div class="form-group">
-        <label>Category</label>
+        <label>{{ '::Product.Form.Category' | abpLocalization }}</label>
         <input class="form-control" formControlName="category" />
       </div>
       <div class="form-group">
-        <label>Status</label>
+        <label>{{ '::Product.Form.Status' | abpLocalization }}</label>
         <select class="form-select" formControlName="status">
-          <option [ngValue]="1">Active</option>
-          <option [ngValue]="0">Inactive</option>
+          <option [ngValue]="1">{{ '::Product.Form.Active' | abpLocalization }}</option>
+          <option [ngValue]="0">{{ '::Product.Form.Inactive' | abpLocalization }}</option>
         </select>
       </div>
       <div class="form-group form-group-full">
-        <label>Description</label>
+        <label>{{ '::Product.Form.Description' | abpLocalization }}</label>
         <textarea class="form-control" formControlName="description"></textarea>
       </div>
       <div class="form-group inline-center">
         <label class="checkbox-label">
           <input type="checkbox" formControlName="hasVariants" />
-          Has Variants
+          {{ '::Product.Form.HasVariants' | abpLocalization }}
         </label>
       </div>
       @if (!form.value.hasVariants) {
         <div class="form-group">
-          <label>Base Price</label>
+          <label>{{ '::Product.Form.BasePrice' | abpLocalization }}</label>
           <input class="form-control" type="number" step="0.01" min="0" formControlName="basePrice" />
         </div>
       }
@@ -39,14 +42,14 @@
     @if (form.value.hasVariants) {
     <div class="variants">
       <div class="v-header">
-        <div>SKU</div>
-        <div>Price</div>
-        <div class="full-width">Options</div>
+        <div>{{ '::Product.Form.Sku' | abpLocalization }}</div>
+        <div>{{ '::Product.Form.Price' | abpLocalization }}</div>
+        <div class="full-width">{{ '::Product.Form.Options' | abpLocalization }}</div>
         <div></div>
       </div>
       @for (v of variants.controls; track $index; let i = $index) {
         <div class="v-row" [formGroup]="v">
-          <input class="form-control form-control-sm" formControlName="sku" placeholder="SKU" />
+          <input class="form-control form-control-sm" formControlName="sku" placeholder="{{ '::Product.Form.Sku' | abpLocalization }}" />
           <input class="form-control form-control-sm" type="number" step="0.01" min="0" formControlName="price" />
 
           <div class="options-col">
@@ -54,24 +57,24 @@
             @for (opt of optionsAt(i).controls; track $index; let j = $index) {
               <div class="option-row" [formGroup]="opt">
                 <div class="opt-field">
-                  <input class="form-control form-control-sm" formControlName="name" placeholder="e.g. Color" />
+                  <input class="form-control form-control-sm" formControlName="name" placeholder="{{ '::Product.Form.OptionNamePlaceholder' | abpLocalization }}" />
                   @if (opt.get('name')?.hasError('duplicate')) {
-                    <div class="error-txt">Duplicate option name</div>
+                    <div class="error-txt">{{ '::Product.Form.DuplicateOptionName' | abpLocalization }}</div>
                   }
                 </div>
                 <div class="opt-field">
-                  <input class="form-control form-control-sm" formControlName="value" placeholder="e.g. Red" />
+                  <input class="form-control form-control-sm" formControlName="value" placeholder="{{ '::Product.Form.OptionValuePlaceholder' | abpLocalization }}" />
                 </div>
               </div>
             }
     
           </div>
           <button type="button" class="btn btn-primary btn-sm" (click)="addOption(i)">
-            <i class="bi "></i> Add option
+            <i class="bi "></i> {{ '::Product.Form.AddOption' | abpLocalization }}
           </button>
           @if (optionsAt(i).length > 0) {
-            <button class="btn btn-danger btn-sm" (click)="removeLastOption(i)" title="Delete option">
-              <i class="bi "></i>Delete option
+            <button class="btn btn-danger btn-sm" (click)="removeLastOption(i)" title="{{ '::Product.Form.DeleteOption' | abpLocalization }}">
+              <i class="bi "></i>{{ '::Product.Form.DeleteOption' | abpLocalization }}
             </button>
           }
  
@@ -82,11 +85,11 @@
       }
       <div class="variant-actions">
         <button type="button" class="btn btn-outline-primary btn-xs" (click)="addVariant()">
-          Add 
+          {{ '::Product.Form.AddVariant' | abpLocalization }}
         </button>
         @if (variants.length > 0) {
           <button type="button" class="btn btn-danger btn-xs" (click)="removeLastVariant()">
-            Delete 
+            {{ '::Product.Form.DeleteVariant' | abpLocalization }}
           </button>
         }
       </div>
@@ -95,10 +98,11 @@
 
     <div class="actions inline-center">
       <button type="submit" class="btn btn-primary" [disabled]="saving || form.invalid">
-        <i class="bi bi-check-lg"></i> {{ saving ? 'Saving...' : 'Save' }}
+        <i class="bi bi-check-lg"></i>
+        {{ saving ? ('::Product.Form.Saving' | abpLocalization) : ('::Product.Form.Save' | abpLocalization) }}
       </button>
       <a class="btn btn-ghost" [routerLink]="['/products']">
-        <i class="bi bi-x-lg"></i> Cancel
+        <i class="bi bi-x-lg"></i> {{ '::Product.Form.Cancel' | abpLocalization }}
       </a>
     </div>
   </form>

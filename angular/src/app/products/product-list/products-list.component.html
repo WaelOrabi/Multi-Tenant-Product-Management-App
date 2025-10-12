@@ -1,26 +1,26 @@
 <div class="page">
   <form class="toolbar" role="search" (submit)="$event.preventDefault()">
-    <input name="filterText" class="form-control form-control-sm" [(ngModel)]="filters.filterText" (ngModelChange)="onSearchChange($event)" placeholder="Search products" />
+    <input name="filterText" class="form-control form-control-sm" [(ngModel)]="filters.filterText" (ngModelChange)="onSearchChange($event)" placeholder="{{ '::Product.List.SearchPlaceholder' | abpLocalization }}" />
     <select name="category" class="form-select form-select-sm" [(ngModel)]="filters.category" (focus)="onCategoryFocus()" (ngModelChange)="onCategoryChange($event)">
-      <option value="">All categories</option>
+      <option value="">{{ '::Product.List.AllCategories' | abpLocalization }}</option>
       @for (c of allCategories; track c; let i = $index) {
         <option [value]="c">{{ c }}</option>
       }
     </select>
     <select name="status" class="form-select form-select-sm" [(ngModel)]="filters.status" (ngModelChange)="onStatusChange($event)">
-      <option value="">All statuses</option>
-      <option value="1">Active</option>
-      <option value="0">Inactive</option>
+      <option value="">{{ '::Product.List.AllStatuses' | abpLocalization }}</option>
+      <option value="1">{{ '::Product.Form.Active' | abpLocalization }}</option>
+      <option value="0">{{ '::Product.Form.Inactive' | abpLocalization }}</option>
     </select>
     @if (canCreate) {
       <a class="btn btn-primary btn-sm" [routerLink]="['/products/create']">
-        New Product
+        {{ '::Product.List.NewProduct' | abpLocalization }}
       </a>
     }
   </form>
 
   @if (loading) {
-    <div class="loading">Loading...</div>
+    <div class="loading">{{ '::Common.Loading' | abpLocalization }}</div>
   } @else {
   <div class="grid">
     @for (p of items; track p.id; let i = $index) {
@@ -28,17 +28,17 @@
       <div class="card-header">
         <div>
           <div class="title">{{ p.name }}</div>
-          <div class="subtitle">{{ p.category || 'Uncategorized' }}</div>
+          <div class="subtitle">{{ p.category || ('::Product.List.Uncategorized' | abpLocalization) }}</div>
           <div class="date">{{ p.creationTime | date:'short' }}</div>
         </div>
         <div class="actions inline-center" (click)="$event.stopPropagation()">
           @if (canEdit) {
-            <a class="btn btn-primary btn-sm" [routerLink]="['/products', p.id, 'edit']" title="Edit">
+            <a class="btn btn-primary btn-sm" [routerLink]="['/products', p.id, 'edit']" [title]="'::Common.Edit' | abpLocalization">
               <i class="bi bi-pencil"></i>
             </a>
           }
           @if (canDelete) {
-            <button class="btn btn-danger btn-sm" (click)="confirmDelete(p)" title="Delete">
+            <button class="btn btn-danger btn-sm" (click)="confirmDelete(p)" [title]="'::Common.Delete' | abpLocalization">
               <i class="bi bi-trash"></i>
             </button>
           }
@@ -48,21 +48,21 @@
         <div class="description">{{ p.description }}</div>
         <div class="product-info">
           @if (!p.hasVariants) {
-            <div class="price">Price: {{ p.basePrice | currency }}</div>
+            <div class="price">{{ '::Product.List.PriceLabel' | abpLocalization }} {{ p.basePrice | currency }}</div>
           } @else {
-            <div class="variants">Variants: {{ p.variants?.length || 0 }}</div>
+            <div class="variants">{{ '::Product.List.VariantsLabel' | abpLocalization }} {{ p.variants?.length || 0 }}</div>
             @if (p.variants?.length) {
               <div class="variant-options">
                 @if (p.variants[0]?.options?.length) {
                   <span class="badge badge-light" *ngFor="let opt of p.variants[0].options | slice:0:3">{{ opt.name }}: {{ opt.value }}</span>
-                  @if (p.variants[0].options.length > 3) { <span class="text-muted">+{{ p.variants[0].options.length - 3 }} more</span> }
+                  @if (p.variants[0].options.length > 3) { <span class="text-muted">+{{ p.variants[0].options.length - 3 }} {{ '::Product.List.More' | abpLocalization }}</span> }
                 } @else {
-                  <span class="text-muted">No options defined</span>
+                  <span class="text-muted">{{ '::Product.List.NoOptions' | abpLocalization }}</span>
                 }
               </div>
             }
           }
-          <div class="status">Status: {{ p.status === 1 ? 'Active' : 'Inactive' }}</div>
+          <div class="status">{{ '::Product.List.StatusLabel' | abpLocalization }} {{ p.status === 1 ? ('::Product.Form.Active' | abpLocalization) : ('::Product.Form.Inactive' | abpLocalization) }}</div>
         </div>
       </div>
     </div>
@@ -72,11 +72,11 @@
 
   <div class="pager">
     <button class="btn btn-outline-primary btn-sm" (click)="prev()" [disabled]="skipCount===0 || loading">
-      <i class="bi bi-chevron-left"></i> Prev
+      <i class="bi bi-chevron-left"></i> {{ '::Common.Prev' | abpLocalization }}
     </button>
     <span>{{ skipCount + 1 }} - {{ Math.min(skipCount+pageSize, totalCount) }} / {{ totalCount }}</span>
     <button class="btn btn-outline-primary btn-sm" (click)="next()" [disabled]="skipCount+pageSize>=totalCount || loading">
-      Next <i class="bi bi-chevron-right"></i>
+      {{ '::Common.Next' | abpLocalization }} <i class="bi bi-chevron-right"></i>
     </button>
   </div>
 </div>

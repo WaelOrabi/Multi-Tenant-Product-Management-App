@@ -1,22 +1,24 @@
 <div class="container py-3">
   <div class="d-flex align-items-center mb-3 gap-2">
-    <button type="button" class="btn btn-outline-secondary btn-sm" title="Back to list" (click)="cancel()">
+    <button type="button" class="btn btn-outline-secondary btn-sm" [title]="'::Stock.Form.BackToList' | abpLocalization" (click)="cancel()">
       <i class="bi bi-arrow-left"></i>
     </button>
-    <h2 class="m-0">{{ title() }}</h2>
+    <h2 class="m-0">
+      {{ (mode() === 'create' ? '::Stock.Form.CreateTitle' : '::Stock.Form.EditTitle') | abpLocalization }}
+    </h2>
   </div>
 
   <form (ngSubmit)="save()" #f="ngForm" class="card p-3 shadow-sm">
     <div class="mb-3">
-      <label class="form-label">Name</label>
+      <label class="form-label">{{ '::Stock.Form.Name' | abpLocalization }}</label>
       <input class="form-control" name="name" [(ngModel)]="vm().name" required />
     </div>
 
     <div class="mb-3">
       <div class="d-flex justify-content-between align-items-center">
-        <label class="form-label mb-0">Products</label>
+        <label class="form-label mb-0">{{ '::Stock.Form.Products' | abpLocalization }}</label>
         <button type="button" class="btn btn-sm btn-outline-primary" (click)="addProduct()">
-          <i class="bi bi-plus"></i> Add product
+          <i class="bi bi-plus"></i> {{ '::Stock.Form.AddProduct' | abpLocalization }}
         </button>
       </div>
     </div>
@@ -25,9 +27,9 @@
       <div class="border rounded p-3 mb-3 bg-light">
         <div class="d-flex justify-content-between align-items-center mb-2">
           <div class="flex-grow-1 me-2">
-            <label class="form-label">Product</label>
+            <label class="form-label">{{ '::Stock.Form.Product' | abpLocalization }}</label>
             <select class="form-select" [name]="'productId_' + i" [(ngModel)]="vm().products[i].productId" (ngModelChange)="onProductChange(i, $event)" [disabled]="loadingProducts()" required>
-              <option value="" disabled>Select a product...</option>
+              <option value="" disabled>{{ '::Stock.Form.SelectProduct' | abpLocalization }}</option>
               @for (pr of products(); track pr.id) {
                 <option [value]="pr.id">{{ pr.name }}</option>
               }
@@ -40,9 +42,9 @@
 
         <div class="mb-2">
           <div class="d-flex justify-content-between align-items-center">
-            <label class="form-label mb-0">Variants and quantities</label>
+            <label class="form-label mb-0">{{ '::Stock.Form.VariantsAndQuantities' | abpLocalization }}</label>
             <button type="button" class="btn btn-sm btn-outline-secondary" (click)="addVariant(i)">
-              <i class="bi bi-plus"></i> Add line
+              <i class="bi bi-plus"></i> {{ '::Stock.Form.AddLine' | abpLocalization }}
             </button>
           </div>
         </div>
@@ -50,27 +52,27 @@
         @for (v of vm().products[i].variants; let j = $index; track j) {
           <div class="row g-2 align-items-end mb-2">
             <div class="col-md-7">
-              <label class="form-label">Variant (optional)</label>
+              <label class="form-label">{{ '::Stock.Form.VariantOptional' | abpLocalization }}</label>
               <select class="form-select"
                       [name]="'variant_' + i + '_' + j"
                       [(ngModel)]="vm().products[i].variants[j].productVariantId"
                       [disabled]="!vm().products[i].productId"
                       (focus)="ensureVariantsLoaded(i)"
                       (click)="ensureVariantsLoaded(i)">
-                <option [ngValue]="null">(No variant - product level stock)</option>
+                <option [ngValue]="null">{{ '::Stock.Form.NoVariant' | abpLocalization }}</option>
                 @if (loadingVariants()[i]) {
-                  <option disabled>Loading variants...</option>
+                  <option disabled>{{ '::Stock.Form.LoadingVariants' | abpLocalization }}</option>
                 } @else if ((variantsPerProduct()[i]?.length || 0) > 0) {
                   @for (vv of (variantsPerProduct()[i] || []); track vv.id) {
                     <option [value]="vv.id">{{ getVariantLabel(vv) }}</option>
                   }
                 } @else {
-                  <option disabled>No variants found</option>
+                  <option disabled>{{ '::Stock.Form.NoVariantsFound' | abpLocalization }}</option>
                 }
               </select>
             </div>
             <div class="col-md-3 ">
-              <label class="form-label  ">Quantity</label>
+              <label class="form-label  ">{{ '::Stock.Form.Quantity' | abpLocalization }}</label>
               <input type="number" min="0" class="form-control select-quantity" [name]="'qty_' + i + '_' + j" [(ngModel)]="vm().products[i].variants[j].quantity" required />
             </div>
             <div class="col-md-2 text-end">
@@ -82,19 +84,19 @@
         }
 
         @if (hasDuplicateVariants(i)) {
-          <div class="text-danger small">Duplicate variant lines detected for this product.</div>
+          <div class="text-danger small">{{ '::Stock.Form.DuplicateVariantLines' | abpLocalization }}</div>
         }
         @if (hasNegativeQuantity(i)) {
-          <div class="text-danger small">Quantity must be non-negative.</div>
+          <div class="text-danger small">{{ '::Stock.Form.QuantityNonNegative' | abpLocalization }}</div>
         }
       </div>
     }
 
     <div class="d-flex justify-content-end gap-2">
-      <button type="button" class="btn btn-outline-secondary" (click)="cancel()">Cancel</button>
+      <button type="button" class="btn btn-outline-secondary" (click)="cancel()">{{ '::Stock.Form.Cancel' | abpLocalization }}</button>
       <button type="submit" class="btn btn-primary" [disabled]="saving() || f.invalid || productsInvalid()">
         <span *ngIf="saving()" class="spinner-border spinner-border-sm me-2"></span>
-        Save
+        {{ '::Stock.Form.Save' | abpLocalization }}
       </button>
     </div>
   </form>

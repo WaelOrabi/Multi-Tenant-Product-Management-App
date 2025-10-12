@@ -6,11 +6,12 @@ import { StockAggregateService } from '../../proxy/stocks/stock-aggregate.servic
 import type { CreateUpdateStockAggregateDto } from '../../proxy/stocks/dtos/models';
 import { ProductService } from '../../proxy/products/product.service';
 import type { ProductDto, GetProductListInput, ProductVariantDto } from '../../proxy/products/dtos/models';
+import { LocalizationPipe, LocalizationService } from '@abp/ng.core';
 
 @Component({
   selector: 'app-stock-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, LocalizationPipe],
   templateUrl: './stock-form.component.html',
   styleUrls: ['./stock-form.component.css'],
 })
@@ -19,6 +20,7 @@ export class StockFormComponent {
   private router = inject(Router);
   private stockService = inject(StockAggregateService);
   private productService = inject(ProductService);
+  private l = inject(LocalizationService);
 
   mode = signal<'create' | 'edit'>('create');
   id = signal<string | null>(null);
@@ -35,7 +37,7 @@ export class StockFormComponent {
   loadingProducts = signal(false);
   loadingVariants = signal<Record<number, boolean>>({});
 
-  title = computed(() => (this.mode() === 'create' ? 'Create Stock' : 'Edit Stock'));
+  title = computed(() => (this.mode() === 'create' ? this.l.instant('::Stock.Form.CreateTitle') : this.l.instant('::Stock.Form.EditTitle')));
   saving = signal(false);
 
   ngOnInit() {
@@ -201,7 +203,7 @@ export class StockFormComponent {
     const invalid = this.vm().products.some((_, i) => this.hasDuplicateVariants(i) || this.hasNegativeQuantity(i));
     if (invalid) {
       this.saving.set(false);
-      alert('Please fix duplicate variants and negative quantities before saving.');
+      alert(this.l.instant('::Stock.Form.FixBeforeSaving'));
       return;
     }
 
