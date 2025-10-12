@@ -132,5 +132,18 @@
     "Product.Details.DeleteFailed": "فشل الحذف",
     "Product.Details.LoadFailed": "فشل تحميل تفاصيل المنتج",
     "Product.Details.ConfirmDelete": "حذف المنتج"
+  ,
+  "Product.Validation.BasePriceRequired": "السعر الأساسي مطلوب عند تعطيل المتغيرات.",
+  "Product.Validation.BasePriceNonNegative": "يجب أن يكون السعر الأساسي أكبر من أو يساوي 0.",
+  "Product.Validation.VariantsEmptyWhenNoVariants": "يجب أن تكون قائمة المتغيرات فارغة عند تعطيل المتغيرات.",
+  "Product.Validation.VariantsRequired": "المتغيرات مطلوبة عند تمكين المتغيرات.",
+  "Product.Validation.AtLeastOneVariant": "مطلوب متغير واحد على الأقل.",
+  "Product.Validation.VariantSkusUnique": "يجب أن تكون رموز SKU للمتغيرات فريدة.",
+  "Product.Validation.SkuMaxLength": "يجب ألا يتجاوز رمز SKU {0} حرفاً.",
+  "Product.Validation.VariantPriceNonNegative": "يجب أن يكون سعر المتغير أكبر من أو يساوي 0.",
+  "Product.Validation.OptionNameRequired": "اسم الخيار مطلوب.",
+  "Product.Validation.OptionNameMaxLength": "يجب ألا يزيد طول اسم الخيار عن {0} حرفاً.",
+  "Product.Validation.OptionValueRequired": "قيمة الخيار مطلوبة.",
+  "Product.Validation.OptionValueMaxLength": "يجب ألا يزيد طول قيمة الخيار عن {0} حرفاً."
   }
 }
