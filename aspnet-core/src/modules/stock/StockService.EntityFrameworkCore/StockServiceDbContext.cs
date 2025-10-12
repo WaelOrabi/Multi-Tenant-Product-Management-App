@@ -21,7 +21,7 @@ public class StockServiceDbContext : AbpDbContext<StockServiceDbContext>
     {
         base.OnModelCreating(builder);
 
-        // Load IEntityTypeConfiguration<> from this assembly
-        builder.ApplyConfigurationsFromAssembly(typeof(StockServiceDbContext).Assembly);
+      
+        builder.ConfigureStockService();
     }
 }

@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using ProductService.Products;
 using Volo.Abp.Data;
 using Volo.Abp.DependencyInjection;
 using Volo.Abp.Guids;
@@ -10,6 +9,7 @@ using Volo.Abp.Identity;
 using Volo.Abp.MultiTenancy;
 using Volo.Abp.TenantManagement;
 using Volo.Abp.Domain.Repositories;
+using ProductService.Products;
 
 namespace MultiTenantProductManagementApp.Data;
 
@@ -85,25 +85,25 @@ public class ProductDemoDataSeedContributor : IDataSeedContributor, ITransientDe
                 }
             }
 
-            // var adminRole = await _roleManager.FindByNameAsync("admin");
-            // if (adminRole == null)
-            // {
-            //     adminRole = new IdentityRole(_guidGenerator.Create(), "admin", tenant.Id);
-            //     var roleCreateResult = await _roleManager.CreateAsync(adminRole);
-            //     if (!roleCreateResult.Succeeded)
-            //     {
-            //         _logger.LogWarning("Failed to create admin role for {Tenant}: {Errors}", tenant.Name, string.Join(", ", roleCreateResult.Errors.Select(e => e.Description)));
-            //     }
-            // }
+            var adminRole = await _roleManager.FindByNameAsync("admin");
+            if (adminRole == null)
+            {
+                adminRole = new IdentityRole(_guidGenerator.Create(), "admin", tenant.Id);
+                var roleCreateResult = await _roleManager.CreateAsync(adminRole);
+                if (!roleCreateResult.Succeeded)
+                {
+                    _logger.LogWarning("Failed to create admin role for {Tenant}: {Errors}", tenant.Name, string.Join(", ", roleCreateResult.Errors.Select(e => e.Description)));
+                }
+            }
 
-            // if (!await _userManager.IsInRoleAsync(adminUser, "admin"))
-            // {
-            //     var addRoleResult = await _userManager.AddToRoleAsync(adminUser, "admin");
-            //     if (!addRoleResult.Succeeded)
-            //     {
-            //         _logger.LogWarning("Failed to add user {User} to admin role for {Tenant}: {Errors}", adminEmail, tenant.Name, string.Join(", ", addRoleResult.Errors.Select(e => e.Description)));
-            //     }
-            // }
+            if (!await _userManager.IsInRoleAsync(adminUser, "admin"))
+            {
+                var addRoleResult = await _userManager.AddToRoleAsync(adminUser, "admin");
+                if (!addRoleResult.Succeeded)
+                {
+                    _logger.LogWarning("Failed to add user {User} to admin role for {Tenant}: {Errors}", adminEmail, tenant.Name, string.Join(", ", addRoleResult.Errors.Select(e => e.Description)));
+                }
+            }
 
             // Seed products using repositories (idempotent)
             await SeedProductsAsync(tenant.Id);

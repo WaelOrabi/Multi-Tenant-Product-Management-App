@@ -20,8 +20,6 @@ public class ProductServiceDbContext : AbpDbContext<ProductServiceDbContext>
     {
         base.OnModelCreating(builder);
 
-        // Load IEntityTypeConfiguration<> from this assembly
-        builder.ApplyConfigurationsFromAssembly(typeof(ProductServiceDbContext).Assembly);
+        builder.ConfigureProductService();
     }
 }
-
