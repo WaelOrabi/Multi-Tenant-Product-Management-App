@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using ProductService;
+using StockService;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
 using Volo.Abp.BackgroundJobs.EntityFrameworkCore;
 using Volo.Abp.Data;
@@ -13,7 +14,6 @@ using Volo.Abp.PermissionManagement.EntityFrameworkCore;
 using Volo.Abp.SettingManagement.EntityFrameworkCore;
 using Volo.Abp.TenantManagement;
 using Volo.Abp.TenantManagement.EntityFrameworkCore;
-using StockService;
 
 namespace MultiTenantProductManagementApp.EntityFrameworkCore;
 
@@ -57,10 +57,7 @@ public class MultiTenantProductManagementAppDbContext :
         builder.ConfigureOpenIddict();
         builder.ConfigureFeatureManagement();
         builder.ConfigureTenantManagement();
-
-        builder.ApplyConfigurationsFromAssembly(typeof(ProductServiceDbContext).Assembly);
-        builder.ApplyConfigurationsFromAssembly(typeof(StockServiceDbContext).Assembly);
-        builder.Ignore<ExtraPropertyDictionary>();
-
+        builder.ConfigureProductService();
+        builder.ConfigureStockService();
     }
 }

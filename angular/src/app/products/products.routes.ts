@@ -9,7 +9,7 @@ export const productsRoutes: Routes = [
   {
     path: 'create',
     loadComponent: () => import('./product-form/product-form.component').then(m => m.ProductFormComponent),
-    data: { mode: 'create' },
+    data: { mode: 'create', requiredPolicy: 'MultiTenantProductManagementApp.Products.Create' },
   },
   {
     path: ':id',
@@ -18,7 +18,7 @@ export const productsRoutes: Routes = [
   {
     path: ':id/edit',
     loadComponent: () => import('./product-form/product-form.component').then(m => m.ProductFormComponent),
-    data: { mode: 'edit' },
+    data: { mode: 'edit', requiredPolicy: 'MultiTenantProductManagementApp.Products.Edit' },
   },
 ];
 

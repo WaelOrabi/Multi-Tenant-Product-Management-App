@@ -8,12 +8,12 @@ export const stocksRoutes: Routes = [
   {
     path: 'create',
     loadComponent: () => import('./stock-form/stock-form.component').then(m => m.StockFormComponent),
-    data: { mode: 'create' },
+    data: { mode: 'create', requiredPolicy: 'MultiTenantProductManagementApp.Stocks.Create' },
   },
   {
     path: ':id/edit',
     loadComponent: () => import('./stock-form/stock-form.component').then(m => m.StockFormComponent),
-    data: { mode: 'edit' },
+    data: { mode: 'edit', requiredPolicy: 'MultiTenantProductManagementApp.Stocks.Edit' },
   },
 ];
 
