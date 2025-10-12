@@ -170,15 +170,15 @@ public class StockAggregateAppService : ApplicationService, IStockAggregateAppSe
     private void ValidateInput(CreateUpdateStockAggregateDto input)
     {
         if (string.IsNullOrWhiteSpace(input.Name))
-            throw new BusinessException("Stock.NameRequired");
+            throw new BusinessException("MultiTenantProductManagementApp:Stock.NameRequired");
 
         foreach (var p in input.Products)
         {
             var set = new HashSet<Guid?>(new NullableGuidComparer());
             foreach (var v in p.Variants)
             {
-                if (v.Quantity < 0) throw new BusinessException("Stock.QuantityNegative");
-                if (!set.Add(v.ProductVariantId)) throw new BusinessException("Stock.DuplicateVariantInProduct");
+                if (v.Quantity < 0) throw new BusinessException("MultiTenantProductManagementApp:Stock.QuantityNegative");
+                if (!set.Add(v.ProductVariantId)) throw new BusinessException("MultiTenantProductManagementApp:Stock.DuplicateVariantInProduct");
             }
         }
     }
@@ -192,7 +192,7 @@ public class StockAggregateAppService : ApplicationService, IStockAggregateAppSe
         foreach (var p in input.Products)
         {
             if (!productMap.ContainsKey(p.ProductId))
-                throw new BusinessException("Stock.ProductNotFound").WithData("ProductId", p.ProductId);
+                throw new BusinessException("MultiTenantProductManagementApp:Stock.ProductNotFound").WithData("ProductId", p.ProductId);
 
             var sp = new StockProduct(LazyServiceProvider.LazyGetRequiredService<IGuidGenerator>().Create(), CurrentTenant.Id, stock.Id, p.ProductId);
             await _stockProductRepo.InsertAsync(sp, autoSave: true);
@@ -206,13 +206,13 @@ public class StockAggregateAppService : ApplicationService, IStockAggregateAppSe
                 if (v.ProductVariantId.HasValue)
                 {
                     if (!variantMap.TryGetValue(v.ProductVariantId.Value, out var ve))
-                        throw new BusinessException("Stock.VariantNotFound").WithData("ProductVariantId", v.ProductVariantId);
+                        throw new BusinessException("MultiTenantProductManagementApp:Stock.VariantNotFound").WithData("ProductVariantId", v.ProductVariantId);
                     if (ve.ProductId != p.ProductId)
-                        throw new BusinessException("Stock.ProductVariantMismatch").WithData("ProductId", p.ProductId).WithData("ProductVariantId", v.ProductVariantId);
+                        throw new BusinessException("MultiTenantProductManagementApp:Stock.ProductVariantMismatch").WithData("ProductId", p.ProductId).WithData("ProductVariantId", v.ProductVariantId);
                 }
             
                 if (v.Quantity > 5)
-                    throw new BusinessException("Stock.QuantityExceedsAvailableStock").WithData("Quantity", v.Quantity);
+                    throw new BusinessException("MultiTenantProductManagementApp:Stock.QuantityExceedsAvailableStock").WithData("Quantity", v.Quantity);
                 var line = new StockProductVariant(LazyServiceProvider.LazyGetRequiredService<IGuidGenerator>().Create(), CurrentTenant.Id, sp.Id, v.ProductVariantId, v.Quantity);
                 await _stockProductVariantRepo.InsertAsync(line, autoSave: true);
             }

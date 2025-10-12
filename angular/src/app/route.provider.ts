@@ -17,7 +17,7 @@ function configureRoutes(routesService: RoutesService) {
       },
       {
         path: '/products',
-        name: 'Products',
+        name: '::Menu:Products',
         iconClass: 'fa fa-box',
         order: 2,
         layout: eLayoutType.application,
@@ -25,7 +25,7 @@ function configureRoutes(routesService: RoutesService) {
       },
       {
         path: '/stocks',
-        name: 'Stocks',
+        name: '::Menu:Stocks',
         iconClass: 'fa fa-warehouse',
         order: 3,
         layout: eLayoutType.application,
@@ -33,7 +33,7 @@ function configureRoutes(routesService: RoutesService) {
       },
       {
         path: '/identity/users',
-        name: 'Identity',
+        name: '::Menu:Identity',
         iconClass: 'fa fa-users',
         order: 2,
         layout: eLayoutType.application,
@@ -41,7 +41,7 @@ function configureRoutes(routesService: RoutesService) {
       },
       {
         path: '/identity/roles',
-        name: 'Roles',
+        name: '::Menu:Roles',
         iconClass: 'fa fa-user-secret',
         order: 2,
         layout: eLayoutType.application,

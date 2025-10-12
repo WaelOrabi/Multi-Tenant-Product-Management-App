@@ -330,11 +330,11 @@ public class ProductAppService : ApplicationService, MultiTenantProductManagemen
         var variant = await _variantRepo.GetAsync(variantId);
         if (variant == null)
         {
-            throw new BusinessException("ProductVariant.ProductMismatch").WithData("ProductId", productId).WithData("VariantId", variantId);
+            throw new BusinessException("MultiTenantProductManagementApp:ProductVariant.ProductMismatch").WithData("ProductId", productId).WithData("VariantId", variantId);
         }
         if (variant.ProductId != productId)
         {
-            throw new BusinessException("ProductVariant.ProductMismatch").WithData("ProductId", productId).WithData("VariantId", variantId);
+            throw new BusinessException("MultiTenantProductManagementApp:ProductVariant.ProductMismatch").WithData("ProductId", productId).WithData("VariantId", variantId);
         }
         variant.SetSku(input.Sku);
         variant.SetPrice(input.Price);
@@ -349,7 +349,7 @@ public class ProductAppService : ApplicationService, MultiTenantProductManagemen
         var variant = await _variantRepo.GetAsync(variantId);
         if (variant.ProductId != productId)
         {
-            throw new BusinessException("ProductVariant.ProductMismatch").WithData("ProductId", productId).WithData("VariantId", variantId);
+            throw new BusinessException("MultiTenantProductManagementApp:ProductVariant.ProductMismatch").WithData("ProductId", productId).WithData("VariantId", variantId);
         }
         await _variantRepo.DeleteAsync(variant);
         return;

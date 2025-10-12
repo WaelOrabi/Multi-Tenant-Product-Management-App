@@ -5,11 +5,12 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ProductService, ProductStatus } from 'src/app/proxy/products';
 import { CreateUpdateProductDto, ProductDto, ProductVariantDto } from 'src/app/proxy/products/dtos';
 import { ToasterService } from '@abp/ng.theme.shared';
+import { LocalizationPipe, LocalizationService } from '@abp/ng.core';
 
 @Component({
   selector: 'app-product-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, LocalizationPipe],
   templateUrl: './product-form.component.html',
   styleUrls: ['./product-form.component.css']
 })
@@ -19,6 +20,7 @@ export class ProductFormComponent implements OnInit {
   private router = inject(Router);
   private service = inject(ProductService);
   private toaster = inject(ToasterService);
+  private l = inject(LocalizationService);
 
   form: FormGroup = this.fb.group({
     name: ['', Validators.required],
@@ -68,7 +70,7 @@ export class ProductFormComponent implements OnInit {
           for (const v of p.variants) this.variants.push(this.createVariantGroup(v));
         }
       },
-      error: err => { this.toaster.error('Failed to load product'); console.error(err); }
+      error: err => { this.toaster.error(this.l.instant('::Product.Form.LoadFailed')); console.error(err); }
     });
   }
 
@@ -181,7 +183,7 @@ export class ProductFormComponent implements OnInit {
     const obs = this.isEdit && this.id ? this.service.update(this.id, input) : this.service.create(input);
     obs.subscribe({
       next: (result) => { 
-        this.toaster.success(this.isEdit ? 'Product updated' : 'Product created'); 
+        this.toaster.success(this.isEdit ? this.l.instant('::Product.Form.ProductUpdated') : this.l.instant('::Product.Form.ProductCreated')); 
         if (!this.isEdit) {
           // Navigate to the newly created product's details page
           this.router.navigate(['/products', result.id]);
@@ -190,7 +192,7 @@ export class ProductFormComponent implements OnInit {
           this.router.navigate(['/products']);
         }
       },
-      error: err => { this.saving = false; this.toaster.error('Save failed'); console.error(err); }
+      error: err => { this.saving = false; this.toaster.error(this.l.instant('::Product.Form.SaveFailed')); console.error(err); }
     });
   }
 }

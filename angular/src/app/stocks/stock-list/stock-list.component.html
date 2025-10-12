@@ -1,10 +1,10 @@
 <div class="container py-3">
   <div class="d-flex justify-content-between align-items-center mb-3">
-    <h2 class="m-0 page-title">Stock</h2>
+    <h2 class="m-0 page-title">{{ '::Stock.List.Title' | abpLocalization }}</h2>
     @if (canCreate) {
       <button class="btn btn-primary btn-sm shadow-sm" (click)="create()">
         <i class="bi bi-plus-lg me-1"></i>
-        New Stock
+        {{ '::Stock.List.NewStock' | abpLocalization }}
       </button>
     }
   </div>
@@ -12,7 +12,7 @@
   <div class="list-card">
     <div class="row mb-3 mt-4 justify-content-center">
       <div class="col-12 col-md-6 col-lg-5 mx-auto">
-        <input class="form-control form-control-sm search-input" [(ngModel)]="filterText" (ngModelChange)="onFilterChange($event)" placeholder="Search by name..." />
+        <input class="form-control form-control-sm search-input" [(ngModel)]="filterText" (ngModelChange)="onFilterChange($event)" placeholder="{{ '::Stock.List.SearchPlaceholder' | abpLocalization }}" />
       </div>
     </div>
 
@@ -20,8 +20,8 @@
       <table class="table table-hover table-sm align-middle mb-2">
         <thead>
           <tr>
-            <th class="text-muted small text-uppercase">Name</th>
-            <th class="text-end text-muted small text-uppercase actions-col">Actions</th>
+            <th class="text-muted small text-uppercase">{{ '::Stock.List.Name' | abpLocalization }}</th>
+            <th class="text-end text-muted small text-uppercase actions-col">{{ '::Stock.List.Actions' | abpLocalization }}</th>
           </tr>
         </thead>
         <tbody>
@@ -32,12 +32,12 @@
               </td>
               <td class="text-end actions-col">
                 @if (canEdit) {
-                  <button class="btn btn-outline-primary btn-icon" title="Edit" (click)="edit(item);">
+                  <button class="btn btn-outline-primary btn-icon" [title]="'::Common.Edit' | abpLocalization" (click)="edit(item);">
                     <i class="bi bi-pencil"></i>
                   </button>
                 }
                 @if (canDelete) {
-                  <button class="btn btn-outline-danger btn-icon" title="Delete" (click)="remove(item);">
+                  <button class="btn btn-outline-danger btn-icon" [title]="'::Common.Delete' | abpLocalization" (click)="remove(item);">
                     <i class="bi bi-trash"></i>
                   </button>
                 }
@@ -45,7 +45,7 @@
             </tr>
           } @empty {
             <tr>
-              <td colspan="2" class="text-center text-muted py-4">No stock records found</td>
+              <td colspan="2" class="text-center text-muted py-4">{{ '::Stock.List.Empty' | abpLocalization }}</td>
             </tr>
           }
         </tbody>
@@ -53,12 +53,12 @@
     </div>
 
     <div class="d-flex justify-content-between align-items-center mt-4">
-      <div class="text-muted small">Total: {{ total() }}</div>
+      <div class="text-muted small">{{ '::Stock.List.Total' | abpLocalization }} {{ total() }}</div>
       <div>
-        <button class="btn btn-outline-secondary btn-sm me-2" (click)="onPageChange('prev')" [disabled]="pageIndex === 1" title="Previous">
+        <button class="btn btn-outline-secondary btn-sm me-2" (click)="onPageChange('prev')" [disabled]="pageIndex === 1" [title]="'::Common.Prev' | abpLocalization">
           <i class="bi bi-chevron-left"></i>
         </button>
-        <button class="btn btn-outline-secondary btn-sm" (click)="onPageChange('next')" [disabled]="pageIndex >= lastPage()" title="Next">
+        <button class="btn btn-outline-secondary btn-sm" (click)="onPageChange('next')" [disabled]="pageIndex >= lastPage()" [title]="'::Common.Next' | abpLocalization">
           <i class="bi bi-chevron-right"></i>
         </button>
       </div>

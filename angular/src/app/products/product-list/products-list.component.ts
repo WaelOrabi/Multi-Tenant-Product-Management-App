@@ -5,14 +5,14 @@ import { Router, RouterModule } from '@angular/router';
 import { ProductService } from 'src/app/proxy/products';
 import { ProductDto } from 'src/app/proxy/products/dtos';
 import { ToasterService } from '@abp/ng.theme.shared';
-import { PermissionService } from '@abp/ng.core';
+import { PermissionService, LocalizationPipe, LocalizationService } from '@abp/ng.core';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-products-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, LocalizationPipe],
   templateUrl: './products-list.component.html',
   styleUrls: ['./products-list.component.css']
 })
@@ -21,6 +21,7 @@ export class ProductsListComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private toaster = inject(ToasterService);
   private permission = inject(PermissionService);
+  private l = inject(LocalizationService);
   private destroy$ = new Subject<void>();
   private search$ = new Subject<string>();
 
@@ -90,7 +91,7 @@ export class ProductsListComponent implements OnInit, OnDestroy {
       },
       error: err => {
         this.loading = false;
-        this.toaster.error('Failed to load products');
+        this.toaster.error(this.l.instant('::Product.List.LoadFailed'));
         console.error(err);
       }
     });
@@ -100,11 +101,12 @@ export class ProductsListComponent implements OnInit, OnDestroy {
   prev(){ this.skipCount = Math.max(0, this.skipCount - this.pageSize); this.reload(); }
 
   confirmDelete(p: ProductDto){
-    if (!confirm(`Delete product "${p.name}"?`)) return;
+    const msg = `${this.l.instant('::Product.List.ConfirmDelete')} "${p.name}"?`;
+    if (!confirm(msg)) return;
     this.loading = true;
     this.service.delete(p.id).subscribe({
-      next: () => { this.toaster.success('Deleted'); this.reload(); },
-      error: err => { this.loading = false; this.toaster.error('Delete failed'); console.error(err); }
+      next: () => { this.toaster.success(this.l.instant('::Common.Deleted')); this.reload(); },
+      error: err => { this.loading = false; this.toaster.error(this.l.instant('::Common.DeleteFailed')); console.error(err); }
     })
   }
 

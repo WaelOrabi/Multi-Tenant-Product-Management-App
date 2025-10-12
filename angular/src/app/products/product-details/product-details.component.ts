@@ -4,12 +4,12 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ProductService } from 'src/app/proxy/products';
 import { ProductDto, ProductVariantOptionDto } from 'src/app/proxy/products/dtos';
 import { ToasterService } from '@abp/ng.theme.shared';
-import { PermissionService } from '@abp/ng.core';
+import { PermissionService, LocalizationPipe, LocalizationService } from '@abp/ng.core';
 
 @Component({
   selector: 'app-product-details',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, LocalizationPipe],
   templateUrl: './product-details.component.html',
   styleUrls: ['./product-details.component.css']
 })
@@ -19,6 +19,7 @@ export class ProductDetailsComponent implements OnInit {
   private service = inject(ProductService);
   private toaster = inject(ToasterService);
   private permission = inject(PermissionService);
+  private l = inject(LocalizationService);
 
   product: ProductDto | null = null;
   loading = false;
@@ -45,7 +46,7 @@ export class ProductDetailsComponent implements OnInit {
       },
       error: (err) => {
         this.loading = false;
-        this.toaster.error('Failed to load product details');
+        this.toaster.error(this.l.instant('::Product.Details.LoadFailed'));
         console.error(err);
       }
     });
@@ -57,17 +58,19 @@ export class ProductDetailsComponent implements OnInit {
   }
 
   private confirmDelete(): void {
-    if (!this.product || !confirm(`Delete product "${this.product.name}"?`)) return;
+    if (!this.product) return;
+    const msg = `${this.l.instant('::Product.Details.ConfirmDelete')} "${this.product.name}"?`;
+    if (!confirm(msg)) return;
     
     this.loading = true;
     this.service.delete(this.product.id).subscribe({
       next: () => {
-        this.toaster.success('Product deleted successfully');
+        this.toaster.success(this.l.instant('::Product.Details.Deleted'));
         this.router.navigate(['/products']);
       },
       error: (err) => {
         this.loading = false;
-        this.toaster.error('Delete failed');
+        this.toaster.error(this.l.instant('::Product.Details.DeleteFailed'));
         console.error(err);
       }
     });

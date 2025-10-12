@@ -4,12 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { StockAggregateService } from '../../proxy/stocks/stock-aggregate.service';
 import type { StockSummaryDto } from '../../proxy/stocks/dtos/models';
-import { PermissionService } from '@abp/ng.core';
+import { PermissionService, LocalizationPipe, LocalizationService } from '@abp/ng.core';
 
 @Component({
   selector: 'app-stock-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, LocalizationPipe],
   templateUrl: './stock-list.component.html',
   styleUrls: ['./stock-list.component.css'],
 })
@@ -17,6 +17,7 @@ export class StockListComponent {
   private stockService = inject(StockAggregateService);
   private router = inject(Router);
   private permission = inject(PermissionService);
+  private l = inject(LocalizationService);
 
   items = signal<StockSummaryDto[]>([]);
   total = signal(0);
@@ -94,7 +95,7 @@ export class StockListComponent {
   }
 
   remove(item: StockSummaryDto) {
-    if (!confirm('Delete this stock record?')) return;
+    if (!confirm(this.l.instant('::Stock.List.ConfirmDelete'))) return;
     this.loading.set(true);
     this.stockService.delete(item.id).subscribe({
       next: () => this.load(),

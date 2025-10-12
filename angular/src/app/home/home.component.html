@@ -4,7 +4,7 @@
       <div class="card-body">
         <div class="starting-content">
           @if(!hasLoggedIn){
-          <h3>Welcome</h3>
+          <h3>{{ '::Home.WelcomeTitle' | abpLocalization }}</h3>
           <p class="lead text-muted mb-2">
             {{ '::LongWelcomeMessage' | abpLocalization }}
           </p>
@@ -13,43 +13,41 @@
           >
           }
 
-          <h3>Getting Started</h3>
+          <h3>{{ '::Home.GettingStartedTitle' | abpLocalization }}</h3>
           <ng-container
             *ngTemplateOutlet="
               startingContentTemplate;
               context: {
                 $implicit: {
-                  description:
-                    'Learn how to create and run a new web application using the application startup template.',
+                  description: ('::Home.GettingStarted.Description' | abpLocalization),
                   href: 'https://abp.io/docs/latest/get-started',
-                  label: 'Getting Started'
+                  label: ('::Home.GettingStarted.Label' | abpLocalization)
                 }
               }
             "
           ></ng-container>
 
-          <h4>Web Application Development Tutorial</h4>
+          <h4>{{ '::Home.TutorialTitle' | abpLocalization }}</h4>
           <ng-container
             *ngTemplateOutlet="
               startingContentTemplate;
               context: {
                 $implicit: {
-                  description:
-                    'Learn how to build an ABP based web application named Acme.BookStore.',
+                  description: ('::Home.Tutorial.Description' | abpLocalization),
                   href: 'https://abp.io/docs/latest/tutorials/book-store/part-01?UI=NG&DB=EF',
-                  label: 'Explore Tutorial'
+                  label: ('::Home.Tutorial.Label' | abpLocalization)
                 }
               }
             "
           ></ng-container>
 
-          <h4>Customize Lepton Theme</h4>
-          <p class="text-muted mb-2">Learn how to customize LeptonX Theme as you wish.</p>
+          <h4>{{ '::Home.CustomizeLeptonTitle' | abpLocalization }}</h4>
+          <p class="text-muted mb-2">{{ '::Home.CustomizeLepton.Description' | abpLocalization }}</p>
           <a
             href="https://abp.io/docs/latest/framework/ui/angular/theming"
             class="btn btn-primary soft mb-5 mb-xl-0"
             target="_blank"
-            >Customize Lepton</a
+            >{{ '::Home.CustomizeLepton.Label' | abpLocalization }}</a
           >
         </div>
 
@@ -64,9 +62,8 @@
           visitLinkTemplate;
           context: {
             $implicit: {
-              label: 'Visit Support',
-              description:
-                'You can check for similar problems and solutions, or open a new topic to discuss your specific issue.',
+              label: ('::Home.VisitSupport.Label' | abpLocalization),
+              description: ('::Home.VisitSupport.Description' | abpLocalization),
               href: 'https://abp.io/support/questions',
               card: 'card overflow-hidden',
               imgClass: '',
@@ -81,9 +78,8 @@
           visitLinkTemplate;
           context: {
             $implicit: {
-              label: 'Visit Blog',
-              description:
-                'You can find content on .NET development, cross-platform, ASP.NET application templates, ABP-related news, and more.',
+              label: ('::Home.VisitBlog.Label' | abpLocalization),
+              description: ('::Home.VisitBlog.Description' | abpLocalization),
               href: 'https://abp.io/blog',
               card: 'card h-md-100 overflow-hidden',
               imgClass: 'margin-bottom: -24px',
@@ -100,15 +96,13 @@
       <div class="card-body">
         <div class="abp-community abp-logo mb-2"></div>
         <p class="lead text-muted">
-          A unique community platform for
-          <span class="fw-bold">ABP Lovers!</span>
+          <span [innerHTML]="'::Home.Community.HeadingLine' | abpLocalization"></span>
         </p>
         <p class="text-muted mb-2">
-          Explore all ABP users' experiences with the ABP Framework, discover articles and videos on
-          how to use ABP, and join raffles for a chance to win surprise gifts!
+          {{ '::Home.Community.Description1' | abpLocalization }}
         </p>
         <a class="btn btn-brand soft mb-3" href="https://abp.io/community/" target="_blank"
-          >Join ABP Community</a
+          >{{ '::Home.Community.JoinLabel' | abpLocalization }}</a
         >
       </div>
       <img class="mt-3" src="assets/images/getting-started/img-community.png" />
@@ -121,14 +115,14 @@
       tableTemplate;
       context: {
         $implicit: {
-          title: 'More from ABP.IO',
+          title: ('::Home.MoreFromAbp.Title' | abpLocalization),
           items: [
             {
               iconType: 'icon',
               style: true,
               icon: 'bi bi-check fs-4',
               iconClass: 'rounded-circle me-2 flex-center bg-brand soft',
-              title: 'Latest Release Logs',
+              title: ('::Home.MoreFromAbp.LatestRelease' | abpLocalization),
               link: 'https://github.com/abpframework/abp/releases',
             },
             {
@@ -136,7 +130,7 @@
               style: true,
               icon: 'bi bi-check fs-4',
               iconClass: 'rounded-circle me-2 flex-center bg-brand soft',
-              title: 'Video Courses',
+              title: ('::Home.MoreFromAbp.VideoCourses' | abpLocalization),
               link: 'https://abp.io/video-courses/essentials',
             },
             {
@@ -144,7 +138,7 @@
               style: true,
               icon: 'bi bi-check fs-4',
               iconClass: 'rounded-circle me-2 flex-center bg-brand soft',
-              title: 'Samples',
+              title: ('::Home.MoreFromAbp.Samples' | abpLocalization),
               link: 'https://abp.io/docs/latest/Samples/Index',
             },
             {
@@ -152,7 +146,7 @@
               style: true,
               icon: 'bi bi-check fs-4',
               iconClass: 'rounded-circle me-2 flex-center bg-brand soft',
-              title: 'Books',
+              title: ('::Home.MoreFromAbp.Books' | abpLocalization),
               link: 'https://abp.io/books',
             },
             {
@@ -160,7 +154,7 @@
               style: true,
               icon: 'bi bi-check fs-4',
               iconClass: 'rounded-circle me-2 flex-center bg-brand soft',
-              title: 'FAQ',
+              title: ('::Home.MoreFromAbp.FAQ' | abpLocalization),
               link: 'https://abp.io/faq',
             },
           ]
@@ -173,11 +167,10 @@
       <div class="card-body d-flex">
         <div class="row align-items-center">
           <div class="col-md-8">
-            <p class="text-muted mb-0">THE OFFICIAL GUIDE</p>
-            <h3>Mastering ABP Framework</h3>
+            <p class="text-muted mb-0">{{ '::Home.Book.OfficialGuide' | abpLocalization }}</p>
+            <h3>{{ '::Home.Book.Title' | abpLocalization }}</h3>
             <p class="text-muted">
-              Written by the creator of the ABP Framework, this book will help you gain a complete
-              understanding of the framework and modern web application development techniques.
+              {{ '::Home.Book.Description' | abpLocalization }}
             </p>
             <div class="d-md-flex mb-2 mb-md-0">
               <a
@@ -185,14 +178,14 @@
                 target="_blank"
                 class="btn btn-primary soft me-md-2 mb-2 mb-md-0"
               >
-                Buy on Amazon US
+                {{ '::Home.Book.BuyAmazon' | abpLocalization }}
               </a>
               <a
                 href="https://www.packtpub.com/product/mastering-abp-framework/9781801079242"
                 target="_blank"
                 class="btn btn-primary soft mb-2 mb-md-0"
               >
-                Buy on PACKT
+                {{ '::Home.Book.BuyPackt' | abpLocalization }}
               </a>
             </div>
           </div>
@@ -208,7 +201,7 @@
       tableTemplate;
       context: {
         $implicit: {
-          title: 'Follow us on Social Media',
+          title: ('::Home.Social.Title' | abpLocalization),
           items: [
             {
               title: 'X.com',
