@@ -162,196 +162,310 @@ public class ProductAppService : ApplicationService, MultiTenantProductManagemen
     [Authorize(MultiTenantProductManagementAppPermissions.Products.Create)]
     public virtual async Task<LegacyDtos.ProductDto> CreateAsync(LegacyDtos.CreateUpdateProductDto input)
     {
-        var createQueryable = await _productRepo.GetQueryableAsync();
-        var exists = await AsyncExecuter.AnyAsync(
-            createQueryable.Where(x => x.TenantId == CurrentTenant.Id && !x.IsDeleted && x.Name == input.Name)
-        );
-        if (exists)
-            throw new BusinessException("MultiTenantProductManagementApp:ProductDuplicateName").WithData("Name", input.Name);
-
-        var product = new Product(
-            LazyServiceProvider.LazyGetRequiredService<IGuidGenerator>().Create(),
-            CurrentTenant.Id,
-            input.Name,
-            input.Description,
-            input.BasePrice,
-            input.Category,
-            input.Status,
-            input.HasVariants
-        );
-
-        // Build variants on the aggregate BEFORE insert, so InsertAsync receives the entity with populated Variants
-        if (input.Variants != null && input.Variants.Count > 0)
+        try
         {
-            product.EnableVariants();
-            foreach (var v in input.Variants)
+            var createQueryable = await _productRepo.GetQueryableAsync();
+            var exists = await AsyncExecuter.AnyAsync(
+                createQueryable.Where(x => x.TenantId == CurrentTenant.Id && !x.IsDeleted && x.Name == input.Name)
+            );
+            if (exists)
+                throw new BusinessException("MultiTenantProductManagementApp:ProductDuplicateName").WithData("Name", input.Name);
+
+            var product = new Product(
+                LazyServiceProvider.LazyGetRequiredService<IGuidGenerator>().Create(),
+                CurrentTenant.Id,
+                input.Name,
+                input.Description,
+                input.BasePrice,
+                input.Category,
+                input.Status,
+                input.HasVariants
+            );
+
+            // Build variants on the aggregate BEFORE insert, so InsertAsync receives the entity with populated Variants
+            if (input.Variants != null && input.Variants.Count > 0)
             {
-                var options = (v.Options ?? new List<LegacyDtos.ProductVariantOptionDto>())
-                    .Select(o => new ProductVariantOption(o.Name, o.Value));
-                var variant = new ProductVariant(
-                    LazyServiceProvider.LazyGetRequiredService<IGuidGenerator>().Create(),
-                    product.TenantId,
-                    product.Id,
-                    v.Price,
-                    v.Sku,
-                    options
-                );
-                product.Variants.Add(variant);
+                product.EnableVariants();
+                foreach (var v in input.Variants)
+                {
+                    var options = (v.Options ?? new List<LegacyDtos.ProductVariantOptionDto>())
+                        .Select(o => new ProductVariantOption(o.Name, o.Value));
+                    var variant = new ProductVariant(
+                        LazyServiceProvider.LazyGetRequiredService<IGuidGenerator>().Create(),
+                        product.TenantId,
+                        product.Id,
+                        v.Price,
+                        v.Sku,
+                        options
+                    );
+                    product.Variants.Add(variant);
+                }
             }
+
+            await _productRepo.InsertAsync(product, autoSave: true);
+
+            var dto = MapProductToDto(product);
+            dto.Variants = (product.Variants ?? new List<ProductVariant>()).Select(MapVariantToDto).ToList();
+            // Publish integration event for other modules (e.g., StockService)
+            await _distributedEventBus.PublishAsync(new ProductCreatedEto
+            {
+                ProductId = product.Id,
+                Name = product.Name,
+                TenantId = CurrentTenant.Id
+            });
+            return dto;
         }
-
-        await _productRepo.InsertAsync(product, autoSave: true);
-
-        var dto = MapProductToDto(product);
-        dto.Variants = (product.Variants ?? new List<ProductVariant>()).Select(MapVariantToDto).ToList();
-        // Publish integration event for other modules (e.g., StockService)
-        await _distributedEventBus.PublishAsync(new ProductCreatedEto
+        catch (BusinessException)
         {
-            ProductId = product.Id,
-            Name = product.Name,
-            TenantId = CurrentTenant.Id
-        });
-        return dto;
+            throw;
+        }
+        catch (EntityNotFoundException)
+        {
+            throw;
+        }
+        catch (Volo.Abp.Validation.AbpValidationException)
+        {
+            throw;
+        }
+        catch (Exception)
+        {
+            throw new BusinessException("MultiTenantProductManagementApp:Common.OperationFailed").WithData("Operation", "Product.Create");
+        }
     }
 
     [Authorize(MultiTenantProductManagementAppPermissions.Products.Edit)]
     public virtual async Task<LegacyDtos.ProductDto> UpdateAsync(Guid id, LegacyDtos.CreateUpdateProductDto input)
     {
-        var details = await _productRepo.WithDetailsAsync(x => x.Variants);
-        var entity = await AsyncExecuter.FirstOrDefaultAsync(details.Where(x => x.Id == id));
-        if (entity == null)
-        {
-            throw new EntityNotFoundException(typeof(Product), id);
-        }
-
-        var updateQueryable = await _productRepo.GetQueryableAsync();
-        var existsWithName = await AsyncExecuter.AnyAsync(
-            updateQueryable.Where(x => x.TenantId == CurrentTenant.Id && !x.IsDeleted && x.Name == input.Name && x.Id != id)
-        );
-        if (existsWithName)
-            throw new BusinessException("MultiTenantProductManagementApp:ProductDuplicateName").WithData("Name", input.Name);
-
-        entity.SetName(input.Name);
-        entity.SetDescription(input.Description);
-        entity.SetBasePrice(input.BasePrice);
-        entity.SetCategory(input.Category);
-        entity.SetStatus(input.Status);
-        if (input.HasVariants) entity.EnableVariants(); else entity.DisableVariants();
-
-        entity.Variants.Clear();
-        if (input.Variants != null && input.Variants.Count > 0)
-        {
-            foreach (var v in input.Variants)
-            {
-                var options = (v.Options ?? new List<LegacyDtos.ProductVariantOptionDto>())
-                    .Select(o => new ProductVariantOption(o.Name, o.Value));
-                entity.Variants.Add(new ProductVariant(
-                    LazyServiceProvider.LazyGetRequiredService<IGuidGenerator>().Create(),
-                    entity.TenantId,
-                    entity.Id,
-                    v.Price,
-                    v.Sku,
-                    options));
-            }
-        }
-
         try
         {
-            await _productRepo.UpdateAsync(entity, autoSave: true);
-        }
-        catch (Volo.Abp.Data.AbpDbConcurrencyException)
-        {
-            var fresh = await _productRepo.GetAsync(id);
-            fresh.SetName(input.Name);
-            fresh.SetDescription(input.Description);
-            fresh.SetBasePrice(input.BasePrice);
-            fresh.SetCategory(input.Category);
-            fresh.SetStatus(input.Status);
-            if (input.HasVariants) fresh.EnableVariants(); else fresh.DisableVariants();
-            fresh.Variants.Clear();
-            foreach (var v in entity.Variants)
-                fresh.Variants.Add(v);
-            entity = fresh;
-            await _productRepo.UpdateAsync(entity, autoSave: true);
-        }
-
-        await _variantRepo.DeleteAsync(v => v.ProductId == entity.Id);
-        if (input.Variants != null)
-        {
-            foreach (var v in input.Variants)
+            var details = await _productRepo.WithDetailsAsync(x => x.Variants);
+            var entity = await AsyncExecuter.FirstOrDefaultAsync(details.Where(x => x.Id == id));
+            if (entity == null)
             {
-                var options = (v.Options ?? new List<LegacyDtos.ProductVariantOptionDto>())
-                    .Select(o => new ProductVariantOption(o.Name, o.Value));
-                var variant = new ProductVariant(
-                    LazyServiceProvider.LazyGetRequiredService<IGuidGenerator>().Create(),
-                    entity.TenantId,
-                    entity.Id,
-                    v.Price,
-                    v.Sku,
-                    options
-                );
-                await _variantRepo.InsertAsync(variant, autoSave: true);
+                throw new EntityNotFoundException(typeof(Product), id);
             }
-        }
 
-        var uq = await _variantRepo.WithDetailsAsync(x => x.Options);
-        var variants = await AsyncExecuter.ToListAsync(uq.Where(v => v.ProductId == entity.Id))
-            ?? new List<ProductVariant>();
-        var dto2 = MapProductToDto(entity);
-        dto2.Variants = (variants ?? new List<ProductVariant>()).Select(MapVariantToDto).ToList();
-        return dto2;
+            var updateQueryable = await _productRepo.GetQueryableAsync();
+            var existsWithName = await AsyncExecuter.AnyAsync(
+                updateQueryable.Where(x => x.TenantId == CurrentTenant.Id && !x.IsDeleted && x.Name == input.Name && x.Id != id)
+            );
+            if (existsWithName)
+                throw new BusinessException("MultiTenantProductManagementApp:ProductDuplicateName").WithData("Name", input.Name);
+
+            entity.SetName(input.Name);
+            entity.SetDescription(input.Description);
+            entity.SetBasePrice(input.BasePrice);
+            entity.SetCategory(input.Category);
+            entity.SetStatus(input.Status);
+            if (input.HasVariants) entity.EnableVariants(); else entity.DisableVariants();
+
+            entity.Variants.Clear();
+            if (input.Variants != null && input.Variants.Count > 0)
+            {
+                foreach (var v in input.Variants)
+                {
+                    var options = (v.Options ?? new List<LegacyDtos.ProductVariantOptionDto>())
+                        .Select(o => new ProductVariantOption(o.Name, o.Value));
+                    entity.Variants.Add(new ProductVariant(
+                        LazyServiceProvider.LazyGetRequiredService<IGuidGenerator>().Create(),
+                        entity.TenantId,
+                        entity.Id,
+                        v.Price,
+                        v.Sku,
+                        options));
+                }
+            }
+
+            try
+            {
+                await _productRepo.UpdateAsync(entity, autoSave: true);
+            }
+            catch (Volo.Abp.Data.AbpDbConcurrencyException)
+            {
+                var fresh = await _productRepo.GetAsync(id);
+                fresh.SetName(input.Name);
+                fresh.SetDescription(input.Description);
+                fresh.SetBasePrice(input.BasePrice);
+                fresh.SetCategory(input.Category);
+                fresh.SetStatus(input.Status);
+                if (input.HasVariants) fresh.EnableVariants(); else fresh.DisableVariants();
+                fresh.Variants.Clear();
+                foreach (var v in entity.Variants)
+                    fresh.Variants.Add(v);
+                entity = fresh;
+                await _productRepo.UpdateAsync(entity, autoSave: true);
+            }
+
+            await _variantRepo.DeleteAsync(v => v.ProductId == entity.Id);
+            if (input.Variants != null)
+            {
+                foreach (var v in input.Variants)
+                {
+                    var options = (v.Options ?? new List<LegacyDtos.ProductVariantOptionDto>())
+                        .Select(o => new ProductVariantOption(o.Name, o.Value));
+                    var variant = new ProductVariant(
+                        LazyServiceProvider.LazyGetRequiredService<IGuidGenerator>().Create(),
+                        entity.TenantId,
+                        entity.Id,
+                        v.Price,
+                        v.Sku,
+                        options
+                    );
+                    await _variantRepo.InsertAsync(variant, autoSave: true);
+                }
+            }
+
+            var uq = await _variantRepo.WithDetailsAsync(x => x.Options);
+            var variants = await AsyncExecuter.ToListAsync(uq.Where(v => v.ProductId == entity.Id))
+                ?? new List<ProductVariant>();
+            var dto2 = MapProductToDto(entity);
+            dto2.Variants = (variants ?? new List<ProductVariant>()).Select(MapVariantToDto).ToList();
+            return dto2;
+        }
+        catch (BusinessException)
+        {
+            throw;
+        }
+        catch (EntityNotFoundException)
+        {
+            throw;
+        }
+        catch (Volo.Abp.Validation.AbpValidationException)
+        {
+            throw;
+        }
+        catch (Exception)
+        {
+            throw new BusinessException("MultiTenantProductManagementApp:Common.OperationFailed").WithData("Operation", "Product.Update");
+        }
     }
 
     [Authorize(MultiTenantProductManagementAppPermissions.Products.Delete)]
     public virtual async Task DeleteAsync(Guid id)
     {
-        await _productRepo.DeleteAsync(id);
+        try
+        {
+            await _productRepo.DeleteAsync(id);
+        }
+        catch (BusinessException)
+        {
+            throw;
+        }
+        catch (EntityNotFoundException)
+        {
+            throw;
+        }
+        catch (Volo.Abp.Validation.AbpValidationException)
+        {
+            throw;
+        }
+        catch (Exception)
+        {
+            throw new BusinessException("MultiTenantProductManagementApp:Common.OperationFailed").WithData("Operation", "Product.Delete");
+        }
     }
 
     [Authorize(MultiTenantProductManagementAppPermissions.Products.Edit)]
     public virtual async Task<LegacyDtos.ProductVariantDto> AddVariantAsync(Guid productId, LegacyDtos.CreateUpdateProductVariantDto input)
     {
-        var product = await _productRepo.GetAsync(productId);
-        var variant = new ProductVariant(
-            LazyServiceProvider.LazyGetRequiredService<IGuidGenerator>().Create(),
-            CurrentTenant.Id,
-            product.Id,
-            input.Price,
-            input.Sku,
-            input.Options?.Select(o => new ProductVariantOption(o.Name, o.Value))
-        );
-        await _variantRepo.InsertAsync(variant, autoSave: true);
-        return MapVariantToDto(variant);
+        try
+        {
+            var product = await _productRepo.GetAsync(productId);
+            var variant = new ProductVariant(
+                LazyServiceProvider.LazyGetRequiredService<IGuidGenerator>().Create(),
+                CurrentTenant.Id,
+                product.Id,
+                input.Price,
+                input.Sku,
+                input.Options?.Select(o => new ProductVariantOption(o.Name, o.Value))
+            );
+            await _variantRepo.InsertAsync(variant, autoSave: true);
+            return MapVariantToDto(variant);
+        }
+        catch (BusinessException)
+        {
+            throw;
+        }
+        catch (EntityNotFoundException)
+        {
+            throw;
+        }
+        catch (Volo.Abp.Validation.AbpValidationException)
+        {
+            throw;
+        }
+        catch (Exception)
+        {
+            throw new BusinessException("MultiTenantProductManagementApp:Common.OperationFailed").WithData("Operation", "Product.AddVariant");
+        }
     }
 
     [Authorize(MultiTenantProductManagementAppPermissions.Products.Edit)]
     public virtual async Task<LegacyDtos.ProductVariantDto> UpdateVariantAsync(Guid productId, Guid variantId, LegacyDtos.CreateUpdateProductVariantDto input)
     {
-        var variant = await _variantRepo.GetAsync(variantId);
-        if (variant == null)
+        try
         {
-            throw new BusinessException("MultiTenantProductManagementApp:ProductVariant.ProductMismatch").WithData("ProductId", productId).WithData("VariantId", variantId);
+            var variant = await _variantRepo.GetAsync(variantId);
+            if (variant == null)
+            {
+                throw new BusinessException("MultiTenantProductManagementApp:ProductVariant.ProductMismatch").WithData("ProductId", productId).WithData("VariantId", variantId);
+            }
+            if (variant.ProductId != productId)
+            {
+                throw new BusinessException("MultiTenantProductManagementApp:ProductVariant.ProductMismatch").WithData("ProductId", productId).WithData("VariantId", variantId);
+            }
+            variant.SetSku(input.Sku);
+            variant.SetPrice(input.Price);
+            variant.ReplaceOptions((input.Options ?? new List<LegacyDtos.ProductVariantOptionDto>()).Select(o => new ProductVariantOption(o.Name, o.Value)));
+            await _variantRepo.UpdateAsync(variant, autoSave: true);
+            return MapVariantToDto(variant);
         }
-        if (variant.ProductId != productId)
+        catch (BusinessException)
         {
-            throw new BusinessException("MultiTenantProductManagementApp:ProductVariant.ProductMismatch").WithData("ProductId", productId).WithData("VariantId", variantId);
+            throw;
         }
-        variant.SetSku(input.Sku);
-        variant.SetPrice(input.Price);
-        variant.ReplaceOptions((input.Options ?? new List<LegacyDtos.ProductVariantOptionDto>()).Select(o => new ProductVariantOption(o.Name, o.Value)));
-        await _variantRepo.UpdateAsync(variant, autoSave: true);
-        return MapVariantToDto(variant);
+        catch (EntityNotFoundException)
+        {
+            throw;
+        }
+        catch (Volo.Abp.Validation.AbpValidationException)
+        {
+            throw;
+        }
+        catch (Exception)
+        {
+            throw new BusinessException("MultiTenantProductManagementApp:Common.OperationFailed").WithData("Operation", "Product.UpdateVariant");
+        }
     }
 
     [Authorize(MultiTenantProductManagementAppPermissions.Products.Delete)]
     public virtual async Task DeleteVariantAsync(Guid productId, Guid variantId)
     {
-        var variant = await _variantRepo.GetAsync(variantId);
-        if (variant.ProductId != productId)
+        try
         {
-            throw new BusinessException("MultiTenantProductManagementApp:ProductVariant.ProductMismatch").WithData("ProductId", productId).WithData("VariantId", variantId);
+            var variant = await _variantRepo.GetAsync(variantId);
+            if (variant.ProductId != productId)
+            {
+                throw new BusinessException("MultiTenantProductManagementApp:ProductVariant.ProductMismatch").WithData("ProductId", productId).WithData("VariantId", variantId);
+            }
+            await _variantRepo.DeleteAsync(variant);
+            return;
         }
-        await _variantRepo.DeleteAsync(variant);
-        return;
+        catch (BusinessException)
+        {
+            throw;
+        }
+        catch (EntityNotFoundException)
+        {
+            throw;
+        }
+        catch (Volo.Abp.Validation.AbpValidationException)
+        {
+            throw;
+        }
+        catch (Exception)
+        {
+            throw new BusinessException("MultiTenantProductManagementApp:Common.OperationFailed").WithData("Operation", "Product.DeleteVariant");
+        }
     }
 }

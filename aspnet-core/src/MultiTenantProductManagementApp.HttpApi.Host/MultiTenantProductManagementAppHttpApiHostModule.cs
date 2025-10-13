@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Volo.Abp.AspNetCore.Mvc.UI.Theme.LeptonXLite;
 using Volo.Abp.AspNetCore.Mvc.UI.Theme.LeptonXLite.Bundling;
@@ -19,6 +20,7 @@ using Volo.Abp.AspNetCore.MultiTenancy;
 using Volo.Abp.AspNetCore.Mvc;
 using Volo.Abp.AspNetCore.Mvc.UI.Bundling;
 using Volo.Abp.AspNetCore.Mvc.UI.Theme.Shared;
+using Volo.Abp.AspNetCore.ExceptionHandling;
 using Volo.Abp.AspNetCore.Serilog;
 using Volo.Abp.Autofac;
 using Volo.Abp.Modularity;
@@ -31,6 +33,7 @@ using MultiTenantProductManagementApp.EntityFrameworkCore;
 using ProductService;
 using StockService;
 using MultiTenantProductManagementApp.MultiTenancy;
+using MultiTenantProductManagementApp.ExceptionHandling;
 
 namespace MultiTenantProductManagementApp;
 
@@ -77,6 +80,10 @@ public class MultiTenantProductManagementAppHttpApiHostModule : AbpModule
         ConfigureVirtualFileSystem(context);
         ConfigureCors(context, configuration);
         ConfigureSwaggerServices(context, configuration);
+
+        context.Services.Replace(
+            ServiceDescriptor.Singleton<IExceptionToErrorInfoConverter, CustomExceptionToErrorInfoConverter>()
+        );
     }
 
     private void ConfigureAuthentication(ServiceConfigurationContext context)

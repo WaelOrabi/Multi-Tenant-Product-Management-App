@@ -90,6 +90,7 @@
     "Common.DeleteFailed": "فشل الحذف",
     "Common.Prev": "السابق",
     "Common.Next": "التالي",
+    "Common.OperationFailed":"فشلت العملية '{Operation}'. يرجى المحاولة مرة أخرى.",
 
     "Stock.List.Title": "المخزون",
     "Stock.List.NewStock": "مخزون جديد",

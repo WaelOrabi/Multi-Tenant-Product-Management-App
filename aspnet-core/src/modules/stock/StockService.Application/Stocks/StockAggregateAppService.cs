@@ -111,60 +111,117 @@ public class StockAggregateAppService : ApplicationService, IStockAggregateAppSe
     [Authorize(MultiTenantProductManagementAppPermissions.Stocks.Create)]
     public virtual async Task<StockDetailDto> CreateAsync(CreateUpdateStockAggregateDto input)
     {
-        ValidateInput(input);
-        var createQueryable = await _stockRepo.GetQueryableAsync();
-        var exists = await AsyncExecuter.AnyAsync(
-            createQueryable.Where(x => x.TenantId == CurrentTenant.Id && !x.IsDeleted && x.Name == input.Name)
-        );
-        if (exists)
-            throw new BusinessException("MultiTenantProductManagementApp:StockDuplicateName").WithData("Name", input.Name);
+        try
+        {
+            ValidateInput(input);
+            var createQueryable = await _stockRepo.GetQueryableAsync();
+            var exists = await AsyncExecuter.AnyAsync(
+                createQueryable.Where(x => x.TenantId == CurrentTenant.Id && !x.IsDeleted && x.Name == input.Name)
+            );
+            if (exists)
+                throw new BusinessException("MultiTenantProductManagementApp:StockDuplicateName").WithData("Name", input.Name);
 
-        var stock = new Stock(LazyServiceProvider.LazyGetRequiredService<IGuidGenerator>().Create(), CurrentTenant.Id, input.Name);
-        await _stockRepo.InsertAsync(stock, autoSave: true);
+            var stock = new Stock(LazyServiceProvider.LazyGetRequiredService<IGuidGenerator>().Create(), CurrentTenant.Id, input.Name);
+            await _stockRepo.InsertAsync(stock, autoSave: true);
 
-        await UpsertChildrenAsync(stock, input);
+            await UpsertChildrenAsync(stock, input);
 
-        return await GetAsync(stock.Id);
+            return await GetAsync(stock.Id);
+        }
+        catch (BusinessException)
+        {
+            throw;
+        }
+        catch (EntityNotFoundException)
+        {
+            throw;
+        }
+        catch (Volo.Abp.Validation.AbpValidationException)
+        {
+            throw;
+        }
+        catch (Exception)
+        {
+            throw new BusinessException("MultiTenantProductManagementApp:Common.OperationFailed").WithData("Operation", "Stock.Create");
+        }
     }
 
     [Authorize(MultiTenantProductManagementAppPermissions.Stocks.Edit)]
     public virtual async Task<StockDetailDto> UpdateAsync(Guid id, CreateUpdateStockAggregateDto input)
     {
-        ValidateInput(input);
-        var updateQueryable = await _stockRepo.GetQueryableAsync();
-        var existsWithName = await AsyncExecuter.AnyAsync(
-            updateQueryable.Where(x => x.TenantId == CurrentTenant.Id && !x.IsDeleted && x.Name == input.Name && x.Id != id)
-        );
-        if (existsWithName)
-            throw new BusinessException("MultiTenantProductManagementApp:StockDuplicateName").WithData("Name", input.Name);
-
-        var stock = await _stockRepo.GetAsync(id);
-        stock.SetName(input.Name);
-        await _stockRepo.UpdateAsync(stock, autoSave: true);
-
-        var existingProducts = await _stockProductRepo.GetListAsync(x => x.StockId == stock.Id);
-        foreach (var sp in existingProducts)
+        try
         {
-            await _stockProductVariantRepo.DeleteAsync(v => v.StockProductId == sp.Id);
+            ValidateInput(input);
+            var updateQueryable = await _stockRepo.GetQueryableAsync();
+            var existsWithName = await AsyncExecuter.AnyAsync(
+                updateQueryable.Where(x => x.TenantId == CurrentTenant.Id && !x.IsDeleted && x.Name == input.Name && x.Id != id)
+            );
+            if (existsWithName)
+                throw new BusinessException("MultiTenantProductManagementApp:StockDuplicateName").WithData("Name", input.Name);
+
+            var stock = await _stockRepo.GetAsync(id);
+            stock.SetName(input.Name);
+            await _stockRepo.UpdateAsync(stock, autoSave: true);
+
+            var existingProducts = await _stockProductRepo.GetListAsync(x => x.StockId == stock.Id);
+            foreach (var sp in existingProducts)
+            {
+                await _stockProductVariantRepo.DeleteAsync(v => v.StockProductId == sp.Id);
+            }
+            await _stockProductRepo.DeleteAsync(x => x.StockId == stock.Id);
+
+            await UpsertChildrenAsync(stock, input);
+
+            return await GetAsync(stock.Id);
         }
-        await _stockProductRepo.DeleteAsync(x => x.StockId == stock.Id);
-
-        await UpsertChildrenAsync(stock, input);
-
-        return await GetAsync(stock.Id);
+        catch (BusinessException)
+        {
+            throw;
+        }
+        catch (EntityNotFoundException)
+        {
+            throw;
+        }
+        catch (Volo.Abp.Validation.AbpValidationException)
+        {
+            throw;
+        }
+        catch (Exception)
+        {
+            throw new BusinessException("MultiTenantProductManagementApp:Common.OperationFailed").WithData("Operation", "Stock.Update");
+        }
     }
 
     [Authorize(MultiTenantProductManagementAppPermissions.Stocks.Delete)]
     public virtual async Task DeleteAsync(Guid id)
     {
-        var stock = await _stockRepo.GetAsync(id);
-        var products = await _stockProductRepo.GetListAsync(x => x.StockId == stock.Id);
-        foreach (var sp in products)
+        try
         {
-            await _stockProductVariantRepo.DeleteAsync(v => v.StockProductId == sp.Id);
+            var stock = await _stockRepo.GetAsync(id);
+            var products = await _stockProductRepo.GetListAsync(x => x.StockId == stock.Id);
+            foreach (var sp in products)
+            {
+                await _stockProductVariantRepo.DeleteAsync(v => v.StockProductId == sp.Id);
+            }
+            await _stockProductRepo.DeleteAsync(x => x.StockId == stock.Id);
+            await _stockRepo.DeleteAsync(id);
         }
-        await _stockProductRepo.DeleteAsync(x => x.StockId == stock.Id);
-        await _stockRepo.DeleteAsync(id);
+        catch (BusinessException)
+        {
+            throw;
+        }
+        catch (EntityNotFoundException)
+        {
+            throw;
+        }
+        catch (Volo.Abp.Validation.AbpValidationException)
+        {
+            throw;
+        }
+        catch (Exception)
+        {
+            throw new BusinessException("MultiTenantProductManagementApp:Common.OperationFailed").WithData("Operation", "Stock.Delete");
+        }
     }
 
     private void ValidateInput(CreateUpdateStockAggregateDto input)

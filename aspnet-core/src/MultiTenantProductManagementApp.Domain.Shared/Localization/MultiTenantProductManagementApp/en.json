@@ -88,6 +88,7 @@
     "Common.Delete": "Delete",
     "Common.Deleted": "Deleted",
     "Common.DeleteFailed": "Delete failed",
+    "Common.OperationFailed": "The operation '{Operation}' failed. Please try again.",
     "Common.Prev": "Prev",
     "Common.Next": "Next",
 
