@@ -184,6 +184,7 @@
     "Feature:Variants": "Product Variants",
     "Feature:Variants.Description": "Enable product options and variant SKUs.",
     "Feature:Stock": "Stock",
-    "Feature:Stock.Description": "Enable stock management per product/variant."
+    "Feature:Stock.Description": "Enable stock management per product/variant.",
+     "Settings.Products.AllowDuplicateNames": "duplicate names" 
   }
 }

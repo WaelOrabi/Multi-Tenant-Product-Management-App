@@ -30,6 +30,16 @@
     ng-zorro-antd "~20.0.0"
     tslib "^2.0.0"
 
+"@abp/ng.components@~9.3.5":
+  version "9.3.5"
+  resolved "https://registry.yarnpkg.com/@abp/ng.components/-/ng.components-9.3.5.tgz#27061b64975d2215325ba5665026058f5bb23928"
+  integrity sha512-1CZNdejUBdMHrwd9b1Pcw7ka/GvOYdNwnkyevipNex2KzyPoXW6C/sPecDAqvP6Aae4FrMPY3M8u0o2DHzbhKg==
+  dependencies:
+    "@ctrl/tinycolor" "^4.0.0"
+    chart.js "^3.5.1"
+    ng-zorro-antd "~20.0.0"
+    tslib "^2.0.0"
+
 "@abp/ng.core@~9.3.2", "@abp/ng.core@~9.3.5":
   version "9.3.5"
   resolved "https://registry.npmjs.org/@abp/ng.core/-/ng.core-9.3.5.tgz"
@@ -42,17 +52,9 @@
     ts-toolbelt "^9.0.0"
     tslib "^2.0.0"
 
-"@abp/ng.feature-management@^9.3.5":
+"@abp/ng.feature-management@^9.3.5", "@abp/ng.feature-management@~9.3.2":
   version "9.3.5"
   resolved "https://registry.yarnpkg.com/@abp/ng.feature-management/-/ng.feature-management-9.3.5.tgz#86ab571780a546949ec34c8048175c2e38507fe0"
-  integrity sha512-5yhxP3/M0fajvEAfXlt2noOmDgueFR/0xtG1Mh6BOUitNuWzblyO75+VJKk5FqnQNtaliNXKK61ibTz8VKcAVQ==
-  dependencies:
-    "@abp/ng.theme.shared" "~9.3.5"
-    tslib "^2.0.0"
-
-"@abp/ng.feature-management@~9.3.2":
-  version "9.3.5"
-  resolved "https://registry.npmjs.org/@abp/ng.feature-management/-/ng.feature-management-9.3.5.tgz"
   integrity sha512-5yhxP3/M0fajvEAfXlt2noOmDgueFR/0xtG1Mh6BOUitNuWzblyO75+VJKk5FqnQNtaliNXKK61ibTz8VKcAVQ==
   dependencies:
     "@abp/ng.theme.shared" "~9.3.5"
@@ -101,13 +103,13 @@
     should-quote "^1.0.0"
     typescript "~5.8.0"
 
-"@abp/ng.setting-management@~9.3.2":
-  version "9.3.2"
-  resolved "https://registry.npmjs.org/@abp/ng.setting-management/-/ng.setting-management-9.3.2.tgz"
-  integrity sha512-KqphzTvvpo2pUeq6s0AOCD+9WflR06E0+eEvX8GSDQIqrETa87z3/XOeCCZUZy5dAP2Y7GEGwQrL3xY0mRU0Pg==
+"@abp/ng.setting-management@^9.3.5":
+  version "9.3.5"
+  resolved "https://registry.yarnpkg.com/@abp/ng.setting-management/-/ng.setting-management-9.3.5.tgz#bc810cccbf03ad079a95fb26fca9ea229f6ce725"
+  integrity sha512-EgTIibCL0E76kQM32mNu4oA8xEcxqvEMmazqoQFL0ooAn2Hrdsc7mAXGr2S9URfW1HmCF5hzmNdASNqlirjokQ==
   dependencies:
-    "@abp/ng.components" "~9.3.2"
-    "@abp/ng.theme.shared" "~9.3.2"
+    "@abp/ng.components" "~9.3.5"
+    "@abp/ng.theme.shared" "~9.3.5"
     tslib "^2.0.0"
 
 "@abp/ng.tenant-management@~9.3.2":

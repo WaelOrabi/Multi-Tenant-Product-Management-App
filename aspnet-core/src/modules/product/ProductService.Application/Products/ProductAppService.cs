@@ -175,12 +175,17 @@ public class ProductAppService : ApplicationService, MultiTenantProductManagemen
                     .WithData("FeatureName", MultiTenantProductManagementAppFeatures.Product.Variants);
             }
         }
-            var createQueryable = await _productRepo.GetQueryableAsync();
-            var exists = await AsyncExecuter.AnyAsync(
-                createQueryable.Where(x => x.TenantId == CurrentTenant.Id && !x.IsDeleted && x.Name == input.Name)
-            );
-            if (exists)
-                throw new BusinessException("MultiTenantProductManagementApp:ProductDuplicateName").WithData("Name", input.Name);
+            var allowDuplicatesValue = await SettingProvider.GetOrNullAsync("MultiTenantProductManagementApp.Products.AllowDuplicateNames");
+            var allowDuplicates = string.Equals(allowDuplicatesValue, "true", StringComparison.OrdinalIgnoreCase);
+            if (!allowDuplicates)
+            {
+                var createQueryable = await _productRepo.GetQueryableAsync();
+                var exists = await AsyncExecuter.AnyAsync(
+                    createQueryable.Where(x => x.TenantId == CurrentTenant.Id && !x.IsDeleted && x.Name == input.Name)
+                );
+                if (exists)
+                    throw new BusinessException("MultiTenantProductManagementApp:ProductDuplicateName").WithData("Name", input.Name);
+            }
 
             var product = new Product(
                 LazyServiceProvider.LazyGetRequiredService<IGuidGenerator>().Create(),
@@ -263,13 +268,17 @@ public class ProductAppService : ApplicationService, MultiTenantProductManagemen
             {
                 throw new EntityNotFoundException(typeof(Product), id);
             }
-
-            var updateQueryable = await _productRepo.GetQueryableAsync();
-            var existsWithName = await AsyncExecuter.AnyAsync(
-                updateQueryable.Where(x => x.TenantId == CurrentTenant.Id && !x.IsDeleted && x.Name == input.Name && x.Id != id)
-            );
-            if (existsWithName)
-                throw new BusinessException("MultiTenantProductManagementApp:ProductDuplicateName").WithData("Name", input.Name);
+            var allowDuplicatesValue2 = await SettingProvider.GetOrNullAsync("MultiTenantProductManagementApp.Products.AllowDuplicateNames");
+            var allowDuplicates = string.Equals(allowDuplicatesValue2, "true", StringComparison.OrdinalIgnoreCase);
+            if (!allowDuplicates)
+            {
+                var updateQueryable = await _productRepo.GetQueryableAsync();
+                var existsWithName = await AsyncExecuter.AnyAsync(
+                    updateQueryable.Where(x => x.TenantId == CurrentTenant.Id && !x.IsDeleted && x.Name == input.Name && x.Id != id)
+                );
+                if (existsWithName)
+                    throw new BusinessException("MultiTenantProductManagementApp:ProductDuplicateName").WithData("Name", input.Name);
+            }
 
             entity.SetName(input.Name);
             entity.SetDescription(input.Description);

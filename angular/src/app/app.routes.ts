@@ -28,6 +28,16 @@ export const appRoutes: Routes = [
       ]),
   },
   {
+    path: 'setting-management',
+    loadChildren: () =>
+      import('@abp/ng.setting-management').then(m => [
+        {
+          path: '',
+          component: m.SettingManagementComponent,
+        },
+      ]),
+  },
+  {
     path: 'account',
     loadChildren: () => import('@abp/ng.account').then(m => m.createRoutes()),
   },

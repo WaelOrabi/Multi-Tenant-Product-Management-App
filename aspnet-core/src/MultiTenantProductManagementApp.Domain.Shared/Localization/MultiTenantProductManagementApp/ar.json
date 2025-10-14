@@ -150,7 +150,9 @@
   "Feature:Variants": "متغيرات المنتج",
   "Feature:Variants.Description": "تفعيل الخيارات ومتغيرات SKU للمنتج.",
   "Feature:Stock": "المخزون",
-  "Feature:Stock.Description": "تفعيل إدارة المخزون لكل منتج/متغير."
+  "Feature:Stock.Description": "تفعيل إدارة المخزون لكل منتج/متغير.",
+  "Settings.Products.AllowDuplicateNames": "تكرار الاسماء"
+
   }
 }
 
