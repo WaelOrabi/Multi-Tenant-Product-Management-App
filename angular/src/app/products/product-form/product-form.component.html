@@ -25,13 +25,17 @@
         <label>{{ '::Product.Form.Description' | abpLocalization }}</label>
         <textarea class="form-control" formControlName="description"></textarea>
       </div>
-      <div class="form-group inline-center">
-        <label class="checkbox-label">
-          <input type="checkbox" formControlName="hasVariants" />
-          {{ '::Product.Form.HasVariants' | abpLocalization }}
-        </label>
-      </div>
-      @if (!form.value.hasVariants) {
+      
+      @if (hasVariantsFeature) {
+        <div class="form-group inline-center">
+          <label class="checkbox-label">
+            <input type="checkbox" formControlName="hasVariants" />
+            {{ '::Product.Form.HasVariants' | abpLocalization }}
+          </label>
+        </div>
+      }
+      
+      @if (!hasVariantsFeature || !form.value.hasVariants) {
         <div class="form-group">
           <label>{{ '::Product.Form.BasePrice' | abpLocalization }}</label>
           <input class="form-control" type="number" step="0.01" min="0" formControlName="basePrice" />
@@ -39,7 +43,7 @@
       }
     </div>
 
-    @if (form.value.hasVariants) {
+    @if (hasVariantsFeature && form.value.hasVariants) {
     <div class="variants">
       <div class="v-header">
         <div>{{ '::Product.Form.Sku' | abpLocalization }}</div>

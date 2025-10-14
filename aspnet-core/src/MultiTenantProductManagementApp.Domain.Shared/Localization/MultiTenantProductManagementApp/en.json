@@ -179,6 +179,11 @@
     "Product.Validation.OptionValueMaxLength": "Option value must be at most {0} characters.",
     "Product.Details.Created": "Created",
     "Product.Details.NoVariantsFoundTitle": "No Variants Found",
-    "Product.Details.NotFoundTitle": "Product Not Found"
+    "Product.Details.NotFoundTitle": "Product Not Found",
+    "Feature:GroupName": "Product Management",
+    "Feature:Variants": "Product Variants",
+    "Feature:Variants.Description": "Enable product options and variant SKUs.",
+    "Feature:Stock": "Stock",
+    "Feature:Stock.Description": "Enable stock management per product/variant."
   }
 }

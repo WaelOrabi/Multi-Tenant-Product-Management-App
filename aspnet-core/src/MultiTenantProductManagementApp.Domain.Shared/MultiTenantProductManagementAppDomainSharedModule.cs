@@ -23,7 +23,8 @@ namespace MultiTenantProductManagementApp;
     typeof(AbpOpenIddictDomainSharedModule),
     typeof(AbpPermissionManagementDomainSharedModule),
     typeof(AbpSettingManagementDomainSharedModule),
-    typeof(AbpTenantManagementDomainSharedModule)    
+    typeof(AbpTenantManagementDomainSharedModule)    ,
+    typeof(AbpFeatureManagementDomainSharedModule)
     )]
 public class MultiTenantProductManagementAppDomainSharedModule : AbpModule
 {

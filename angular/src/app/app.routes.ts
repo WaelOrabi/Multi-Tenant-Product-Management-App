@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { featureCanMatch } from './shared/feature.guard';
 
 export const appRoutes: Routes = [
   {
@@ -13,6 +14,18 @@ export const appRoutes: Routes = [
   {
     path: 'stocks',
     loadChildren: () => import('./stocks/stocks.routes').then(m => m.stocksRoutes),
+    canMatch: [featureCanMatch],
+    data: { requiredFeatures: ['MultiTenantProductManagementApp.Stock'] },
+  },
+  {
+    path: 'feature-management',
+    loadChildren: () =>
+      import('@abp/ng.feature-management').then(m => [
+        {
+          path: '',
+          component: m.FeatureManagementComponent,
+        },
+      ]),
   },
   {
     path: 'account',

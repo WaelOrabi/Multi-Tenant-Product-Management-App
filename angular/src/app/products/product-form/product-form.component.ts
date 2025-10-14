@@ -5,7 +5,7 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ProductService, ProductStatus } from 'src/app/proxy/products';
 import { CreateUpdateProductDto, ProductDto, ProductVariantDto } from 'src/app/proxy/products/dtos';
 import { ToasterService } from '@abp/ng.theme.shared';
-import { LocalizationPipe, LocalizationService } from '@abp/ng.core';
+import { LocalizationPipe, LocalizationService, ConfigStateService } from '@abp/ng.core';
 
 @Component({
   selector: 'app-product-form',
@@ -21,6 +21,9 @@ export class ProductFormComponent implements OnInit {
   private service = inject(ProductService);
   private toaster = inject(ToasterService);
   private l = inject(LocalizationService);
+  private config = inject(ConfigStateService);
+
+  hasVariantsFeature = this.config.getFeature('MultiTenantProductManagementApp.Variants') === 'true';
 
   form: FormGroup = this.fb.group({
     name: ['', Validators.required],
@@ -41,6 +44,12 @@ export class ProductFormComponent implements OnInit {
   ngOnInit(): void {
     this.isEdit = (this.route.snapshot.data['mode'] || '') === 'edit';
     this.id = this.route.snapshot.paramMap.get('id');
+
+    // If variants feature is disabled, force hasVariants to false and disable the control
+    if (!this.hasVariantsFeature) {
+      this.form.get('hasVariants')!.setValue(false);
+      this.form.get('hasVariants')!.disable();
+    }
 
     if (this.isEdit && this.id) {
       this.load();
@@ -63,10 +72,10 @@ export class ProductFormComponent implements OnInit {
           basePrice: p.basePrice ?? null,
           category: p.category,
           status: p.status ?? ProductStatus.Inactive,
-          hasVariants: p.hasVariants,
+          hasVariants: this.hasVariantsFeature ? p.hasVariants : false,
         });
         this.variants.clear();
-        if (p.hasVariants && p.variants) {
+        if (p.hasVariants && p.variants && this.hasVariantsFeature) {
           for (const v of p.variants) this.variants.push(this.createVariantGroup(v));
         }
       },
@@ -74,7 +83,6 @@ export class ProductFormComponent implements OnInit {
     });
   }
 
-  // Use 'any' to tolerate older generated proxies that don't yet include 'options' on ProductVariantDto
   createVariantGroup(v?: any){
     const group = this.fb.group({
       sku: [v?.sku || '', Validators.required],
@@ -88,10 +96,8 @@ export class ProductFormComponent implements OnInit {
         opts.push(this.createOptionGroup(o.name, o.value));
       }
     } else {
-      // Default blank option row to guide the user for new variants
       opts.push(this.createOptionGroup());
     }
-    // Wire validators to keep option names unique per variant
     this.applyOptionNameValidators(opts);
     return group;
   }
@@ -135,8 +141,6 @@ export class ProductFormComponent implements OnInit {
   }
 
   private applyOptionNameValidators(opts: FormArray<FormGroup>){
-    // Subscribe once to update duplicate errors
-    // Clear previous subscription by using a micro-task debounce
     setTimeout(() => {
       const check = () => {
         const names = opts.controls.map(c => (c.get('name') as FormControl)?.value?.trim()?.toLowerCase() || '');
@@ -157,7 +161,6 @@ export class ProductFormComponent implements OnInit {
         });
       };
       check();
-      // Ensure changes propagate on value changes
       opts.valueChanges.subscribe(() => check());
     });
   }
@@ -166,15 +169,14 @@ export class ProductFormComponent implements OnInit {
     if (this.form.invalid) return;
     this.saving = true;
     const value = this.form.value as any;
-    // Cast to 'any' to allow sending 'options' even if local proxy type doesn't declare it yet
     const input: any = {
       name: value.name,
       description: value.description || undefined,
       basePrice: value.hasVariants ? null : (value.basePrice ?? null),
       category: value.category || undefined,
       status: value.status ?? ProductStatus.Inactive,
-      hasVariants: value.hasVariants,
-      variants: value.hasVariants ? (value.variants as any).map((v: any) => ({
+      hasVariants: this.hasVariantsFeature ? value.hasVariants : false,
+      variants: (value.hasVariants && this.hasVariantsFeature) ? (value.variants as any).map((v: any) => ({
         sku: v.sku,
         price: v.price,
         options: (v.options || [])
@@ -185,10 +187,8 @@ export class ProductFormComponent implements OnInit {
       next: (result) => { 
         this.toaster.success(this.isEdit ? this.l.instant('::Product.Form.ProductUpdated') : this.l.instant('::Product.Form.ProductCreated')); 
         if (!this.isEdit) {
-          // Navigate to the newly created product's details page
           this.router.navigate(['/products', result.id]);
         } else {
-          // Navigate back to products list for edits
           this.router.navigate(['/products']);
         }
       },

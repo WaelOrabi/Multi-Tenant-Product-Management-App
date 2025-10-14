@@ -45,7 +45,7 @@ public class CreateUpdateProductDtoValidator : AbstractValidator<CreateUpdatePro
                 .WithMessage(L["Product.Validation.AtLeastOneVariant"]);
 
             RuleForEach(x => x.Variants)
-                .SetValidator(new CreateUpdateProductVariantDtoValidator());
+                .SetValidator(new CreateUpdateProductVariantDtoValidator(L));
 
             RuleFor(x => x)
                 .Must(x =>

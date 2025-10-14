@@ -17,9 +17,11 @@ using MultiTenantProductManagementApp.Permissions;
 using LegacyDtos = MultiTenantProductManagementApp.Products.Dtos;
 using Volo.Abp.EventBus.Distributed;
 using ProductService.Events;
-
+using Volo.Abp.Features;
+using MultiTenantProductManagementApp.Features;
 namespace ProductService.Products;
-
+using Volo.Abp.Features;
+using MultiTenantProductManagementApp.Features;
 [Authorize(MultiTenantProductManagementAppPermissions.Products.Default)]
 public class ProductAppService : ApplicationService, MultiTenantProductManagementApp.Products.IProductAppService
 {
@@ -99,6 +101,7 @@ public class ProductAppService : ApplicationService, MultiTenantProductManagemen
 
     public virtual async Task<PagedResultDto<LegacyDtos.ProductDto>> GetListAsync(LegacyDtos.GetProductListInput input)
     {
+        
         var queryable = await _productRepo.WithDetailsAsync(x => x.Variants);
 
         if (!input.FilterText.IsNullOrWhiteSpace())
@@ -164,6 +167,14 @@ public class ProductAppService : ApplicationService, MultiTenantProductManagemen
     {
         try
         {
+        if (!await FeatureChecker.IsEnabledAsync(MultiTenantProductManagementAppFeatures.Product.Variants))
+        {
+            if (input.HasVariants || (input.Variants != null && input.Variants.Count > 0))
+            {
+                throw new BusinessException("Volo.Abp:FeatureIsNotEnabled")
+                    .WithData("FeatureName", MultiTenantProductManagementAppFeatures.Product.Variants);
+            }
+        }
             var createQueryable = await _productRepo.GetQueryableAsync();
             var exists = await AsyncExecuter.AnyAsync(
                 createQueryable.Where(x => x.TenantId == CurrentTenant.Id && !x.IsDeleted && x.Name == input.Name)
@@ -238,6 +249,14 @@ public class ProductAppService : ApplicationService, MultiTenantProductManagemen
     {
         try
         {
+        if (!await FeatureChecker.IsEnabledAsync(MultiTenantProductManagementAppFeatures.Product.Variants))
+        {
+            if (input.HasVariants || (input.Variants != null && input.Variants.Count > 0))
+            {
+                throw new BusinessException("Volo.Abp:FeatureIsNotEnabled")
+                    .WithData("FeatureName", MultiTenantProductManagementAppFeatures.Product.Variants);
+            }
+        }
             var details = await _productRepo.WithDetailsAsync(x => x.Variants);
             var entity = await AsyncExecuter.FirstOrDefaultAsync(details.Where(x => x.Id == id));
             if (entity == null)
@@ -365,7 +384,8 @@ public class ProductAppService : ApplicationService, MultiTenantProductManagemen
         }
     }
 
-    [Authorize(MultiTenantProductManagementAppPermissions.Products.Edit)]
+   [Authorize(MultiTenantProductManagementAppPermissions.Products.Edit)]
+[RequiresFeature(MultiTenantProductManagementAppFeatures.Product.Variants)]
     public virtual async Task<LegacyDtos.ProductVariantDto> AddVariantAsync(Guid productId, LegacyDtos.CreateUpdateProductVariantDto input)
     {
         try
@@ -401,6 +421,8 @@ public class ProductAppService : ApplicationService, MultiTenantProductManagemen
     }
 
     [Authorize(MultiTenantProductManagementAppPermissions.Products.Edit)]
+    [RequiresFeature(MultiTenantProductManagementAppFeatures.Product.Variants)]
+
     public virtual async Task<LegacyDtos.ProductVariantDto> UpdateVariantAsync(Guid productId, Guid variantId, LegacyDtos.CreateUpdateProductVariantDto input)
     {
         try
@@ -439,6 +461,8 @@ public class ProductAppService : ApplicationService, MultiTenantProductManagemen
     }
 
     [Authorize(MultiTenantProductManagementAppPermissions.Products.Delete)]
+  [RequiresFeature(MultiTenantProductManagementAppFeatures.Product.Variants)]
+
     public virtual async Task DeleteVariantAsync(Guid productId, Guid variantId)
     {
         try

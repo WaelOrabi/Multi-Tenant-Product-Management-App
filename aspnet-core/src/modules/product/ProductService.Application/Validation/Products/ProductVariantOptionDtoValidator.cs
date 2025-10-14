@@ -14,10 +14,10 @@ public class ProductVariantOptionDtoValidator : AbstractValidator<ProductVariant
         L = localizer;
         RuleFor(x => x.Name)
             .NotEmpty().WithMessage(L["Product.Validation.OptionNameRequired"]) 
-            .MaximumLength(64).WithMessage(L["Product.Validation.OptionNameMaxLength"], 64);
+            .MaximumLength(64).WithMessage(L["Product.Validation.OptionNameMaxLength", 64]);
 
         RuleFor(x => x.Value)
             .NotEmpty().WithMessage(L["Product.Validation.OptionValueRequired"]) 
-            .MaximumLength(128).WithMessage(L["Product.Validation.OptionValueMaxLength"], 128);
+            .MaximumLength(128).WithMessage(L["Product.Validation.OptionValueMaxLength", 128]);
     }
 }

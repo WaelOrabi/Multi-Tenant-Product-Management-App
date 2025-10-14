@@ -145,6 +145,13 @@
   "Product.Validation.OptionNameRequired": "اسم الخيار مطلوب.",
   "Product.Validation.OptionNameMaxLength": "يجب ألا يزيد طول اسم الخيار عن {0} حرفاً.",
   "Product.Validation.OptionValueRequired": "قيمة الخيار مطلوبة.",
-  "Product.Validation.OptionValueMaxLength": "يجب ألا يزيد طول قيمة الخيار عن {0} حرفاً."
+  "Product.Validation.OptionValueMaxLength": "يجب ألا يزيد طول قيمة الخيار عن {0} حرفاً.",
+  "Feature:GroupName": "إدارة المنتجات",
+  "Feature:Variants": "متغيرات المنتج",
+  "Feature:Variants.Description": "تفعيل الخيارات ومتغيرات SKU للمنتج.",
+  "Feature:Stock": "المخزون",
+  "Feature:Stock.Description": "تفعيل إدارة المخزون لكل منتج/متغير."
   }
 }
+
+  

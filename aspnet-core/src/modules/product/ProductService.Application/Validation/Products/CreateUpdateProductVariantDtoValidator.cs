@@ -14,7 +14,7 @@ public class CreateUpdateProductVariantDtoValidator : AbstractValidator<CreateUp
         L = localizer;
         RuleFor(x => x.Sku)
             .MaximumLength(64)
-            .WithMessage(L["Product.Validation.SkuMaxLength"], 64);
+            .WithMessage(L["Product.Validation.SkuMaxLength", 64]);
 
         RuleFor(x => x.Price)
             .GreaterThanOrEqualTo(0)
@@ -23,7 +23,7 @@ public class CreateUpdateProductVariantDtoValidator : AbstractValidator<CreateUp
         When(x => x.Options != null, () =>
         {
             RuleForEach(x => x.Options!)
-                .SetValidator(new ProductVariantOptionDtoValidator());
+                .SetValidator(new ProductVariantOptionDtoValidator(L));
         });
     }
 }

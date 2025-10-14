@@ -15,10 +15,13 @@ using MultiTenantProductManagementApp.Stocks;
 using MultiTenantProductManagementApp.Stocks.Dtos;
 using StockService.Stocks;
 using ProductService.Products;
+using Volo.Abp.Features;
+using MultiTenantProductManagementApp.Features;
 
 namespace StockService.Stocks;
 
 [Authorize(MultiTenantProductManagementAppPermissions.Stocks.Default)]
+[RequiresFeature(MultiTenantProductManagementAppFeatures.Inventory.Stock)]
 public class StockAggregateAppService : ApplicationService, IStockAggregateAppService
 {
     private readonly IRepository<Stock, Guid> _stockRepo;
