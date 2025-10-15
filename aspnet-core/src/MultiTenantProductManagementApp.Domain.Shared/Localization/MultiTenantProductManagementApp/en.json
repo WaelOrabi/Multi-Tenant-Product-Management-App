@@ -185,6 +185,13 @@
     "Feature:Variants.Description": "Enable product options and variant SKUs.",
     "Feature:Stock": "Stock",
     "Feature:Stock.Description": "Enable stock management per product/variant.",
-     "Settings.Products.AllowDuplicateNames": "duplicate names" 
+  "Settings.Products.AllowDuplicateNames": "Allow Duplicate Product Names",
+  "Settings.Products.AllowDuplicateNames.Description": "When enabled, products with duplicate names are allowed.",
+  "SettingsSavedSuccessfully": "Settings saved successfully",
+  "SettingSaveFailed": "Failed to save settings",
+  "Saving": "Saving...",
+  "Save": "Save",
+  "Reset": "Reset"
+
   }
 }

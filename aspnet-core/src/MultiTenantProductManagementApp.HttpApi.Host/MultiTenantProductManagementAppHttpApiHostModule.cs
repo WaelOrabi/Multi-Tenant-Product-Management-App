@@ -28,13 +28,11 @@ using Volo.Abp.Security.Claims;
 using Volo.Abp.Swashbuckle;
 using Volo.Abp.UI.Navigation.Urls;
 using Volo.Abp.VirtualFileSystem;
-using Volo.Abp.EventBus.RabbitMq;
 using MultiTenantProductManagementApp.EntityFrameworkCore;
 using ProductService;
 using StockService;
 using MultiTenantProductManagementApp.MultiTenancy;
 using MultiTenantProductManagementApp.ExceptionHandling;
-
 namespace MultiTenantProductManagementApp;
 
 [DependsOn(
@@ -52,6 +50,7 @@ namespace MultiTenantProductManagementApp;
     typeof(ProductServiceEntityFrameworkCoreModule),
     typeof(StockServiceHttpApiModule),
     typeof(StockServiceEntityFrameworkCoreModule)
+    
 )]
 public class MultiTenantProductManagementAppHttpApiHostModule : AbpModule
 {

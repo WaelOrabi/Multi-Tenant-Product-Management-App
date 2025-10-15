@@ -17,26 +17,7 @@ export const appRoutes: Routes = [
     canMatch: [featureCanMatch],
     data: { requiredFeatures: ['MultiTenantProductManagementApp.Stock'] },
   },
-  {
-    path: 'feature-management',
-    loadChildren: () =>
-      import('@abp/ng.feature-management').then(m => [
-        {
-          path: '',
-          component: m.FeatureManagementComponent,
-        },
-      ]),
-  },
-  {
-    path: 'setting-management',
-    loadChildren: () =>
-      import('@abp/ng.setting-management').then(m => [
-        {
-          path: '',
-          component: m.SettingManagementComponent,
-        },
-      ]),
-  },
+  
   {
     path: 'account',
     loadChildren: () => import('@abp/ng.account').then(m => m.createRoutes()),
@@ -50,6 +31,16 @@ export const appRoutes: Routes = [
     loadChildren: () =>
       import('@abp/ng.tenant-management').then(m => m.createRoutes()),
   },
+   {
+    path: 'feature-management',
+    loadChildren: () =>
+      import('@abp/ng.feature-management').then(m =>[
+               {
+          path: '',
+          component: m.FeatureManagementComponent,
+        },
+      ]),
+   },
   {
     path: 'setting-management',
     loadChildren: () =>

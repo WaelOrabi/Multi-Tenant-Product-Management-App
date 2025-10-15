@@ -6,7 +6,7 @@ using Volo.Abp.Modularity;
 using Volo.Abp.PermissionManagement;
 using Volo.Abp.SettingManagement;
 using Volo.Abp.TenantManagement;
-
+using Volo.Abp.UI.Navigation;
 namespace MultiTenantProductManagementApp;
 
 [DependsOn(
@@ -28,5 +28,10 @@ public class MultiTenantProductManagementAppApplicationModule : AbpModule
         {
             options.AddMaps<MultiTenantProductManagementAppApplicationModule>();
         });
+             Configure<AbpNavigationOptions>(options =>
+        {
+            options.MenuContributors.Add(new MultiTenantProductManagementAppMenuContributor());
+        });
+        
     }
 }

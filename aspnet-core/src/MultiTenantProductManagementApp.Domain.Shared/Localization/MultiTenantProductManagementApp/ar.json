@@ -151,7 +151,13 @@
   "Feature:Variants.Description": "تفعيل الخيارات ومتغيرات SKU للمنتج.",
   "Feature:Stock": "المخزون",
   "Feature:Stock.Description": "تفعيل إدارة المخزون لكل منتج/متغير.",
-  "Settings.Products.AllowDuplicateNames": "تكرار الاسماء"
+  "Settings.Products.AllowDuplicateNames": "السماح بتكرار أسماء المنتجات",
+  "Settings.Products.AllowDuplicateNames.Description": "عند التفعيل، يُسمح بالمنتجات ذات الأسماء المكررة.",
+  "SettingsSavedSuccessfully": "تم حفظ الإعدادات بنجاح",
+  "SettingSaveFailed": "فشل حفظ الإعدادات",
+  "Saving": "جارٍ الحفظ...",
+  "Save": "حفظ",
+  "Reset": "إعادة تعيين"
 
   }
 }
